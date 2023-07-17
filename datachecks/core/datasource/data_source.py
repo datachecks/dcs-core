@@ -1,11 +1,18 @@
 from abc import ABC, abstractmethod
+from dataclasses import asdict
 from enum import Enum
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from opensearchpy import OpenSearch
+from sqlalchemy import URL, create_engine
+
+from datachecks.core.configuration.configuration import DataSourceConfiguration
 
 
 class DataSource(ABC):
+    """
+    Abstract class for data sources
+    """
     def __init__(
             self,
             data_source_name: str,
@@ -27,8 +34,10 @@ class DataSource(ABC):
         raise NotImplementedError("is_connected method is not implemented")
 
 
-class SearchIndexDataSource(ABC, DataSource):
-
+class SearchIndexDataSource(DataSource):
+    """
+    Abstract class for search index data sources
+    """
     def __init__(
             self,
             data_source_name: str,
@@ -39,11 +48,19 @@ class SearchIndexDataSource(ABC, DataSource):
         self.client = None
 
     def query_get_document_count(self, index_name: str, filter: str = None) -> int:
+        """
+        Get the document count
+        :param index_name: name of the index
+        :param filter: optional filter
+        :return: count of documents
+        """
         raise NotImplementedError("query_get_document_count method is not implemented")
 
 
 class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
-
+    """
+    OpenSearch data source
+    """
     def __init__(
             self,
             data_source_name: str,
@@ -59,10 +76,12 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         auth = ('admin', 'admin')
         host = self.data_connection.get('host')
         port = int(self.data_connection.get('port'))
-        ca_certs_path = '/full/path/to/root-ca.pem'
         self.client = OpenSearch(
             hosts=[{'host': host, 'port': port}],
             http_auth=auth,
+            use_ssl=True,
+            verify_certs=False,
+            ca_certs=False
         )
         return self.client
 
@@ -72,17 +91,21 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         """
         return self.client.ping()
 
-    def query_get_document_count(self, index_name: str, filter: str) -> int:
+    def query_get_document_count(self, index_name: str, filter: str = None) -> int:
         """
         Get the document count
+        :param index_name: name of the index
+        :param filter: optional filter
         """
         response = self.client.count(index=index_name, body=filter)
 
         return response['count']
 
 
-class SQLDatasource(ABC, DataSource):
-
+class SQLDatasource(DataSource):
+    """
+    Abstract class for SQL data sources
+    """
     def __init__(
             self,
             data_source_name: str,
@@ -108,9 +131,74 @@ class PostgresSQLDatasource(SQLDatasource):
     ):
         super().__init__(data_source_name, data_source_properties)
 
+    def connect(self) -> Any:
+        """
+        Connect to the data source
+        """
+        url = URL.create(
+            drivername="postgresql",
+            username=self.data_connection.get('username'),
+            password=self.data_connection.get('password'),
+            host=self.data_connection.get('host'),
+            port=self.data_connection.get('port'),
+            database=self.data_connection.get('database')
+        )
+        engine = create_engine(url)
+        self.connection = engine.connect()
+        return self.connection
+
 
 class DataSourceManager:
+    """
+    Data source manager.
+    This class is responsible for managing the data sources.
 
-    def __init__(self):
+    """
+    def __init__(self, config: List[DataSourceConfiguration]):
+        self.data_source_configs: List[DataSourceConfiguration] = config
         self.data_sources: Dict[str, DataSource] = {}
+        self._initialize_data_sources()
 
+    def _initialize_data_sources(self):
+        """
+        Initialize the data sources
+        :return:
+        """
+        for data_source_config in self.data_source_configs:
+            self.data_sources[data_source_config.name] = self.create_data_source(data_source_config=data_source_config)
+            self.data_sources[data_source_config.name].connect()
+
+    @staticmethod
+    def create_data_source(data_source_config: DataSourceConfiguration) -> DataSource:
+        """
+        Create a data source
+        :param data_source_config: data source configuration
+        :return: data source
+        """
+        if data_source_config.type == 'opensearch':
+            return OpenSearchSearchIndexDataSource(
+                data_source_name=data_source_config.name,
+                data_connection=asdict(data_source_config.connection_config),
+            )
+        elif data_source_config.type == 'postgres':
+            return PostgresSQLDatasource(
+                data_source_name=data_source_config.name,
+                data_source_properties=asdict(data_source_config.connection_config)
+            )
+        else:
+            raise ValueError(f"Unsupported data source type: {data_source_config.type}")
+
+    def get_data_source(self, data_source_name: str) -> DataSource:
+        """
+        Get a data source
+        :param data_source_name:
+        :return:
+        """
+        return self.data_sources[data_source_name]
+
+    def get_data_source_names(self) -> List[str]:
+        """
+        Get the data source names
+        :return:
+        """
+        return list(self.data_sources.keys())

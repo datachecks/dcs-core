@@ -1,29 +1,29 @@
 data_sources:
   - name: search
-    type: elasticsearch
+    type: opensearch
     connection:
       host: 127.0.0.1
-      port: 9200
+      port: 9201
   - name: content
     type: postgres
     connection:
       host: 127.0.0.1
-      port: 9200
-      user: user
-      password: password
-      database: test_db
+      port: 5431
+      username: postgres
+      password: changeme
+      database: postgres
   - name: staging
     type: postgres
     connection:
       host: 127.0.0.1
-      port: 9200
-      user: user
-      password: password
-      database: test_db
+      port: 5430
+      username: postgres
+      password: changeme
+      database: postgres
 
 metrics:
   - name: count_search
-    data_source: test_es
+    data_source: search
     type: document_count
     properties:
       indices:
@@ -46,7 +46,3 @@ metrics:
         - table_2
     filter:
       sql_query: 'category == 2 AND is_valid is True'
-
-metric_store:
-  - name: elk_store
-    metric_store_type: elk

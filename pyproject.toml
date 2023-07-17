@@ -12,6 +12,8 @@ python = ">=3.8,<4.0"
 click = "^8.1.5"
 pyyaml = "^6.0"
 opensearch-py = "^2.2.0"
+sqlalchemy = "^2.0.19"
+psycopg2 = "^2.9.6"
 
 [tool.poetry.scripts]
 datachecks = "datachecks.cli.cli:main"

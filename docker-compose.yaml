@@ -71,6 +71,20 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+  postgres1:
+    container_name: postgres_container1
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5430:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
 
 networks:
   opensearch-net:
