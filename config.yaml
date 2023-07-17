@@ -1,0 +1,52 @@
+data_sources:
+  - name: search
+    type: elasticsearch
+    connection:
+      host: 127.0.0.1
+      port: 9200
+  - name: content
+    type: postgres
+    connection:
+      host: 127.0.0.1
+      port: 9200
+      user: user
+      password: password
+      database: test_db
+  - name: staging
+    type: postgres
+    connection:
+      host: 127.0.0.1
+      port: 9200
+      user: user
+      password: password
+      database: test_db
+
+metrics:
+  - name: count_search
+    data_source: test_es
+    type: document_count
+    properties:
+      indices:
+        - index_1
+    filter:
+      search_query: '{"query" : {"term" : { "user.id" : "kimchy" }}}'
+  - name: count_content
+    data_source: content
+    type: row_count
+    properties:
+      tables:
+        - table_1
+    filter:
+      sql_query: 'category == 1 AND is_valid is True'
+  - name: count_staging
+    data_source: staging
+    type: row_count
+    properties:
+      tables:
+        - table_2
+    filter:
+      sql_query: 'category == 2 AND is_valid is True'
+
+metric_store:
+  - name: elk_store
+    metric_store_type: elk
