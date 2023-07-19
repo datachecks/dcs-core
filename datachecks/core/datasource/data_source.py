@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 from enum import Enum
-from typing import Dict, Any, List
+from sqlite3 import Connection
+from typing import Dict, Any, List, Union
 
 from opensearchpy import OpenSearch
-from sqlalchemy import URL, create_engine
+from sqlalchemy import URL, create_engine, text
 
 from datachecks.core.configuration.configuration import DataSourceConfiguration
 
@@ -113,13 +114,26 @@ class SQLDatasource(DataSource):
     ):
         super().__init__(data_source_name, data_source_properties)
 
-        self.connection = None
+        self.connection: Union[Connection, None] = None
 
     def is_connected(self) -> bool:
         """
         Check if the data source is connected
         """
         return self.connection is not None
+
+    def query_get_row_count(self, table: str, filter: str = None) -> int:
+        """
+        Get the document count
+        :param index_name: name of the index
+        :param filter: optional filter
+        :return: count of documents
+        """
+        query = "SELECT COUNT(*) FROM {}".format(table)
+        if filter:
+            query += " WHERE {}".format(filter)
+
+        return self.connection.execute(text(query)).fetchone()[0]
 
 
 class PostgresSQLDatasource(SQLDatasource):

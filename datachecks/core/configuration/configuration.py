@@ -52,7 +52,7 @@ class MetricConfiguration:
     Metric configuration
     """
     name: str
-    type: str
+    metric_type: str
     data_source: str
     properties: Optional[MetricsPropertiesConfiguration]
     filter: Optional[MetricsFilterConfiguration]
@@ -94,7 +94,7 @@ def load_configuration(file_path: str) -> Configuration:
         ]
         metric_configurations = [MetricConfiguration(
             name=metric["name"],
-            type=metric["type"],
+            metric_type=metric["metric_type"],
             data_source=metric["data_source"],
             properties=MetricsPropertiesConfiguration(
                 indices=metric["properties"].get("indices"),

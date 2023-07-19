@@ -24,25 +24,25 @@ data_sources:
 metrics:
   - name: count_search
     data_source: search
-    type: document_count
+    metric_type: document_count
     properties:
       indices:
-        - index_1
+        - opensearch_dashboards_sample_data_logs
     filter:
-      search_query: '{"query" : {"term" : { "user.id" : "kimchy" }}}'
+      search_query: '{"query" : {"term" : { "extension": "deb" }}}'
   - name: count_content
     data_source: content
-    type: row_count
+    metric_type: row_count
     properties:
       tables:
         - table_1
     filter:
-      sql_query: 'category == 1 AND is_valid is True'
+      sql_query: "category = '1' AND is_valid is True"
   - name: count_staging
     data_source: staging
-    type: row_count
+    metric_type: row_count
     properties:
       tables:
         - table_2
     filter:
-      sql_query: 'category == 2 AND is_valid is True'
+      sql_query: "category = '2' AND is_valid is True"
