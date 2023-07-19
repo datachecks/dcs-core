@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import List, Dict
 
 from datachecks.core.configuration.configuration import Configuration
 from datachecks.core.datasource.data_source import DataSourceManager
@@ -28,6 +29,9 @@ class Inspect:
         )
 
     def start(self):
+        metric_values: List[Dict] = []
         for metric_name, metric in self.metric_manager.metrics.items():
             metric_value = metric.get_value()
-            print(f"{metric_name} : {metric_value}")
+            # print(f"{metric_name} : {metric_value}")
+            metric_values.append(metric_value)
+        return metric_values

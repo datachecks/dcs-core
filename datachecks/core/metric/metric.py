@@ -77,13 +77,20 @@ class Metric(ABC):
         pass
 
     def get_value(self):
-        return {
+        value = {
                 "identity": self.metric_identity,
                 "metricName": self.name,
+                "metricType": self.metric_type.value,
                 "value": self._generate_metric_value(),
                 "dataSourceName": self.data_source.data_source_name,
-                "timestamp": datetime.datetime.utcnow().timestamp()
+                "@timestamp": datetime.datetime.utcnow().isoformat()
             }
+        if "index_name" in self.__dict__:
+            value["index_name"] = self.__dict__["index_name"]
+        elif "table_name" in self.__dict__:
+            value["table_name"] = self.__dict__["table_name"]
+
+        return value
 
 
 class DocumentCountMetrics(Metric):
