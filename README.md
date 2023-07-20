@@ -1,8 +1,10 @@
 <h1 align="center">Datachecks</h1>
 <p align="center"><b>Open Source Data Quality Monitoring.</b></p>
 
-<img align="center" alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>
-<img align="center" src="https://static.pepy.tech/personalized-badge/datachecks?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads"/>
+<p align="center">
+    <img align="center" alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>
+    <img align="center" src="https://static.pepy.tech/personalized-badge/datachecks?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads"/>
+</p>
 
 ## What is `datachecks`?
 
