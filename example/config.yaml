@@ -4,6 +4,8 @@ data_sources:
     connection:
       host: 127.0.0.1
       port: 9201
+      username: admin
+      password: admin
   - name: content
     type: postgres
     connection:
@@ -22,12 +24,14 @@ data_sources:
       database: postgres
 
 metrics:
+
   search:
     count_search:
       metric_type: document_count
       index: category_tabel
       filter:
         search_query: '{"query" : {"match_all" : {}}}'
+
   content:
     count_content_hat:
       metric_type: row_count
@@ -39,6 +43,7 @@ metrics:
       table: table_1
       filter:
         sql_query: "is_valid is False"
+
   staging:
     count_staging:
       metric_type: row_count

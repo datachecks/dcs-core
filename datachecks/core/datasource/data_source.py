@@ -88,7 +88,7 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         Connect to the data source
         """
 
-        auth = ('admin', 'admin')
+        auth = (self.data_connection.get('username'), self.data_connection.get('password'))
         host = self.data_connection.get('host')
         port = int(self.data_connection.get('port'))
         self.client = OpenSearch(
