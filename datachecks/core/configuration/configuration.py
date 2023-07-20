@@ -43,15 +43,6 @@ class DataSourceConfiguration:
 
 
 @dataclass
-class MetricsPropertiesConfiguration:
-    """
-    Properties configuration for a metric
-    """
-    indices: Optional[list]
-    tables: Optional[list]
-
-
-@dataclass
 class MetricsFilterConfiguration:
     """
     Filter configuration for a metric
@@ -67,9 +58,9 @@ class MetricConfiguration:
     """
     name: str
     metric_type: str
-    data_source: str
-    properties: Optional[MetricsPropertiesConfiguration]
-    filter: Optional[MetricsFilterConfiguration]
+    index: Optional[str] = None
+    table: Optional[str] = None
+    filter: Optional[MetricsFilterConfiguration] = None
 
 
 @dataclass
@@ -78,7 +69,7 @@ class Configuration:
     Configuration for the data checks
     """
     data_sources: List[DataSourceConfiguration]
-    metrics: List[MetricConfiguration]
+    metrics: Dict[str, List[MetricConfiguration]]
 
 
 def load_configuration(file_path: str) -> Configuration:
@@ -106,17 +97,22 @@ def load_configuration(file_path: str) -> Configuration:
             )
             for data_source in config_dict["data_sources"]
         ]
-        metric_configurations = [MetricConfiguration(
-            name=metric["name"],
-            metric_type=metric["metric_type"],
-            data_source=metric["data_source"],
-            properties=MetricsPropertiesConfiguration(
-                indices=metric["properties"].get("indices"),
-                tables=metric["properties"].get("tables"),
-            ),
-            filter=MetricsFilterConfiguration(
-                sql_query=metric["filter"].get("sql_query"),
-                search_query=metric["filter"].get("search_query"),
-            ),
-        ) for metric in config_dict["metrics"]]
+
+        metric_configurations = {
+            data_source_name: [
+                MetricConfiguration(
+                    name=metric_name,
+                    metric_type=metric_value["metric_type"],
+                    index=metric_value.get("index"),
+                    table=metric_value.get("table"),
+                    filter=MetricsFilterConfiguration(
+                        sql_query=metric_value.get("filter", {}).get("sql_query", None),
+                        search_query=metric_value.get("filter", {}).get("search_query", None)
+                    )
+                )
+                for metric_name, metric_value in metric_list.items()
+            ]
+            for data_source_name, metric_list in config_dict["metrics"].items()
+        }
+
         return Configuration(data_sources=data_source_configurations, metrics=metric_configurations)

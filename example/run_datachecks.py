@@ -4,7 +4,7 @@ import requests
 
 
 if __name__ == "__main__":
-    configuration: Configuration = load_configuration('config.yaml')
+    configuration: Configuration = load_configuration('config_v1.yaml')
 
     metrics = Inspect(configuration).start()
     for m in metrics:

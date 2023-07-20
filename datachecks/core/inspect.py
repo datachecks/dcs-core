@@ -32,6 +32,5 @@ class Inspect:
         metric_values: List[Dict] = []
         for metric_name, metric in self.metric_manager.metrics.items():
             metric_value = metric.get_value()
-            # print(f"{metric_name} : {metric_value}")
             metric_values.append(metric_value)
         return metric_values

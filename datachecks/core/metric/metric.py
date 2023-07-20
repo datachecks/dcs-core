@@ -18,7 +18,7 @@ from dataclasses import asdict
 from enum import Enum
 from typing import Dict, List
 
-from datachecks.core.configuration.configuration import MetricsPropertiesConfiguration, MetricConfiguration
+from datachecks.core.configuration.configuration import MetricConfiguration as MetricConfigurationV1
 from datachecks.core.datasource.data_source import DataSource, SearchIndexDataSource, DataSourceManager, SQLDatasource
 
 
@@ -35,7 +35,8 @@ class MetricIdentity:
             metric_name: str,
             data_source: DataSource = None,
             index_name: str = None,
-            tabel_name: str = None
+            table_name: str = None,
+            row_name: str = None
     ):
         identifiers = []
         if data_source:
@@ -44,8 +45,11 @@ class MetricIdentity:
         identifiers.append(metric_name)
         if index_name:
             identifiers.append(index_name)
-        if tabel_name:
-            identifiers.append(tabel_name)
+        if table_name:
+            identifiers.append(table_name)
+        if row_name:
+            identifiers.append(row_name)
+
         return ".".join([str(p) for p in identifiers])
 
 
@@ -58,13 +62,11 @@ class Metric(ABC):
             name: str,
             data_source: DataSource,
             metric_type: MetricsType,
-            properties: Dict = None,
             filter: Dict = None
     ):
         self.name: str = name
         self.data_source = data_source
         self.metric_type = metric_type
-        self.properties = properties
         self.data_filter = filter
         self.metric_identity = MetricIdentity.generate_identity(
             metric_type=metric_type,
@@ -90,7 +92,43 @@ class Metric(ABC):
         elif "table_name" in self.__dict__:
             value["table_name"] = self.__dict__["table_name"]
 
+        if "row_name" in self.__dict__:
+            value["row_name"] = self.__dict__["row_name"]
+
         return value
+
+
+class RowMetrics(Metric, ABC):
+
+    def __init__(
+            self,
+            name: str,
+            data_source: DataSource,
+            table_name: str,
+            row_name: str,
+            metric_type=MetricsType,
+            filter: Dict = None
+    ):
+        super().__init__(
+            name=name,
+            data_source=data_source,
+            metric_type=metric_type,
+            filter=filter
+        )
+        self.table_name = table_name
+        self.row_name = row_name
+
+        self.metric_identity = MetricIdentity.generate_identity(
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            metric_name=name,
+            data_source=data_source,
+            table_name=table_name,
+            row_name=row_name
+        )
+
+    @property
+    def get_row_name(self):
+        return self.row_name
 
 
 class DocumentCountMetrics(Metric):
@@ -100,14 +138,12 @@ class DocumentCountMetrics(Metric):
             name: str,
             data_source: DataSource,
             index_name: str,
-            properties: Dict = None,
             filter: Dict = None
     ):
         super().__init__(
             name=name,
             data_source=data_source,
             metric_type=MetricsType.DOCUMENT_COUNT,
-            properties=properties,
             filter=filter
         )
         self.index_name = index_name
@@ -133,78 +169,73 @@ class DocumentCountMetrics(Metric):
 
 class RowCountMetrics(Metric):
 
-        def __init__(
-                self,
-                name: str,
-                data_source: DataSource,
-                table_name: str,
-                properties: Dict = None,
-                filter: Dict = None
-        ):
-            super().__init__(
-                name=name,
-                data_source=data_source,
-                metric_type=MetricsType.ROW_COUNT,
-                properties=properties,
-                filter=filter
-            )
-            self.table_name = table_name
-            self.metric_identity = MetricIdentity.generate_identity(
-                metric_type=MetricsType.ROW_COUNT,
-                metric_name=name,
-                data_source=data_source,
-                tabel_name=table_name
-            )
+    def __init__(
+        self,
+        name: str,
+        data_source: DataSource,
+        table_name: str,
+        filter: Dict = None
+    ):
+        super().__init__(
+            name=name,
+            data_source=data_source,
+            metric_type=MetricsType.ROW_COUNT,
+            filter=filter
+        )
+        self.table_name = table_name
+        self.metric_identity = MetricIdentity.generate_identity(
+            metric_type=MetricsType.ROW_COUNT,
+            metric_name=name,
+            data_source=data_source,
+            table_name=table_name
+        )
 
-        def validate_data_source(self):
-            return isinstance(self.data_source, SQLDatasource)
+    def validate_data_source(self):
+        return isinstance(self.data_source, SQLDatasource)
 
-        def _generate_metric_value(self):
-            if isinstance(self.data_source, SQLDatasource):
-                return self.data_source.query_get_row_count(
-                    table=self.table_name,
-                    filter=self.data_filter['sql_query']
-                )
-            else:
-                raise ValueError("Invalid data source type")
+    def _generate_metric_value(self):
+        if isinstance(self.data_source, SQLDatasource):
+            return self.data_source.query_get_row_count(
+                table=self.table_name,
+                filter=self.data_filter['sql_query']
+            )
+        else:
+            raise ValueError("Invalid data source type")
 
 
 class MetricManager:
 
     def __init__(
             self,
-            metric_config: List[MetricConfiguration],
+            metric_config: Dict[str, List[MetricConfigurationV1]],
             data_source_manager: DataSourceManager
     ):
         self.data_source_manager = data_source_manager
         self.metrics = {}
         self._build_metrics(config=metric_config)
 
-    def _build_metrics(self, config: List[MetricConfiguration]):
-        for metric_config in config:
-            if metric_config.metric_type == MetricsType.DOCUMENT_COUNT:
-                for index in metric_config.properties.indices:
+    def _build_metrics(self, config: Dict[str, List[MetricConfigurationV1]]):
+        for data_source, metric_list in config.items():
+            for metric_config in metric_list:
+                if metric_config.metric_type == MetricsType.DOCUMENT_COUNT:
 
                     metric = DocumentCountMetrics(
                         name=metric_config.name,
-                        data_source=self.data_source_manager.get_data_source(metric_config.data_source),
-                        properties=asdict(metric_config.properties),
+                        data_source=self.data_source_manager.get_data_source(data_source),
                         filter=asdict(metric_config.filter),
-                        index_name=index
+                        index_name=metric_config.index
                     )
                     self.metrics[metric.metric_identity] = metric
-            elif metric_config.metric_type == MetricsType.ROW_COUNT:
-                for table in metric_config.properties.tables:
+                elif metric_config.metric_type == MetricsType.ROW_COUNT:
                     metric = RowCountMetrics(
                         name=metric_config.name,
-                        data_source=self.data_source_manager.get_data_source(metric_config.data_source),
-                        properties=asdict(metric_config.properties),
+                        data_source=self.data_source_manager.get_data_source(data_source),
                         filter=asdict(metric_config.filter),
-                        table_name=table
+                        table_name=metric_config.table
                     )
                     self.metrics[metric.metric_identity] = metric
-            else:
-                raise ValueError("Invalid metric type")
+                else:
+                    raise ValueError("Invalid metric type")
 
     @property
     def get_metrics(self):

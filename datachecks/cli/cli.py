@@ -11,15 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Union
 
 import click
-import yaml
-from yaml import SafeLoader
 
-from ..__version__ import __version__
-from ..core.configuration.configuration import load_configuration, Configuration
-from ..core.datasource.data_source import DataSourceManager
-from ..core.metric.metric import MetricManager
+from datachecks.__version__ import __version__
+from datachecks.core.configuration.configuration import Configuration, load_configuration
+from datachecks.core.datasource.data_source import DataSourceManager
+from datachecks.core.metric.metric import MetricManager
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
@@ -31,8 +30,17 @@ def main():
 @main.command(
     short_help="Starts the datachecks inspection",
 )
-def inspect():
-    configuration: Configuration = load_configuration('config.yaml')
+@click.option(
+    "-C",
+    "--config-path",
+    required=True,
+    default=None,
+    help="Specify the file path for configuration",
+)
+def inspect(
+    config_path: Union[str, None] = None,
+):
+    configuration: Configuration = load_configuration(config_path)
 
     data_source_manager = DataSourceManager(configuration.data_sources)
     for data_source_name in data_source_manager.get_data_source_names():
