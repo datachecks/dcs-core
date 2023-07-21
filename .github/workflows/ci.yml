@@ -63,7 +63,7 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest --cov=datachecks --cov-report=xml -p no:warnings ./tests/*
-          
+
       #-----------------------------------------
       # Run Pytest
       #---------------------------------------

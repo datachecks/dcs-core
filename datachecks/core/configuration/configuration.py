@@ -13,10 +13,16 @@
 #  limitations under the License.
 
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import yaml
 from yaml import SafeLoader
+
+
+class DatasourceType(Enum):
+    OPENSEARCH = "opensearch"
+    POSTGRES = "postgres"
 
 
 @dataclass
@@ -24,6 +30,7 @@ class DataSourceConnectionConfiguration:
     """
     Connection configuration for a data source
     """
+
     host: str
     port: int
     username: Optional[str]
@@ -37,8 +44,9 @@ class DataSourceConfiguration:
     """
     Data source configuration
     """
+
     name: str
-    type: str
+    type: DatasourceType
     connection_config: DataSourceConnectionConfiguration
 
 
@@ -47,6 +55,7 @@ class MetricsFilterConfiguration:
     """
     Filter configuration for a metric
     """
+
     sql_query: Optional[list]
     search_query: Optional[list]
 
@@ -56,6 +65,7 @@ class MetricConfiguration:
     """
     Metric configuration
     """
+
     name: str
     metric_type: str
     index: Optional[str] = None
@@ -68,51 +78,65 @@ class Configuration:
     """
     Configuration for the data checks
     """
+
     data_sources: List[DataSourceConfiguration]
     metrics: Dict[str, List[MetricConfiguration]]
 
 
 def load_configuration(file_path: str) -> Configuration:
     """
-    Load the configuration from a YAML file
+    Load configuration from a yaml file
     :param file_path:
     :return:
     """
     with open(file_path) as config_yaml_file:
         yaml_string = config_yaml_file.read()
-        config_dict: Dict = yaml.safe_load(yaml_string)
 
-        data_source_configurations = [
-            DataSourceConfiguration(
-                name=data_source["name"],
-                type=data_source["type"],
-                connection_config=DataSourceConnectionConfiguration(
-                    host=data_source["connection"]["host"],
-                    port=data_source["connection"]["port"],
-                    username=data_source["connection"].get("username"),
-                    password=data_source["connection"].get("password"),
-                    database=data_source["connection"].get("database"),
-                    schema=data_source["connection"].get("schema"),
+        return load_configuration_from_yaml_str(yaml_string)
+
+
+def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
+    """
+    Load configuration from a yaml string
+    """
+
+    config_dict: Dict = yaml.safe_load(yaml_string)
+
+    data_source_configurations = [
+        DataSourceConfiguration(
+            name=data_source["name"],
+            type=DatasourceType(data_source["type"]),
+            connection_config=DataSourceConnectionConfiguration(
+                host=data_source["connection"]["host"],
+                port=data_source["connection"]["port"],
+                username=data_source["connection"].get("username"),
+                password=data_source["connection"].get("password"),
+                database=data_source["connection"].get("database"),
+                schema=data_source["connection"].get("schema"),
+            ),
+        )
+        for data_source in config_dict["data_sources"]
+    ]
+
+    metric_configurations = {
+        data_source_name: [
+            MetricConfiguration(
+                name=metric_name,
+                metric_type=metric_value["metric_type"],
+                index=metric_value.get("index"),
+                table=metric_value.get("table"),
+                filter=MetricsFilterConfiguration(
+                    sql_query=metric_value.get("filter", {}).get("sql_query", None),
+                    search_query=metric_value.get("filter", {}).get(
+                        "search_query", None
+                    ),
                 ),
             )
-            for data_source in config_dict["data_sources"]
+            for metric_name, metric_value in metric_list.items()
         ]
+        for data_source_name, metric_list in config_dict["metrics"].items()
+    }
 
-        metric_configurations = {
-            data_source_name: [
-                MetricConfiguration(
-                    name=metric_name,
-                    metric_type=metric_value["metric_type"],
-                    index=metric_value.get("index"),
-                    table=metric_value.get("table"),
-                    filter=MetricsFilterConfiguration(
-                        sql_query=metric_value.get("filter", {}).get("sql_query", None),
-                        search_query=metric_value.get("filter", {}).get("search_query", None)
-                    )
-                )
-                for metric_name, metric_value in metric_list.items()
-            ]
-            for data_source_name, metric_list in config_dict["metrics"].items()
-        }
-
-        return Configuration(data_sources=data_source_configurations, metrics=metric_configurations)
+    return Configuration(
+        data_sources=data_source_configurations, metrics=metric_configurations
+    )

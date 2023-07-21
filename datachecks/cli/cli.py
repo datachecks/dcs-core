@@ -16,7 +16,8 @@ from typing import Union
 import click
 
 from datachecks.__version__ import __version__
-from datachecks.core.configuration.configuration import Configuration, load_configuration
+from datachecks.core.configuration.configuration import (Configuration,
+                                                         load_configuration)
 from datachecks.core.datasource.data_source import DataSourceManager
 from datachecks.core.metric.metric import MetricManager
 
@@ -44,16 +45,18 @@ def inspect(
 
     data_source_manager = DataSourceManager(configuration.data_sources)
     for data_source_name in data_source_manager.get_data_source_names():
-        data_source = data_source_manager.get_data_source(data_source_name=data_source_name)
-        print(f"Data source: {data_source.data_source_name} is {data_source.is_connected()}")
+        data_source = data_source_manager.get_data_source(
+            data_source_name=data_source_name
+        )
+        print(
+            f"Data source: {data_source.data_source_name} is {data_source.is_connected()}"
+        )
     metric_manager = MetricManager(
-        metric_config=configuration.metrics,
-        data_source_manager=data_source_manager
+        metric_config=configuration.metrics, data_source_manager=data_source_manager
     )
     for metric_name, metric in metric_manager.metrics.items():
         metric_value = metric.get_value()
         print(f"{metric_name} : {metric_value}")
-
 
     """
     1. Read config

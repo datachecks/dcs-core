@@ -44,7 +44,7 @@ datachecks inspect -C config.yaml
 
 ### Data Source Configuration
 
-Declare the data sources in the `data_sources` section of the config file. 
+Declare the data sources in the `data_sources` section of the config file.
 The data sources can be of type `postgres` or `opensearch`.
 ```yaml
 data_sources:
@@ -67,7 +67,7 @@ data_sources:
 
 ### Metric Configuration
 
-Metrics are defined in the `metrics` section of the config file. 
+Metrics are defined in the `metrics` section of the config file.
 
 ```yaml
 metrics:
