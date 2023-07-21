@@ -14,8 +14,8 @@
 from typing import List, Dict
 
 from datachecks.core.configuration.configuration import Configuration
-from datachecks.core.datasource.data_source import DataSourceManager
-from datachecks.core.metric.metric import MetricManager
+from datachecks.core.datasource.manager import DataSourceManager
+from datachecks.core.metric.manager import MetricManager
 
 
 class Inspect:

@@ -3,7 +3,11 @@
 
 <p align="center">
     <img align="center" alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>
-    <img align="center" src="https://static.pepy.tech/personalized-badge/datachecks?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads"/>
+    <img align="center" src="https://img.shields.io/pypi/pyversions/datachecks"/>
+    <img align="center" alt="Versions" src="https://img.shields.io/pypi/v/datachecks"/>
+    <img align="center" alt="coverage" src="https://static.pepy.tech/personalized-badge/datachecks?period=total&units=international_system&left_color=black&right_color=green&left_text=Downloads"/>
+    <img align="center" alt="coverage" src="https://codecov.io/gh/waterdipai/datachecks/branch/main/graph/badge.svg?token=cn6lkDRXpl">
+    <img align="center" alt="Status" src="https://github.com/waterdipai/datachecks/actions/workflows/ci.yml/badge.svg?branch=main"/>
 </p>
 
 ## What is `datachecks`?
