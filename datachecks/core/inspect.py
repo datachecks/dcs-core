@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Dict
+from typing import Dict, List
 
 from datachecks.core.configuration.configuration import Configuration
 from datachecks.core.datasource.manager import DataSourceManager
@@ -19,13 +19,12 @@ from datachecks.core.metric.manager import MetricManager
 
 
 class Inspect:
-
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
         self.data_source_manager = DataSourceManager(configuration.data_sources)
         self.metric_manager = MetricManager(
             metric_config=configuration.metrics,
-            data_source_manager=self.data_source_manager
+            data_source_manager=self.data_source_manager,
         )
 
     def start(self):
