@@ -46,6 +46,9 @@ datachecks inspect -C config.yaml
 
 Declare the data sources in the `data_sources` section of the config file.
 The data sources can be of type `postgres` or `opensearch`.
+
+The configuration file can also use environment variables for the connection parameters.
+
 ```yaml
 data_sources:
   - name: search
@@ -53,15 +56,15 @@ data_sources:
     connection:
       host: 127.0.0.1
       port: 9201
-      username: admin
-      password: admin
+      username: !ENV ${OS_USER}
+      password: !ENV ${OS_PASS}
   - name: content
     type: postgres
     connection:
       host: 127.0.0.1
       port: 5431
-      username: postgres
-      password: changeme
+      username: !ENV ${PG_USER}
+      password: !ENV ${OS_PASS}
       database: postgres
 ```
 

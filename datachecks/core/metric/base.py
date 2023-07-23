@@ -86,17 +86,14 @@ class Metric(ABC):
         self.metric_type = metric_type
         self.filter_query = None
         if filters is not None:
-            if (
-                    "search_query" in filters and filters["search_query"] is not None
-            ) and (
-                    "where_clause" in filters and filters["where_clause"] is not None
+            if ("search_query" in filters and filters["search_query"] is not None) and (
+                "where_clause" in filters and filters["where_clause"] is not None
             ):
                 raise ValueError(
                     "Please give a value for search_query or where_clause (but not both)"
                 )
 
             if "search_query" in filters and filters["search_query"] is not None:
-                print(filters)
                 self.filter_query = json.loads(filters["search_query"])
             elif "where_clause" in filters:
                 self.filter_query = filters["where_clause"]

@@ -1,49 +1,53 @@
+# Data sources to query
 data_sources:
-  - name: search
-    type: opensearch
+  - name: search                  # Data source name
+    type: opensearch              # Data source type is OpenSearch
     connection:
       host: 127.0.0.1
       port: 9201
-      username: admin
-      password: admin
-  - name: content
-    type: postgres
+      username: !ENV ${OS_USER}   # Username to use for authentication ENV variables
+      password: !ENV ${OS_PASS}   # Password to use for authentication ENV variables
+  - name: content                 # Data source name
+    type: postgres                # Data source type is Postgres
     connection:
       host: 127.0.0.1
       port: 5431
-      username: postgres
-      password: postgres
+      username: !ENV ${DB_USER}   # Username to use for authentication ENV variables
+      password: !ENV ${DB_PASS}   # Password to use for authentication ENV variables
       database: dc_db
 
+# Metrics to generate
 metrics:
 
+  # Data source reference name
   search:
-    count_document:
-      metric_type: document_count
-      index: category_tabel
+    count_document:               # Metric name
+      metric_type: document_count # Type of metric is DOCUMENT_COUNT
+      index: category_tabel       # Index to query
       filters:
-        search_query: '{"match_all" : {}}'
+        search_query: '{"match_all" : {}}'                           # Search query to use for filtering
     max_price:
-      metric_type: max
-      index: category_tabel
-      field: price
-    last_updated:
-      metric_type: freshness
-      index: category_tabel
-      field: last_updated
+      metric_type: max            # Type of metric is MAX
+      index: category_tabel       # Index to query
+      field: price                # Field to use for max calculation
+    last_updated_row:
+      metric_type: freshness      # Type of metric is FRESHNESS
+      index: category_tabel       # Index to query
+      field: last_updated         # Datetime Field to use for freshness check
 
+  # Data source name
   content:
-    count_content_hat:
-      metric_type: row_count
-      table: table_1
+    count_content_hat: # Metric name
+      metric_type: row_count      # Type of metric is ROW_COUNT
+      table: table_1              # Table to query
       filters:
-        where_clause: "category = 'HAT' AND is_valid is True"
-    count_content_non_valid:
-      metric_type: row_count
-      table: table_1
+        where_clause: "category = 'HAT' AND is_valid is True"           # Where clause to use for filtering
+    count_content_non_valid:      # Metric name
+      metric_type: row_count      # Type of metric is ROW_COUNT
+      table: table_1              # Table to query
       filters:
-        where_clause: "is_valid is False"
-    max_content:
-      metric_type: max
-      table: table_1
-      field: price
+        where_clause: "is_valid is False"  # Where clause to use for filtering
+    max_content:                  # Metric name
+      metric_type: max            # Type of metric is MAX
+      table: table_1              # Table to query
+      field: price                # Field to use for max calculation

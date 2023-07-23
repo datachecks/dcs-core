@@ -17,8 +17,8 @@ from datetime import datetime
 from sqlite3 import Connection
 from typing import Any, Dict, Union
 
-from sqlalchemy import text
 from dateutil import parser
+from sqlalchemy import text
 
 
 class DataSource(ABC):
@@ -145,16 +145,7 @@ class SQLDatasource(DataSource):
         query = f"""
             SELECT {field} from {table} ORDER BY {field} DESC LIMIT 1;
         """
-        print("=========")
-        print(query)
         result = self.connection.execute(text(query)).fetchone()
-        print("=========")
-        for r in result:
-            print(r)
-        print("=========")
         if result:
-            print(result[0])
-            print(type(result[0]))
-
             return int((datetime.utcnow() - result[0]).total_seconds())
         return 0

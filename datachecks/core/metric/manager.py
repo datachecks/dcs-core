@@ -18,6 +18,7 @@ from typing import Dict, List
 from datachecks.core.configuration.configuration import MetricConfiguration
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.metric.base import MetricsType
+from datachecks.core.metric.freshness_metric import FreshnessValueMetric
 from datachecks.core.metric.numeric_metric import (DocumentCountMetric,
                                                    MaxMetric, RowCountMetric)
 
@@ -54,7 +55,9 @@ class MetricManager:
                         data_source=self.data_source_manager.get_data_source(
                             data_source
                         ),
-                        filters=asdict(metric_config.filters) if metric_config.filters else None,
+                        filters=asdict(metric_config.filters)
+                        if metric_config.filters
+                        else None,
                         table_name=metric_config.table,
                         metric_type=MetricsType.ROW_COUNT,
                     )
@@ -65,10 +68,27 @@ class MetricManager:
                         data_source=self.data_source_manager.get_data_source(
                             data_source
                         ),
-                        filters=asdict(metric_config.filters) if metric_config.filters else None,
+                        filters=asdict(metric_config.filters)
+                        if metric_config.filters
+                        else None,
                         table_name=metric_config.table,
                         index_name=metric_config.index,
                         metric_type=MetricsType.MAX,
+                        field_name=metric_config.field,
+                    )
+                    self.metrics[metric.get_metric_identity()] = metric
+                elif metric_config.metric_type == MetricsType.FRESHNESS:
+                    metric = FreshnessValueMetric(
+                        name=metric_config.name,
+                        data_source=self.data_source_manager.get_data_source(
+                            data_source
+                        ),
+                        filters=asdict(metric_config.filters)
+                        if metric_config.filters
+                        else None,
+                        table_name=metric_config.table,
+                        index_name=metric_config.index,
+                        metric_type=MetricsType.FRESHNESS,
                         field_name=metric_config.field,
                     )
                     self.metrics[metric.get_metric_identity()] = metric

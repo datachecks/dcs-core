@@ -71,7 +71,9 @@ class TestMetricManager:
             data_source_manager=setup_data_source_manager,
         )
 
-        metric_identity = f"{OPEN_SEARCH_DATA_SOURCE_NAME}.document_count.{metric_name}.{index_name}"
+        metric_identity = (
+            f"{OPEN_SEARCH_DATA_SOURCE_NAME}.document_count.{metric_name}.{index_name}"
+        )
         metric = metric_manager.get_metric(metric_identity)
 
         assert isinstance(metric, DocumentCountMetric)
@@ -97,7 +99,9 @@ class TestMetricManager:
             data_source_manager=setup_data_source_manager,
         )
 
-        metric_identity = f"{OPEN_SEARCH_DATA_SOURCE_NAME}.document_count.{metric_name}.{index_name}"
+        metric_identity = (
+            f"{OPEN_SEARCH_DATA_SOURCE_NAME}.document_count.{metric_name}.{index_name}"
+        )
         metric = metric_manager.get_metric(metric_identity)
 
         assert isinstance(metric, DocumentCountMetric)
@@ -122,7 +126,9 @@ class TestMetricManager:
             data_source_manager=setup_data_source_manager,
         )
 
-        metric_identity = f"{POSTGRES_DATA_SOURCE_NAME}.row_count.{metric_name}.{table_name}"
+        metric_identity = (
+            f"{POSTGRES_DATA_SOURCE_NAME}.row_count.{metric_name}.{table_name}"
+        )
         metric = metric_manager.get_metric(metric_identity)
 
         assert metric.name == "test_row_count_metric"
@@ -146,14 +152,18 @@ class TestMetricManager:
             data_source_manager=setup_data_source_manager,
         )
 
-        metric_identity = f"{POSTGRES_DATA_SOURCE_NAME}.row_count.{metric_name}.{table_name}"
+        metric_identity = (
+            f"{POSTGRES_DATA_SOURCE_NAME}.row_count.{metric_name}.{table_name}"
+        )
         metric = metric_manager.get_metric(metric_identity)
 
         assert metric.name == metric_name
         assert metric.metric_type == MetricsType.ROW_COUNT
         assert metric.table_name == "test_table"
 
-    def test_should_create_max_metric(self, setup_data_source_manager: DataSourceManager):
+    def test_should_create_max_metric(
+        self, setup_data_source_manager: DataSourceManager
+    ):
         metric_name, table_name, field_name = "test_max_metric", "test_table", "age"
         metric_config = {
             "metric_type": "max",
@@ -167,10 +177,9 @@ class TestMetricManager:
             metric_config={POSTGRES_DATA_SOURCE_NAME: [metric_config]},
             data_source_manager=setup_data_source_manager,
         )
-        print("====")
-        print(metric_manager.metrics)
-        print("====")
-        metric_identity = f"{POSTGRES_DATA_SOURCE_NAME}.max.{metric_name}.{table_name}.{field_name}"
+        metric_identity = (
+            f"{POSTGRES_DATA_SOURCE_NAME}.max.{metric_name}.{table_name}.{field_name}"
+        )
         metric = metric_manager.get_metric(metric_identity)
 
         assert metric.name == metric_name

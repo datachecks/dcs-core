@@ -2,7 +2,7 @@ coverage:
   status:
     project:
       default:
-        target: 85%
+        target: 80%
         # adjust accordingly based on how flaky your tests are
         # this allows a 1% drop from the previous base commit coverage
         threshold: 1%

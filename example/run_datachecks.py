@@ -11,13 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 
 import requests
 
 from datachecks import Configuration, Inspect, load_configuration
 
+requests.packages.urllib3.disable_warnings(
+    requests.packages.urllib3.exceptions.InsecureRequestWarning
+)
+
 if __name__ == "__main__":
     # Reding Config File
+
+    os.environ["DB_USER"] = "postgres"
+    os.environ["DB_PASS"] = "postgres"
+    os.environ["OS_USER"] = "admin"
+    os.environ["OS_PASS"] = "admin"
+
     configuration: Configuration = load_configuration("config.yaml")
 
     # Generating Metrics
@@ -25,10 +36,11 @@ if __name__ == "__main__":
 
     # Sending to ELK
     for metric in metrics:
-        print(metric)
         requests.post(
             "https://localhost:9201/example_indices/_doc",
             json=metric,
             auth=("admin", "admin"),
             verify=False,
         )
+    for metric in metrics:
+        print(metric)
