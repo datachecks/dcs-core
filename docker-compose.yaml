@@ -29,8 +29,9 @@ services:
     container_name: postgres_container
     image: postgres
     environment:
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpass
+      POSTGRES_DB: dc_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
@@ -48,3 +49,4 @@ networks:
 volumes:
   opensearch-data:
   postgres:
+    driver: local

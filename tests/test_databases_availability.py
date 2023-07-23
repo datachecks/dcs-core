@@ -12,32 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from opensearchpy import OpenSearch
 from sqlalchemy import create_engine, text
 
 from datachecks.core.configuration.configuration import \
     DataSourceConnectionConfiguration
+from tests.utils import create_opensearch_client, create_postgres_connection
 
 
-@pytest.mark.usefixtures("opensearch_client_config")
+@pytest.mark.usefixtures("opensearch_client_configuration")
 def test_opensearch_available(
-    opensearch_client_config: DataSourceConnectionConfiguration,
+    opensearch_client_configuration,
 ):
-    client = OpenSearch(
-        hosts=[
-            {
-                "host": opensearch_client_config.host,
-                "port": opensearch_client_config.port,
-            }
-        ],
-        http_auth=(
-            opensearch_client_config.username,
-            opensearch_client_config.password,
-        ),
-        use_ssl=True,
-        verify_certs=False,
-        ca_certs=False,
-    )
+    client = create_opensearch_client(opensearch_client_configuration)
     assert client.ping()
     client.close()
 
@@ -46,15 +32,7 @@ def test_opensearch_available(
 def test_pgsql_available(
     pgsql_connection_configuration: DataSourceConnectionConfiguration,
 ):
-    host = pgsql_connection_configuration.host
-    port = pgsql_connection_configuration.port
-    user = pgsql_connection_configuration.username
-    password = pgsql_connection_configuration.password
-    database = pgsql_connection_configuration.database
-    engine = create_engine(
-        f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
-    )
+    psql_connection = create_postgres_connection(pgsql_connection_configuration)
 
-    connect = engine.connect()
-    assert connect.execute(text("SELECT 1")).fetchone()[0] == 1
-    connect.close()
+    assert psql_connection.execute(text("SELECT 1")).fetchone()[0] == 1
+    psql_connection.close()

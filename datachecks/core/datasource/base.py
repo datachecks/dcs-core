@@ -40,6 +40,12 @@ class DataSource(ABC):
         """
         raise NotImplementedError("is_connected method is not implemented")
 
+    def close(self):
+        """
+        Close the connection
+        """
+        raise NotImplementedError("close_connection method is not implemented")
+
 
 class SearchIndexDataSource(DataSource):
     """
@@ -51,21 +57,21 @@ class SearchIndexDataSource(DataSource):
 
         self.client = None
 
-    def query_get_document_count(self, index_name: str, filter: str = None) -> int:
+    def query_get_document_count(self, index_name: str, filters: Dict = None) -> int:
         """
         Get the document count
         :param index_name: name of the index
-        :param filter: optional filter
+        :param filters: optional filter
         :return: count of documents
         """
         raise NotImplementedError("query_get_document_count method is not implemented")
 
-    def query_get_max(self, index_name: str, field: str, filter: str = None) -> int:
+    def query_get_max(self, index_name: str, field: str, filters: str = None) -> int:
         """
         Get the max value
         :param index_name: name of the index
         :param field: field name
-        :param filter: optional filter
+        :param filters: optional filter
         :return: max value
         """
         raise NotImplementedError("query_get_max method is not implemented")
@@ -80,6 +86,7 @@ class SQLDatasource(DataSource):
         super().__init__(data_source_name, data_source_properties)
 
         self.connection: Union[Connection, None] = None
+        self.database: str = data_source_properties.get("database")
 
     def is_connected(self) -> bool:
         """
@@ -87,15 +94,18 @@ class SQLDatasource(DataSource):
         """
         return self.connection is not None
 
-    def query_get_row_count(self, table: str, filter: str = None) -> int:
+    def close(self):
+        self.connection.close()
+
+    def query_get_row_count(self, table: str, filters: str = None) -> int:
         """
         Get the row count
         :param table: name of the table
-        :param filter: optional filter
+        :param filters: optional filter
         """
-        query = "SELECT COUNT(*) FROM {}".format(table)
-        if filter:
-            query += " WHERE {}".format(filter)
+        query = f"SELECT COUNT(*) FROM {table} AS row_count"
+        if filters:
+            query += f" WHERE {filters}"
 
         return self.connection.execute(text(query)).fetchone()[0]
 
