@@ -29,18 +29,18 @@ class FreshnessValueMetric(FieldMetrics):
             metric_name=self.name,
             data_source=self.data_source,
             field_name=self.field_name,
+            table_name=self.table_name,
+            index_name=self.index_name,
         )
 
     def _generate_metric_value(self):
         if isinstance(self.data_source, SQLDatasource):
             return self.data_source.query_get_time_diff(
-                table=self.table_name,
-                field=self.field_name
+                table=self.table_name, field=self.field_name
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
             return self.data_source.query_get_time_diff(
-                index_name=self.index_name,
-                field=self.field_name
+                index_name=self.index_name, field=self.field_name
             )
         else:
             raise ValueError("Invalid data source type")

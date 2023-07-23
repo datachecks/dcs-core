@@ -14,6 +14,7 @@
 
 import random
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import List
 
 from opensearchpy import OpenSearch
@@ -29,6 +30,7 @@ class TestData:
     category: str = None
     is_valid: bool = True
     price: int = None
+    last_updated: datetime = None
 
 
 CATEGORIES = ["HAT", "OIL", "FILTER", "BATTERIES", "HARDWARE"]
@@ -55,6 +57,9 @@ content_connection = engine_content.connect()
 
 
 def generate_data_content(number_of_data: int):
+    content_connection.execute(text("DROP TABLE IF EXISTS table_1"))
+    content_connection.commit()
+
     for i in range(number_of_data):
         d = TestData(
             id=i + 2000,
@@ -100,16 +105,43 @@ def generate_data_content(number_of_data: int):
 
 
 def generate_open_search(number_of_data: int):
+    client.indices.delete(index="category_tabel", ignore=[400, 404])
+    client.indices.create(
+        index="category_tabel",
+        ignore=400,
+        body={
+            "mappings": {
+                "properties": {
+                    "name": {"type": "text"},
+                    "category": {"type": "text"},
+                    "is_valid": {"type": "boolean"},
+                    "price": {"type": "integer"},
+                    "last_updated": {
+                        "type": "date",
+                        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis",
+                    },
+                }
+            }
+        },
+    )
     for i in range(number_of_data):
         d = TestData(
             id=i,
             name=f"name_{i}",
             category=random.choice(CATEGORIES),
             is_valid=bool(random.getrandbits(1)),
+            price=random.randint(1, 1000),
+            last_updated=datetime.now() - timedelta(days=random.randint(1, 1000)),
         )
         client.index(
             index="category_tabel",
-            body={"name": d.name, "category": d.category, "is_valid": d.is_valid},
+            body={
+                "name": d.name,
+                "category": d.category,
+                "is_valid": d.is_valid,
+                "price": d.price,
+                "last_updated": d.last_updated.strftime("%Y-%m-%d %H:%M:%S"),
+            },
         )
 
 

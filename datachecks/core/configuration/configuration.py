@@ -11,12 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
 
 import yaml
+
+from datachecks.core.configuration.config_loader import parse_config
 
 
 class DatasourceType(Enum):
@@ -100,8 +102,7 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
     Load configuration from a yaml string
     """
 
-    config_dict: Dict = yaml.safe_load(yaml_string)
-
+    config_dict: Dict = parse_config(data=yaml_string)
     data_source_configurations = [
         DataSourceConfiguration(
             name=data_source["name"],
@@ -127,10 +128,12 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
                 table=metric_value.get("table"),
                 field=metric_value.get("field"),
                 filters=MetricsFilterConfiguration(
-                    where_clause=metric_value.get("filters", {}).get("where_clause", None),
+                    where_clause=metric_value.get("filters", {}).get(
+                        "where_clause", None
+                    ),
                     search_query=metric_value.get("filters", {}).get(
                         "search_query", None
-                    )
+                    ),
                 ),
             )
             for metric_name, metric_value in metric_list.items()
