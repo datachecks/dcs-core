@@ -47,33 +47,39 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         )
         return self.client
 
+    def close(self):
+        """
+        Close the connection
+        """
+        self.client.close()
+
     def is_connected(self) -> bool:
         """
         Check if the data source is connected
         """
         return self.client.ping()
 
-    def query_get_document_count(self, index_name: str, filter: str = None) -> int:
+    def query_get_document_count(self, index_name: str, filters: Dict = None) -> int:
         """
         Get the document count
         :param index_name: name of the index
-        :param filter: optional filter
+        :param filters: optional filter
         """
-        response = self.client.count(index=index_name, body=filter if filter else {})
-        print(response)
+        body = {"query": filters} if filters else {}
+        response = self.client.count(index=index_name, body=body)
         return response["count"]
 
-    def query_get_max(self, index_name: str, field: str, filter: str = None) -> int:
+    def query_get_max(self, index_name: str, field: str, filters: Dict = None) -> int:
         """
         Get the max value of a field
         :param index_name:
         :param field:
-        :param filter:
+        :param filters:
         :return:
         """
         query = {"aggs": {"max_value": {"max": {"field": field}}}}
-        if filter:
-            query["query"] = filter
+        if filters:
+            query["query"] = filters
 
         response = self.client.search(index=index_name, body=query)
         return response["aggregations"]["max_value"]["value"]

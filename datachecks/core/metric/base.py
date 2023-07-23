@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import datetime
+import json
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Optional
@@ -64,7 +65,7 @@ class Metric(ABC):
         metric_type: MetricsType,
         table_name: Optional[str] = None,
         index_name: Optional[str] = None,
-        filter: Dict = None,
+        filters: Dict = None,
     ):
         if index_name is not None and table_name is not None:
             raise ValueError(
@@ -82,16 +83,16 @@ class Metric(ABC):
         self.data_source = data_source
         self.metric_type = metric_type
         self.filter_query = None
-        if filter is not None:
-            if "search_query" in filter and "sql_query" in filter:
+        if filters is not None:
+            if "search_query" in filters and "sql_query" in filters:
                 raise ValueError(
                     "Please give a value for search_query or sql_query (but not both)"
                 )
 
-            if "search_query" in filter:
-                self.filter_query = filter["search_query"]
-            elif "sql_query" in filter:
-                self.filter_query = filter["sql_query"]
+            if "search_query" in filters:
+                self.filter_query = json.loads(filters["search_query"])
+            elif "where_clause" in filters:
+                self.filter_query = filters["where_clause"]
 
     def get_metric_identity(self):
         return MetricIdentity.generate_identity(
@@ -128,12 +129,12 @@ class FieldMetrics(Metric, ABC):
     def __init__(
         self,
         name: str,
+        metric_type: MetricsType,
         data_source: DataSource,
-        table_name: Optional[str],
-        index_name: Optional[str],
         field_name: str,
-        metric_type=MetricsType,
-        filter: Dict = None,
+        table_name: Optional[str] = None,
+        index_name: Optional[str] = None,
+        filters: Dict = None,
     ):
         super().__init__(
             name=name,
@@ -141,7 +142,7 @@ class FieldMetrics(Metric, ABC):
             table_name=table_name,
             index_name=index_name,
             metric_type=metric_type,
-            filter=filter,
+            filters=filters,
         )
 
         self.field_name = field_name

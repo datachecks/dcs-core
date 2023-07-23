@@ -29,24 +29,24 @@ metrics:
     count_search:
       metric_type: document_count
       index: category_tabel
-      filter:
-        search_query: '{"query" : {"match_all" : {}}}'
+      filters:
+        search_query: '{"match_all" : {}}'
 
   content:
     count_content_hat:
       metric_type: row_count
       table: table_1
-      filter:
+      filters:
         sql_query: "category = 'HAT' AND is_valid is True"
     count_content_non_valid:
       metric_type: row_count
       table: table_1
-      filter:
-        sql_query: "is_valid is False"
+      filters:
+        where_clause: "is_valid is False"
 
   staging:
     count_staging:
       metric_type: row_count
       table: table_2
-      filter:
-        sql_query: "category = 'OIL' AND is_valid is True"
+      filters:
+        where_clause: "category = 'OIL' AND is_valid is True"

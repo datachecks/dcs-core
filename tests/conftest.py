@@ -23,35 +23,14 @@ from datachecks.core.configuration.configuration import \
     DataSourceConnectionConfiguration
 from datachecks.core.datasource.opensearch import \
     OpenSearchSearchIndexDataSource
+from datachecks.core.datasource.postgres import PostgresSQLDatasource
+from tests.utils import is_opensearch_responsive, is_pgsql_responsive
 
-
-def is_opensearch_responsive(host, port):
-    try:
-        client = OpenSearch(
-            hosts=[{"host": host, "port": port}],
-            http_auth=("admin", "admin"),
-            use_ssl=True,
-            verify_certs=False,
-            ca_certs=False,
-        )
-        status = client.ping()
-        client.close()
-    except ConnectionError:
-        status = False
-    return status
-
-
-def is_pgsql_responsive(host, port):
-    try:
-        engine = create_engine(
-            f"postgresql+psycopg2://dbuser:dbpass@{host}:{port}/postgres"
-        )
-        connection = engine.connect()
-        status = True
-        connection.close()
-    except ConnectionError:
-        status = False
-    return status
+OS_USER_NAME = "admin"
+OS_PASSWORD = "admin"
+PSQl_USER_NAME = "postgres"
+PSQl_PASSWORD = "postgres"
+PSQl_DATABASE = "dc_db"
 
 
 @pytest.fixture(scope="session")
@@ -60,28 +39,30 @@ def docker_compose_file(pytestconfig):
     return os.path.join(base_directory, "docker-compose.yaml")
 
 
-@pytest.fixture(scope="session")
-def opensearch_client_config(
+@pytest.fixture(scope="session", autouse=True)
+def opensearch_client_configuration(
     docker_ip, docker_services
 ) -> DataSourceConnectionConfiguration:
     port = docker_services.port_for("dc-opensearch", 9200)
     docker_services.wait_until_responsive(
         timeout=60.0,
         pause=20,
-        check=lambda: is_opensearch_responsive(host=docker_ip, port=port),
+        check=lambda: is_opensearch_responsive(
+            host=docker_ip, port=port, username=OS_USER_NAME, password=OS_PASSWORD
+        ),
     )
 
     return DataSourceConnectionConfiguration(
         host=docker_ip,
         port=port,
-        username="admin",
-        password="admin",
+        username=OS_PASSWORD,
+        password=OS_PASSWORD,
         database=None,
         schema=None,
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def pgsql_connection_configuration(
     docker_ip, docker_services
 ) -> DataSourceConnectionConfiguration:
@@ -89,49 +70,46 @@ def pgsql_connection_configuration(
     docker_services.wait_until_responsive(
         timeout=60.0,
         pause=20,
-        check=lambda: is_pgsql_responsive(host=docker_ip, port=port),
+        check=lambda: is_pgsql_responsive(
+            host=docker_ip,
+            port=port,
+            username=PSQl_USER_NAME,
+            password=PSQl_PASSWORD,
+            database=PSQl_DATABASE,
+        ),
     )
 
     return DataSourceConnectionConfiguration(
         host=docker_ip,
         port=port,
-        username="dbuser",
-        password="dbpass",
-        database="postgres",
+        username=PSQl_USER_NAME,
+        password=PSQl_PASSWORD,
+        database=PSQl_DATABASE,
         schema="public",
     )
 
 
-@pytest.mark.usefixtures("opensearch_client_config")
-@pytest.fixture(scope="session")
-def opensearch_client(
-    opensearch_client_config: DataSourceConnectionConfiguration,
-) -> OpenSearch:
-    client = OpenSearch(
-        hosts=[
-            {
-                "host": opensearch_client_config.host,
-                "port": opensearch_client_config.port,
-            }
-        ],
-        http_auth=(
-            opensearch_client_config.username,
-            opensearch_client_config.password,
-        ),
-        use_ssl=True,
-        verify_certs=False,
-        ca_certs=False,
-    )
-    return client
-
-
-@pytest.mark.usefixtures("opensearch_client_config")
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def opensearch_datasource(
-    opensearch_client_config: DataSourceConnectionConfiguration,
+    opensearch_client_configuration,
 ) -> OpenSearchSearchIndexDataSource:
     source = OpenSearchSearchIndexDataSource(
-        data_source_name="opensearch", data_connection=asdict(opensearch_client_config)
+        data_source_name="opensearch",
+        data_connection=asdict(opensearch_client_configuration),
     )
     source.connect()
-    return source
+    yield source
+    source.close()
+
+
+@pytest.fixture(scope="class")
+def postgres_datasource(
+    pgsql_connection_configuration: DataSourceConnectionConfiguration,
+) -> PostgresSQLDatasource:
+    source = PostgresSQLDatasource(
+        data_source_name="postgresql",
+        data_source_properties=asdict(pgsql_connection_configuration),
+    )
+    source.connect()
+    yield source
+    source.close()

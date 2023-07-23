@@ -32,7 +32,7 @@ class DocumentCountMetric(Metric):
         if isinstance(self.data_source, SearchIndexDataSource):
             return self.data_source.query_get_document_count(
                 index_name=self.index_name,
-                filter=self.filter_query if self.filter_query else None,
+                filters=self.filter_query if self.filter_query else None,
             )
         else:
             raise ValueError("Invalid data source type")
@@ -59,7 +59,7 @@ class RowCountMetric(Metric):
         if isinstance(self.data_source, SQLDatasource):
             return self.data_source.query_get_row_count(
                 table=self.table_name,
-                filter=self.filter_query if self.filter_query else None,
+                filters=self.filter_query if self.filter_query else None,
             )
         else:
             raise ValueError("Invalid data source type")
@@ -90,7 +90,7 @@ class MaxMetric(FieldMetrics):
             return self.data_source.query_get_max(
                 index_name=self.index_name,
                 field=self.field_name,
-                filter=self.filter_query if self.filter_query else None,
+                filters=self.filter_query if self.filter_query else None,
             )
         else:
             raise ValueError("Invalid data source type")
