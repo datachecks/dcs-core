@@ -76,10 +76,10 @@ metrics:
       metric_type: row_count
       table: table_1
       filter:
-        sql_query: "category = 'HAT' AND is_valid is True"
+        where_clause: "category = 'HAT' AND is_valid is True"
     count_content_non_valid:
       metric_type: row_count
       table: table_1
       filter:
-        sql_query: "is_valid is False"
+        where_clause: "is_valid is False"
 ```

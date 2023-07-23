@@ -41,13 +41,13 @@ class DataSourceManager:
         :return:
         """
         for data_source_config in self.data_source_configs:
-            self.data_sources[data_source_config.name] = self.create_data_source(
+            self.data_sources[data_source_config.name] = self._create_data_source(
                 data_source_config=data_source_config
             )
             self.data_sources[data_source_config.name].connect()
 
     @staticmethod
-    def create_data_source(data_source_config: DataSourceConfiguration) -> DataSource:
+    def _create_data_source(data_source_config: DataSourceConfiguration) -> DataSource:
         """
         Create a data source
         :param data_source_config: data source configuration

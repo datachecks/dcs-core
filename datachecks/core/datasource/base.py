@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 from abc import ABC
+from datetime import datetime
 from sqlite3 import Connection
 from typing import Any, Dict, Union
 
 from sqlalchemy import text
+from dateutil import parser
 
 
 class DataSource(ABC):
@@ -76,6 +78,16 @@ class SearchIndexDataSource(DataSource):
         """
         raise NotImplementedError("query_get_max method is not implemented")
 
+    def query_get_time_diff(self, index_name: str, field: str) -> int:
+        """
+        Get the time difference
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: time difference in milliseconds
+        """
+        raise NotImplementedError("query_get_time_diff method is not implemented")
+
 
 class SQLDatasource(DataSource):
     """
@@ -109,16 +121,40 @@ class SQLDatasource(DataSource):
 
         return self.connection.execute(text(query)).fetchone()[0]
 
-    def query_get_max(self, table: str, field: str, filter: str = None) -> int:
+    def query_get_max(self, table: str, field: str, filters: str = None) -> int:
         """
         Get the max value
         :param table: table name
         :param field: column name
-        :param filter: filter condition
+        :param filters: filter condition
         :return:
         """
         query = "SELECT MAX({}) FROM {}".format(field, table)
-        if filter:
-            query += " WHERE {}".format(filter)
+        if filters:
+            query += " WHERE {}".format(filters)
 
         return self.connection.execute(text(query)).fetchone()[0]
+
+    def query_get_time_diff(self, table: str, field: str) -> int:
+        """
+        Get the time difference
+        :param table: name of the index
+        :param field: field name of updated time column
+        :return: time difference in milliseconds
+        """
+        query = f"""
+            SELECT {field} from {table} ORDER BY {field} DESC LIMIT 1;
+        """
+        print("=========")
+        print(query)
+        result = self.connection.execute(text(query)).fetchone()
+        print("=========")
+        for r in result:
+            print(r)
+        print("=========")
+        if result:
+            print(result[0])
+            print(type(result[0]))
+
+            return int((datetime.utcnow() - result[0]).total_seconds())
+        return 0

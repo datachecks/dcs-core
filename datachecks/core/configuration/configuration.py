@@ -14,10 +14,9 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import yaml
-from yaml import SafeLoader
 
 
 class DatasourceType(Enum):
@@ -56,8 +55,8 @@ class MetricsFilterConfiguration:
     Filter configuration for a metric
     """
 
-    sql_query: Optional[list]
-    search_query: Optional[list]
+    where_clause: Optional[str] = None
+    search_query: Optional[str] = None
 
 
 @dataclass
@@ -70,7 +69,8 @@ class MetricConfiguration:
     metric_type: str
     index: Optional[str] = None
     table: Optional[str] = None
-    filter: Optional[MetricsFilterConfiguration] = None
+    field: Optional[str] = None
+    filters: Optional[MetricsFilterConfiguration] = None
 
 
 @dataclass
@@ -125,11 +125,12 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
                 metric_type=metric_value["metric_type"],
                 index=metric_value.get("index"),
                 table=metric_value.get("table"),
-                filter=MetricsFilterConfiguration(
-                    sql_query=metric_value.get("filter", {}).get("sql_query", None),
-                    search_query=metric_value.get("filter", {}).get(
+                field=metric_value.get("field"),
+                filters=MetricsFilterConfiguration(
+                    where_clause=metric_value.get("filters", {}).get("where_clause", None),
+                    search_query=metric_value.get("filters", {}).get(
                         "search_query", None
-                    ),
+                    )
                 ),
             )
             for metric_name, metric_value in metric_list.items()
