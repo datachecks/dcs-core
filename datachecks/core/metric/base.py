@@ -26,6 +26,7 @@ class MetricsType(str, Enum):
     ROW_COUNT = "row_count"
     DOCUMENT_COUNT = "document_count"
     MAX = "max"
+    FRESHNESS = "freshness"
 
 
 class MetricIdentity:
@@ -45,7 +46,7 @@ class MetricIdentity:
         identifiers.append(metric_name)
         if index_name:
             identifiers.append(index_name)
-        if table_name:
+        elif table_name:
             identifiers.append(table_name)
         if field_name:
             identifiers.append(field_name)
@@ -74,6 +75,7 @@ class Metric(ABC):
         if index_name is None and table_name is None:
             raise ValueError("Please give a value for table_name or index_name")
 
+        self.index_name, self.table_name = None, None
         if index_name:
             self.index_name = index_name
         if table_name:
@@ -84,12 +86,17 @@ class Metric(ABC):
         self.metric_type = metric_type
         self.filter_query = None
         if filters is not None:
-            if "search_query" in filters and "sql_query" in filters:
+            if (
+                    "search_query" in filters and filters["search_query"] is not None
+            ) and (
+                    "where_clause" in filters and filters["where_clause"] is not None
+            ):
                 raise ValueError(
-                    "Please give a value for search_query or sql_query (but not both)"
+                    "Please give a value for search_query or where_clause (but not both)"
                 )
 
-            if "search_query" in filters:
+            if "search_query" in filters and filters["search_query"] is not None:
+                print(filters)
                 self.filter_query = json.loads(filters["search_query"])
             elif "where_clause" in filters:
                 self.filter_query = filters["where_clause"]
@@ -146,15 +153,6 @@ class FieldMetrics(Metric, ABC):
         )
 
         self.field_name = field_name
-
-    def get_metric_identity(self):
-        return MetricIdentity.generate_identity(
-            metric_type=MetricsType.DOCUMENT_COUNT,
-            metric_name=self.name,
-            data_source=self.data_source,
-            table_name=self.table_name,
-            field_name=self.field_name,
-        )
 
     @property
     def get_field_name(self):

@@ -28,6 +28,14 @@ class DocumentCountMetric(Metric):
     def validate_data_source(self):
         return isinstance(self.data_source, SearchIndexDataSource)
 
+    def get_metric_identity(self):
+        return MetricIdentity.generate_identity(
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            metric_name=self.name,
+            data_source=self.data_source,
+            index_name=self.index_name,
+        )
+
     def _generate_metric_value(self):
         if isinstance(self.data_source, SearchIndexDataSource):
             return self.data_source.query_get_document_count(
@@ -77,6 +85,8 @@ class MaxMetric(FieldMetrics):
             metric_name=self.name,
             data_source=self.data_source,
             field_name=self.field_name,
+            table_name=self.table_name if self.table_name else None,
+            index_name=self.index_name if self.index_name else None,
         )
 
     def _generate_metric_value(self):
@@ -84,7 +94,7 @@ class MaxMetric(FieldMetrics):
             return self.data_source.query_get_max(
                 table=self.table_name,
                 field=self.field_name,
-                filter=self.filter_query if self.filter_query else None,
+                filters=self.filter_query if self.filter_query else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
             return self.data_source.query_get_max(

@@ -12,41 +12,38 @@ data_sources:
       host: 127.0.0.1
       port: 5431
       username: postgres
-      password: changeme
-      database: postgres
-  - name: staging
-    type: postgres
-    connection:
-      host: 127.0.0.1
-      port: 5430
-      username: postgres
-      password: changeme
-      database: postgres
+      password: postgres
+      database: dc_db
 
 metrics:
 
   search:
-    count_search:
+    count_document:
       metric_type: document_count
       index: category_tabel
       filters:
         search_query: '{"match_all" : {}}'
+    max_price:
+      metric_type: max
+      index: category_tabel
+      field: price
+    last_updated:
+      metric_type: freshness
+      index: category_tabel
+      field: last_updated
 
   content:
     count_content_hat:
       metric_type: row_count
       table: table_1
       filters:
-        sql_query: "category = 'HAT' AND is_valid is True"
+        where_clause: "category = 'HAT' AND is_valid is True"
     count_content_non_valid:
       metric_type: row_count
       table: table_1
       filters:
         where_clause: "is_valid is False"
-
-  staging:
-    count_staging:
-      metric_type: row_count
-      table: table_2
-      filters:
-        where_clause: "category = 'OIL' AND is_valid is True"
+    max_content:
+      metric_type: max
+      table: table_1
+      field: price

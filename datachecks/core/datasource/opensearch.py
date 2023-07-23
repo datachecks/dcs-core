@@ -11,9 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from datetime import datetime
 from typing import Dict
 
+from dateutil import parser
 from opensearchpy import OpenSearch
 
 from datachecks.core.datasource.base import SearchIndexDataSource
@@ -83,3 +84,23 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
 
         response = self.client.search(index=index_name, body=query)
         return response["aggregations"]["max_value"]["value"]
+
+    def query_get_time_diff(self, index_name: str, field: str) -> int:
+        """
+        Get the time difference between the latest and the now
+        :param index_name:
+        :param field:
+        :return:
+        """
+        query = {"query": {"match_all": {}}, "sort": [{f"{field}": {"order": "desc"}}]}
+
+        response = self.client.search(index=index_name, body=query)
+
+        if response["hits"]["hits"]:
+            last_updated = response["hits"]["hits"][0]["_source"][field]
+
+            last_updated = parser.parse(timestr=last_updated).timestamp()
+            now = datetime.utcnow().timestamp()
+            return int(now - last_updated)
+
+        return 0

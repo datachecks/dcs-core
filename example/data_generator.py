@@ -28,6 +28,7 @@ class TestData:
     name: str = None
     category: str = None
     is_valid: bool = True
+    price: int = None
 
 
 CATEGORIES = ["HAT", "OIL", "FILTER", "BATTERIES", "HARDWARE"]
@@ -35,19 +36,12 @@ CATEGORIES = ["HAT", "OIL", "FILTER", "BATTERIES", "HARDWARE"]
 url_content = URL.create(
     drivername="postgresql",
     username="postgres",
-    password="changeme",
+    password="postgres",
     host="127.0.0.1",
     port=5431,
-    database="postgres",
+    database="dc_db",
 )
-url_staging = URL.create(
-    drivername="postgresql",
-    username="postgres",
-    password="changeme",
-    host="127.0.0.1",
-    port=5430,
-    database="postgres",
-)
+
 client = OpenSearch(
     hosts=[{"host": "127.0.0.1", "port": 9201}],
     http_auth=("admin", "admin"),
@@ -56,10 +50,8 @@ client = OpenSearch(
     ca_certs=False,
 )
 engine_content = create_engine(url_content)
-engine_staging = create_engine(url_staging)
 
 content_connection = engine_content.connect()
-staging_connection = engine_staging.connect()
 
 
 def generate_data_content(number_of_data: int):
@@ -69,12 +61,29 @@ def generate_data_content(number_of_data: int):
             name=f"name_{i}",
             category=random.choice(CATEGORIES),
             is_valid=bool(random.getrandbits(1)),
+            price=random.randint(1, 1000),
         )
         try:
             content_connection.execute(
                 text(
                     """
-                INSERT INTO table_1 (id, name, category, is_valid)  VALUES (:id, :name, :category, :is_valid)
+                CREATE TABLE IF NOT EXISTS table_1 (
+                    id int,
+                    name varchar(255),
+                    category varchar(255),
+                    is_valid boolean,
+                    price int,
+                    PRIMARY KEY (id)
+                    )
+            """
+                )
+            )
+            content_connection.commit()
+            content_connection.execute(
+                text(
+                    """
+                INSERT INTO table_1 (id, name, category, is_valid, price)
+                VALUES (:id, :name, :category, :is_valid, :price)
                 """
                 ),
                 {
@@ -82,38 +91,12 @@ def generate_data_content(number_of_data: int):
                     "name": d.name,
                     "category": d.category,
                     "is_valid": d.is_valid,
+                    "price": d.price,
                 },
             )
             content_connection.commit()
         except Exception as e:
             raise e
-
-
-def generate_data_staging(number_of_data: int):
-    for i in range(number_of_data):
-        d = TestData(
-            id=i + 2000,
-            name=f"name_{i}",
-            category=random.choice(CATEGORIES),
-            is_valid=bool(random.getrandbits(1)),
-        )
-        try:
-            staging_connection.execute(
-                text(
-                    """
-                INSERT INTO table_2 (id, name, category, is_valid) VALUES (:id, :name, :category, :is_valid)
-                """
-                ),
-                {
-                    "id": d.id,
-                    "name": d.name,
-                    "category": d.category,
-                    "is_valid": d.is_valid,
-                },
-            )
-            staging_connection.commit()
-        except Exception as e:
-            print(e)
 
 
 def generate_open_search(number_of_data: int):
@@ -131,6 +114,5 @@ def generate_open_search(number_of_data: int):
 
 
 if __name__ == "__main__":
-    generate_data_content(100)
-    generate_data_staging(200)
+    generate_data_content(1000)
     generate_open_search(300)
