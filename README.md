@@ -1,5 +1,5 @@
 <h1 align="center">Datachecks</h1>
-<p align="center"><b>Open Source Data Quality Monitoring.</b></p>
+<p align="center"><b>Open Source Data Reliability Tool</b></p>
 
 <p align="center">
     <img align="center" alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>
@@ -12,7 +12,7 @@
 
 ## What is `datachecks`?
 
-Datachecks is a opensource data quality monitoring tool. It helps to monitor the data quality of the data pipelines. It helps to identify the data quality issues in the databases and  data pipelines.
+Datachecks is an open-source data Reliability Tool. It helps monitor the data quality of the data applications so that they can work reliably. It helps to identify the data quality issues in the databases and  data pipelines.
 
 ## Getting Started
 
