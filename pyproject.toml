@@ -42,7 +42,7 @@ pytest-cov = "^4.0.0"
 
 [tool.poetry.extras]
 # When adding, update also: README + dev deps just above
-postgresql = ["psycopg2", "sqlalchemy"]
+postgres = ["psycopg2", "sqlalchemy"]
 opensearch = ["opensearch-py"]
 
 [tool.poetry.scripts]
