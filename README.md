@@ -1,5 +1,7 @@
-<h1 align="center">Datachecks</h1>
-<p align="center"><b>Open Source Data Reliability Tool</b></p>
+<p align="center">
+    <img alt="Logo" src="docs/assets/datachecks_banner_logo.svg" width="1512">
+</p>
+<p align="center"><b>Open Source Data Quality Monitoring.</b></p>
 
 <p align="center">
     <img align="center" alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/>
@@ -12,7 +14,10 @@
 
 ## What is `datachecks`?
 
-Datachecks is an open-source data Reliability Tool. It helps monitor the data quality of the data applications so that they can work reliably. It helps to identify the data quality issues in the databases and  data pipelines.
+Datachecks is an open-source data monitoring tool that helps to monitor the data quality of databases and data pipelines.
+It identifies potential issues, including in the databases and data pipelines. It helps to identify the root cause of the data quality issues and helps to improve the data quality.
+
+Datachecks can generate several metrics, including row count, missing values, invalid values etc. from multiple data sources. Below are the list of supported data sources and metrics.
 
 ## Getting Started
 
@@ -23,13 +28,13 @@ Install `datachecks` with the command that is specific to the database.
 ### Postgres
 
 ```
-pip install datachecks 'datachecks[Postgres]' -U
+pip install datachecks 'datachecks[postgres]' -U
 ```
 
 ### OpenSearch
 
 ```
-pip install datachecks 'datachecks[OpenSearch]' -U
+pip install datachecks 'datachecks[opensearch]' -U
 ```
 
 ## Running Datachecks
@@ -40,32 +45,29 @@ datachecks inspect -C config.yaml
 ```
 
 
-## Example Config
+## Datachecks Configuration File
 
 ### Data Source Configuration
 
 Declare the data sources in the `data_sources` section of the config file.
 The data sources can be of type `postgres` or `opensearch`.
 
-The configuration file can also use environment variables for the connection parameters.
+### Environment Variables in Config File
+
+The configuration file can also use environment variables for the connection parameters. To use environment variables in the config file, use the `!ENV` tag in the config file like `!ENV ${PG_USER}`
+
+### Example Data Source Configuration
 
 ```yaml
 data_sources:
-  - name: search
-    type: opensearch
-    connection:
-      host: 127.0.0.1
-      port: 9201
-      username: !ENV ${OS_USER}
-      password: !ENV ${OS_PASS}
-  - name: content
-    type: postgres
-    connection:
-      host: 127.0.0.1
-      port: 5431
-      username: !ENV ${PG_USER}
-      password: !ENV ${OS_PASS}
-      database: postgres
+  - name: content_datasource        # Name of the data source
+    type: postgres                  # Type of the data source
+    connection:                     # Connection details of the data source
+      host: 127.0.0.1               # Host of the data source
+      port: 5431                    # Port of the data source
+      username: !ENV ${PG_USER}     # Username of the data source
+      password: !ENV ${OS_PASS}     # Password of the data source
+      database: postgres            # Database name of the data source
 ```
 
 ### Metric Configuration
@@ -74,15 +76,104 @@ Metrics are defined in the `metrics` section of the config file.
 
 ```yaml
 metrics:
-  content:
-    count_content_hat:
-      metric_type: row_count
-      table: table_1
-      filter:
+  content_datasource:               # Reference of the data source for which the metric is defined
+    count_content_hat:              # Name of the metric
+      metric_type: row_count        # Type of the metric
+      table: example_table          # Table name to check for row count
+      filter:                       # Optional Filter to apply on the table before applying the metric
         where_clause: "category = 'HAT' AND is_valid is True"
-    count_content_non_valid:
-      metric_type: row_count
-      table: table_1
-      filter:
-        where_clause: "is_valid is False"
+```
+
+## Supported Data Sources
+
+Datachecks supports sql and search data sources. Below are the list of supported data sources.
+
+### PostgreSQL
+Postgresql data source can be defined as below in the config file.
+
+```yaml
+data_sources:
+  - name: content_datasource     # Name of the data source
+    type: postgres               # Type of the data source
+    connection:                  # Connection details of the data source
+      host:                      # Host of the data source
+      port:                      # Port of the data source
+      username:                  # Username of the data source
+      password:                  # Password of the data source
+      database:                  # Database name of the data source
+      schema:                    # Schema name of the data source
+```
+
+### OpenSearch
+
+OpenSearch data source can be defined as below in the config file.
+
+```yaml
+data_sources:
+  - name: content_datasource     # Name of the data source
+    type: opensearch             # Type of the data source
+    connection:                  # Connection details of the data source
+      host:                      # Host of the data source
+      port:                      # Port of the data source
+      username:                  # Username of the data source
+      password:                  # Password of the data source
+```
+
+## Supported Metrics
+
+### Numeric Metrics
+By using a numeric metric to perform basic calculations on your data, you can more easily assess trends.
+
+| Metric           | Description                                              |
+|------------------|----------------------------------------------------------|
+| `row_count`      | The number of rows in a table.                           |
+| `document_count` | The number of documents in a document db or search index |
+| `max`            | Maximum value of a numeric column                        |
+| `min`            | Minimum value of a numeric column                        |
+
+#### How to define numeric metrics in datachecks config file?
+
+For SQL data sources, the numeric metric can be defined as below.
+```yaml
+  <Datasource name>:
+    <Metrics name>:
+      metric_type: <Metric type>      # Type of NUMERIC metric
+      table: <Table name>             # Table name to check for numeric metric
+      field: <Field name>             # Field name to check for numeric metric
+      filter:                         # Optional Filter to apply on the table
+        where_clause: <Where clause>  # SQL Where clause to filter the data before applying the metric
+```
+For Search data sources, the numeric metric can be defined as below.
+```yaml
+  <Datasource name>:
+    <Metrics name>:
+      metric_type: <Metric type>      # Type of NUMERIC metric
+      index: <Index name>             # Index name to check for numeric metric
+      field: <Field name>             # Field name to check for numeric metric
+      filter:                         # Optional Filter to apply on the index
+        search_query: <Search Query>  # Search Query to filter the data before applying the metric
+```
+
+### Freshness Metrics
+Data freshness, sometimes referred to as data timeliness, is the frequency in which data is updated for consumption.
+It is an important data quality dimension and a pillar of data observability because recently refreshed data is more accurate, and thus more valuable
+
+#### How to define freshness in datachecks config file?
+
+For SQL data sources, the freshness metric can be defined as below.
+```yaml
+  <Datasource name>:
+    last_updated_row <Metrics name>:
+      metric_type: freshness      # Type of metric is FRESHNESS
+      table: category_tabel       # Table name to check for freshness check if datasource is sql type
+      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
+```
+
+For Search data sources, the freshness metric can be defined as below.
+```yaml
+  <Datasource name>:
+    last_updated_doc <Metrics name>:
+      metric_type: freshness      # Type of metric is FRESHNESS
+      index: category_index       # Index name to check for freshness check if datasource is search index type
+      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
 ```

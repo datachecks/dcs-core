@@ -18,8 +18,8 @@ import click
 from datachecks.__version__ import __version__
 from datachecks.core.configuration.configuration import (Configuration,
                                                          load_configuration)
-from datachecks.core.datasource.data_source import DataSourceManager
-from datachecks.core.metric.metric import MetricManager
+from datachecks.core.datasource.manager import DataSourceManager
+from datachecks.core.metric.manager import MetricManager
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
