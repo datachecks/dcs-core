@@ -19,21 +19,61 @@ It identifies potential issues, including in the databases and data pipelines. I
 
 Datachecks can generate several metrics, including row count, missing values, invalid values etc. from multiple data sources. Below are the list of supported data sources and metrics.
 
-## Getting Started
+## Why Data Monitoring?
 
-**Install `datachecks`**
+APM (Application Performance Monitoring) tools are used to monitor the performance of applications. AMP tools are mandatory part of dev stack. Without AMP tools, it is very difficult to monitor the performance of applications.
+
+<p align="center">
+    <img alt="why_data_observability" src="docs/assets/datachecks_why_data_observability.svg" width="800">
+</p>
+
+But for Data products regular APM tools are not enough. We need a new kind of tools that can monitor the performance of Data applications. 
+Data monitoring tools are used to monitor the data quality of databases and data pipelines. It identifies potential issues, including in the databases and data pipelines. It helps to identify the root cause of the data quality issues and helps to improve the data quality.
+
+## Architecture
+
+<p align="center">
+    <img alt="datacheck_architecture" src="docs/assets/data_check_architecture.svg" width="800">
+</p>
+
+## What Datacheck does not do?
+
+<p align="middle">
+  <img alt="" src="docs/assets/datachecks_does_not_do.svg" width="800"/>
+</p>
+
+## Metric Types
+
+| Metric                           | Description                                                                                                      |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------|
+| **Reliability Metrics**          | Reliability metrics detect whether tables/indices/collections are updating with timely data                      |
+| **Numeric Distribution Metrics** | Numeric Distribution metrics detect changes in the numeric distributions i.e. of values, variance, skew and more |
+| **Uniqueness Metrics**           | Uniqueness metrics detect when data constraints are breached like duplicates, number of distinct values etc      |
+| **Completeness Metrics**         | Completeness metrics detect when there are missing values in datasets i.e. Null, empty value                     |
+| **Validity Metrics**             | Validity metrics detect whether data is formatted correctly and represents a valid value                         |
+
+## Getting Started
 
 Install `datachecks` with the command that is specific to the database.
 
+### Install Datachecks
+
+To install all datachecks dependencies, use the below command.
+```shell
+pip install datachecks -U
+```
+
 ### Postgres
 
-```
+To install only postgres data source, use the below command.
+```shell
 pip install datachecks 'datachecks[postgres]' -U
 ```
 
 ### OpenSearch
 
-```
+To install only opensearch data source, use the below command.
+```shell
 pip install datachecks 'datachecks[opensearch]' -U
 ```
 
@@ -118,6 +158,13 @@ data_sources:
       username:                  # Username of the data source
       password:                  # Password of the data source
 ```
+
+### [Work In Progress] Data Source Integrations
+- **MySql**
+- **MongoDB**
+- **Elasticsearch**
+- **GCP BigQuery**
+- **AWS RedShift**
 
 ## Supported Metrics
 
