@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  test-dc-opensearch: # This is also the hostname of the container within the Docker network (i.e. https://test-dc-opensearch/)
+    image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
+    container_name: test-dc-opensearch
+    environment:
+      - cluster.name=opensearch-cluster # Name the cluster
+      - node.name=test-dc-opensearch # Name the node that will run in this container
+      - discovery.seed_hosts=test-dc-opensearch # Nodes to look for when discovering the cluster
+      - cluster.initial_cluster_manager_nodes=test-dc-opensearch # Nodes eligible to serve as cluster manager
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    volumes:
+      - test-opensearch-data:/usr/share/opensearch/data # Creates volume called opensearch-data and mounts it to the container
+    ports:
+      - 9222:9200 # REST API
+      - 9666:9600 # Performance Analyzer
+    networks:
+      - test-opensearch-net # All of the containers will join the same Docker bridge network
+  test-dc-postgres:
+    container_name: test-postgres_container
+    image: postgres
+    environment:
+      POSTGRES_DB: dc_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - test-postgres:/data/postgres
+    ports:
+      - "5434:5432"
+    networks:
+      - test-postgres
+    restart: unless-stopped
+
+networks:
+  test-opensearch-net:
+  test-postgres:
+    driver: bridge
+
+volumes:
+  test-opensearch-data:
+  test-postgres:
+    driver: local

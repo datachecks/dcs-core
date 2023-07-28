@@ -16,8 +16,6 @@ import os
 from dataclasses import asdict
 
 import pytest
-from opensearchpy import OpenSearch
-from sqlalchemy import Connection, create_engine
 
 from datachecks.core.configuration.configuration import \
     DataSourceConnectionConfiguration
@@ -36,14 +34,14 @@ PSQl_DATABASE = "dc_db"
 @pytest.fixture(scope="session")
 def docker_compose_file(pytestconfig):
     base_directory = os.path.dirname(os.path.abspath(__file__)).replace("tests", "")
-    return os.path.join(base_directory, "docker-compose.yaml")
+    return os.path.join(base_directory, "docker-compose-test.yaml")
 
 
 @pytest.fixture(scope="session", autouse=True)
 def opensearch_client_configuration(
     docker_ip, docker_services
 ) -> DataSourceConnectionConfiguration:
-    port = docker_services.port_for("dc-opensearch", 9200)
+    port = docker_services.port_for("test-dc-opensearch", 9200)
     docker_services.wait_until_responsive(
         timeout=60.0,
         pause=20,
@@ -66,7 +64,7 @@ def opensearch_client_configuration(
 def pgsql_connection_configuration(
     docker_ip, docker_services
 ) -> DataSourceConnectionConfiguration:
-    port = docker_services.port_for("dc-postgres", 5432)
+    port = docker_services.port_for("test-dc-postgres", 5432)
     docker_services.wait_until_responsive(
         timeout=60.0,
         pause=20,
