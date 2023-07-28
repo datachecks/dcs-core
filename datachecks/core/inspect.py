@@ -13,18 +13,37 @@
 #  limitations under the License.
 from typing import Dict, List
 
+import requests
+
 from datachecks.core.configuration.configuration import Configuration
 from datachecks.core.datasource.manager import DataSourceManager
+from datachecks.core.logger.default_logger import DefaultLogger
 from datachecks.core.metric.manager import MetricManager
+
+requests.packages.urllib3.disable_warnings(
+    requests.packages.urllib3.exceptions.InsecureRequestWarning
+)
 
 
 class Inspect:
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
         self.data_source_manager = DataSourceManager(configuration.data_sources)
+
+        self.metric_logger = None
+
+        if self.configuration.metric_logger:
+            if self.configuration.metric_logger.type == "default":
+                self.metric_logger = DefaultLogger(
+                    **self.configuration.metric_logger.config
+                    if self.configuration.metric_logger.config
+                    else {}
+                )
+
         self.metric_manager = MetricManager(
             metric_config=configuration.metrics,
             data_source_manager=self.data_source_manager,
+            metric_logger=self.metric_logger,
         )
 
     def start(self):
