@@ -20,6 +20,7 @@ from typing import Dict, Optional
 
 from datachecks.core.datasource.base import (DataSource, SearchIndexDataSource,
                                              SQLDatasource)
+from datachecks.core.logger.base import MetricLogger
 
 
 class MetricsType(str, Enum):
@@ -67,6 +68,7 @@ class Metric(ABC):
         table_name: Optional[str] = None,
         index_name: Optional[str] = None,
         filters: Dict = None,
+        metric_logger: MetricLogger = None
     ):
         if index_name is not None and table_name is not None:
             raise ValueError(
@@ -97,6 +99,7 @@ class Metric(ABC):
                 self.filter_query = json.loads(filters["search_query"])
             elif "where_clause" in filters:
                 self.filter_query = filters["where_clause"]
+        self.metric_logger = metric_logger
 
     def get_metric_identity(self):
         return MetricIdentity.generate_identity(
@@ -106,27 +109,33 @@ class Metric(ABC):
         )
 
     @abstractmethod
-    def _generate_metric_value(self):
+    def _generate_metric_value(self) -> float:
         pass
 
-    def get_value(self):
-        value = {
+    def get_value(self) -> Dict:
+        metric_value = self._generate_metric_value()
+        metric_values = {
             "identity": self.get_metric_identity(),
             "metricName": self.name,
             "metricType": self.metric_type.value,
-            "value": self._generate_metric_value(),
+            "value": metric_value,
             "dataSourceName": self.data_source.data_source_name,
             "@timestamp": datetime.datetime.utcnow().isoformat(),
         }
         if "index_name" in self.__dict__:
-            value["index_name"] = self.__dict__["index_name"]
+            metric_values["index_name"] = self.__dict__["index_name"]
         elif "table_name" in self.__dict__:
-            value["table_name"] = self.__dict__["table_name"]
+            metric_values["table_name"] = self.__dict__["table_name"]
 
         if "field_name" in self.__dict__:
-            value["field_name"] = self.__dict__["field_name"]
-
-        return value
+            metric_values["field_name"] = self.__dict__["field_name"]
+        if self.metric_logger:
+            self.metric_logger.log(
+                metric_name=self.name,
+                metric_value=metric_value,
+                metric_tags=metric_values
+            )
+        return metric_values
 
 
 class FieldMetrics(Metric, ABC):
@@ -139,6 +148,7 @@ class FieldMetrics(Metric, ABC):
         table_name: Optional[str] = None,
         index_name: Optional[str] = None,
         filters: Dict = None,
+        metric_logger: MetricLogger = None
     ):
         super().__init__(
             name=name,
@@ -147,6 +157,7 @@ class FieldMetrics(Metric, ABC):
             index_name=index_name,
             metric_type=metric_type,
             filters=filters,
+            metric_logger=metric_logger
         )
 
         self.field_name = field_name

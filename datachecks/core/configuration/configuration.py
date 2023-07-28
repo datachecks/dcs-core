@@ -34,10 +34,10 @@ class DataSourceConnectionConfiguration:
 
     host: str
     port: int
-    username: Optional[str]
-    password: Optional[str]
     database: Optional[str]
-    schema: Optional[str]
+    username: Optional[str] = None
+    password: Optional[str] = None
+    schema: Optional[str] = "public"
 
 
 @dataclass
@@ -76,6 +76,17 @@ class MetricConfiguration:
 
 
 @dataclass
+class MetricLoggerConfiguration:
+    """
+    Configuration for the metric logger
+    """
+
+    type: Optional[str] = "default"
+    enabled: Optional[bool] = True
+    config: Optional[Dict] = None
+
+
+@dataclass
 class Configuration:
     """
     Configuration for the data checks
@@ -83,6 +94,7 @@ class Configuration:
 
     data_sources: List[DataSourceConfiguration]
     metrics: Dict[str, List[MetricConfiguration]]
+    metric_logger: Optional[MetricLoggerConfiguration] = MetricLoggerConfiguration()
 
 
 def load_configuration(file_path: str) -> Configuration:

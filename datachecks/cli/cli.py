@@ -14,12 +14,12 @@
 from typing import Union
 
 import click
+from loguru import logger
 
+from datachecks import Inspect
 from datachecks.__version__ import __version__
 from datachecks.core.configuration.configuration import (Configuration,
                                                          load_configuration)
-from datachecks.core.datasource.manager import DataSourceManager
-from datachecks.core.metric.manager import MetricManager
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
@@ -38,29 +38,34 @@ def main():
     default=None,
     help="Specify the file path for configuration",
 )
+@click.option(
+    "-A",
+    "--application-name",
+    required=False,
+    default="datachecks",
+    help="Specify the application name for logging",
+)
+@click.option(
+    "--time-format",
+    required=False,
+    default=None,
+    help="Specify the time format for logging",
+)
 def inspect(
     config_path: Union[str, None] = None,
+    application_name: str = "datachecks",
+    time_format: str = None,
 ):
+    """
+    Starts the datachecks inspection
+    """
     configuration: Configuration = load_configuration(config_path)
 
-    data_source_manager = DataSourceManager(configuration.data_sources)
-    for data_source_name in data_source_manager.get_data_source_names():
-        data_source = data_source_manager.get_data_source(
-            data_source_name=data_source_name
-        )
-        print(
-            f"Data source: {data_source.data_source_name} is {data_source.is_connected()}"
-        )
-    metric_manager = MetricManager(
-        metric_config=configuration.metrics, data_source_manager=data_source_manager
-    )
-    for metric_name, metric in metric_manager.metrics.items():
-        metric_value = metric.get_value()
-        print(f"{metric_name} : {metric_value}")
+    configuration.metric_logger.config["application_name"] = application_name
+    if time_format is not None:
+        configuration.metric_logger.config["time_format"] = time_format
 
-    """
-    1. Read config
-    2. Create data sources
-    3. Create metrics
-    4. for each metric, run it call get_value()
-    """
+    inspector = Inspect(configuration=configuration)
+
+    logger.info("Starting datachecks inspection...")
+    inspector.start()

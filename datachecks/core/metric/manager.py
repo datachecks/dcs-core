@@ -17,7 +17,8 @@ from typing import Dict, List
 
 from datachecks.core.configuration.configuration import MetricConfiguration
 from datachecks.core.datasource.manager import DataSourceManager
-from datachecks.core.metric.base import MetricsType
+from datachecks.core.logger.base import MetricLogger
+from datachecks.core.metric.base import Metric, MetricsType
 from datachecks.core.metric.freshness_metric import FreshnessValueMetric
 from datachecks.core.metric.numeric_metric import (DocumentCountMetric,
                                                    MaxMetric, RowCountMetric)
@@ -28,9 +29,11 @@ class MetricManager:
         self,
         metric_config: Dict[str, List[MetricConfiguration]],
         data_source_manager: DataSourceManager,
+        metric_logger: MetricLogger = None,
     ):
         self.data_source_manager = data_source_manager
-        self.metrics = {}
+        self.metrics: Dict[str, Metric] = {}
+        self.metric_logger: MetricLogger = metric_logger
         self._build_metrics(config=metric_config)
 
     def _build_metrics(self, config: Dict[str, List[MetricConfiguration]]):
@@ -47,6 +50,7 @@ class MetricManager:
                         else None,
                         index_name=metric_config.index,
                         metric_type=MetricsType.DOCUMENT_COUNT,
+                        metric_logger=self.metric_logger,
                     )
                     self.metrics[metric.get_metric_identity()] = metric
                 elif metric_config.metric_type == MetricsType.ROW_COUNT:
@@ -60,6 +64,7 @@ class MetricManager:
                         else None,
                         table_name=metric_config.table,
                         metric_type=MetricsType.ROW_COUNT,
+                        metric_logger=self.metric_logger,
                     )
                     self.metrics[metric.get_metric_identity()] = metric
                 elif metric_config.metric_type == MetricsType.MAX:
@@ -75,6 +80,7 @@ class MetricManager:
                         index_name=metric_config.index,
                         metric_type=MetricsType.MAX,
                         field_name=metric_config.field,
+                        metric_logger=self.metric_logger,
                     )
                     self.metrics[metric.get_metric_identity()] = metric
                 elif metric_config.metric_type == MetricsType.FRESHNESS:
@@ -90,6 +96,7 @@ class MetricManager:
                         index_name=metric_config.index,
                         metric_type=MetricsType.FRESHNESS,
                         field_name=metric_config.field,
+                        metric_logger=self.metric_logger,
                     )
                     self.metrics[metric.get_metric_identity()] = metric
                 else:
