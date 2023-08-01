@@ -27,7 +27,7 @@ APM (Application Performance Monitoring) tools are used to monitor the performan
     <img alt="why_data_observability" src="docs/assets/datachecks_why_data_observability.svg" width="800">
 </p>
 
-But for Data products regular APM tools are not enough. We need a new kind of tools that can monitor the performance of Data applications. 
+But for Data products regular APM tools are not enough. We need a new kind of tools that can monitor the performance of Data applications.
 Data monitoring tools are used to monitor the data quality of databases and data pipelines. It identifies potential issues, including in the databases and data pipelines. It helps to identify the root cause of the data quality issues and helps to improve the data quality.
 
 ## Architecture
@@ -168,7 +168,36 @@ data_sources:
 
 ## Supported Metrics
 
-### Numeric Metrics
+### Reliability Metrics
+Reliability metrics detect whether tables/indices/collections are updating with timely data and whether the data is being updated at the expected volume.
+
+| Metric           | Description                                                                                                                                                                                                                                                                |
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `row_count`      | The number of rows in a table.                                                                                                                                                                                                                                             |
+| `document_count` | The number of documents in a document db or search index                                                                                                                                                                                                                   |
+| `freshness`      | Data freshness, sometimes referred to as data timeliness, is the frequency in which data is updated for consumption. It is an important data quality dimension and a pillar of data observability because recently refreshed data is more accurate, and thus more valuable |
+
+#### How to define freshness in datachecks config file?
+
+For SQL data sources, the freshness metric can be defined as below.
+```yaml
+  <Datasource name>:
+    last_updated_row <Metrics name>:
+      metric_type: freshness      # Type of metric is FRESHNESS
+      table: category_tabel       # Table name to check for freshness check if datasource is sql type
+      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
+```
+
+For Search data sources, the freshness metric can be defined as below.
+```yaml
+  <Datasource name>:
+    last_updated_doc <Metrics name>:
+      metric_type: freshness      # Type of metric is FRESHNESS
+      index: category_index       # Index name to check for freshness check if datasource is search index type
+      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
+```
+
+### Numeric Distribution Metrics
 By using a numeric metric to perform basic calculations on your data, you can more easily assess trends.
 
 | Metric           | Description                                              |
@@ -177,6 +206,16 @@ By using a numeric metric to perform basic calculations on your data, you can mo
 | `document_count` | The number of documents in a document db or search index |
 | `max`            | Maximum value of a numeric column                        |
 | `min`            | Minimum value of a numeric column                        |
+| `average`        | Average value of a numeric column                        |
+| `variance`       | The statistical variance of the column.                  |
+| `skew`           | The statistical skew of the column                       |
+| `kurtosis`       | The statistical kurtosis of the column                   |
+| `sum`            | The sum of the values in the column                      |
+| `percentile`     | The statistical percentile of the column                 |
+| `geometric_mean` | The statistical median of the column                     |
+| `harmonic_mean`  | The statistical harmonic mean of the column              |
+
+
 
 #### How to define numeric metrics in datachecks config file?
 
@@ -200,27 +239,23 @@ For Search data sources, the numeric metric can be defined as below.
       filter:                         # Optional Filter to apply on the index
         search_query: <Search Query>  # Search Query to filter the data before applying the metric
 ```
+### Completeness Metrics
 
-### Freshness Metrics
-Data freshness, sometimes referred to as data timeliness, is the frequency in which data is updated for consumption.
-It is an important data quality dimension and a pillar of data observability because recently refreshed data is more accurate, and thus more valuable
+Completeness metrics detect when there are missing values in datasets.
 
-#### How to define freshness in datachecks config file?
+| Metric                    | Description                                                                          |
+|---------------------------|--------------------------------------------------------------------------------------|
+| `null_count`              | The count of rows with a null value in the column.                                   |
+| `null_percentage`         | The percentage of rows with a null value in the column                               |
+| `empty_string`            | The count of rows with a 0-length string (i.e. "") as the value for the column.      |
+| `empty_string_percentage` | The percentage of rows with a 0-length string (i.e. "") as the value for the column. |
 
-For SQL data sources, the freshness metric can be defined as below.
-```yaml
-  <Datasource name>:
-    last_updated_row <Metrics name>:
-      metric_type: freshness      # Type of metric is FRESHNESS
-      table: category_tabel       # Table name to check for freshness check if datasource is sql type
-      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
-```
 
-For Search data sources, the freshness metric can be defined as below.
-```yaml
-  <Datasource name>:
-    last_updated_doc <Metrics name>:
-      metric_type: freshness      # Type of metric is FRESHNESS
-      index: category_index       # Index name to check for freshness check if datasource is search index type
-      field: last_updated         # Field name to check for freshness check, this field should be a timestamp field
-```
+### Uniqueness Metrics
+
+Uniqueness metrics detect when schema and data constraints are breached.
+
+| Metric            | Description                                                                                                              |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `distinct_count`  | The count of distinct elements in the column. This metric should be used when you expect a fixed number of value options |
+| `duplicate_count` | The count of rows with the same value for a particular column.                                                           |
