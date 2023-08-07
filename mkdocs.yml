@@ -1,0 +1,68 @@
+site_name: ""
+site_url: https://waterdipai.github.io/datachecks/
+repo_url: https://github.com/Waterdipai/datachecks
+repo_name: waterdipai/datachecks
+edit_uri: blob/main/docs/
+theme:
+  name: material
+  logo: assets/datachecks_full_logo.svg
+  favicon: assets/datachecks_favicon.png
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
+  features:
+    - navigation.expand
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+  font:
+    text: Roboto
+    code: Roboto Mono
+extra_css:
+  - stylesheets/extra.css
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - tables
+  - admonition
+  - pymdownx.details
+nav:
+  - Welcome to Datachecks: index.md
+
+extra:
+  generator: true
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/waterdipai/datachecks
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/waterdip
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg
+
+copyright: "&copy; 2023 BY WATERDIP LABS"
