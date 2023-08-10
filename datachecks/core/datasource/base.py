@@ -77,6 +77,16 @@ class SearchIndexDataSource(DataSource):
         :return: max value
         """
         raise NotImplementedError("query_get_max method is not implemented")
+    
+    def query_get_avg(self, index_name: str, field: str, filters: str = None) -> int:
+        """
+        Get the average value
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: average value
+        """
+        raise NotImplementedError("query_get_avg method is not implemented")
 
     def query_get_time_diff(self, index_name: str, field: str) -> int:
         """
@@ -130,6 +140,20 @@ class SQLDatasource(DataSource):
         :return:
         """
         query = "SELECT MAX({}) FROM {}".format(field, table)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return self.connection.execute(text(query)).fetchone()[0]
+    
+    def query_get_avg(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the average value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        query = "SELECT ROUND(AVG({}), 2) FROM {}".format(field, table)
         if filters:
             query += " WHERE {}".format(filters)
 

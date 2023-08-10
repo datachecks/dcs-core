@@ -84,6 +84,21 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
 
         response = self.client.search(index=index_name, body=query)
         return response["aggregations"]["max_value"]["value"]
+    
+    def query_get_avg(self, index_name: str, field: str, filters: Dict = None) -> int:
+        """
+        Get the average value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"avg_value": {"avg": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)
+        return round(response["aggregations"]["avg_value"]["value"], 2)
 
     def query_get_time_diff(self, index_name: str, field: str) -> int:
         """

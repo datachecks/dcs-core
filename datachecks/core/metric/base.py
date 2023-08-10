@@ -27,6 +27,7 @@ class MetricsType(str, Enum):
     ROW_COUNT = "row_count"
     DOCUMENT_COUNT = "document_count"
     MAX = "max"
+    AVG = "avg"
     FRESHNESS = "freshness"
 
 
