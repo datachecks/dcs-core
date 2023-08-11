@@ -26,6 +26,7 @@ from datachecks.core.logger.base import MetricLogger
 class MetricsType(str, Enum):
     ROW_COUNT = "row_count"
     DOCUMENT_COUNT = "document_count"
+    MIN = "min"
     MAX = "max"
     AVG = "avg"
     FRESHNESS = "freshness"

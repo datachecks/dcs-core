@@ -69,6 +69,21 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         body = {"query": filters} if filters else {}
         response = self.client.count(index=index_name, body=body)
         return response["count"]
+    
+    def query_get_min(self, index_name: str, field: str, filters: Dict = None) -> int:
+        """
+        Get the min value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"min_value": {"min": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)
+        return response["aggregations"]["min_value"]["value"]
 
     def query_get_max(self, index_name: str, field: str, filters: Dict = None) -> int:
         """
