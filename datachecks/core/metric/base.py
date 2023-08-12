@@ -66,29 +66,29 @@ class Metric(ABC):
         name: str,
         data_source: DataSource,
         metric_type: MetricsType,
-        table_name: Optional[str] = None,
-        index_name: Optional[str] = None,
-        filters: Dict = None,
         metric_logger: MetricLogger = None,
+        **kwargs,
     ):
-        if index_name is not None and table_name is not None:
-            raise ValueError(
-                "Please give a value for table_name or index_name (but not both)"
-            )
-        if index_name is None and table_name is None:
+        if "index_name" in kwargs and "table_name" in kwargs:
+            if kwargs["index_name"] is not None and kwargs["table_name"] is not None:
+                raise ValueError(
+                    "Please give a value for table_name or index_name (but not both)"
+                )
+        if "index_name" not in kwargs and "table_name" not in kwargs:
             raise ValueError("Please give a value for table_name or index_name")
 
         self.index_name, self.table_name = None, None
-        if index_name:
-            self.index_name = index_name
-        if table_name:
-            self.table_name = table_name
+        if "index_name" in kwargs:
+            self.index_name = kwargs["index_name"]
+        if "table_name" in kwargs:
+            self.table_name = kwargs["table_name"]
 
         self.name: str = name
         self.data_source = data_source
         self.metric_type = metric_type
         self.filter_query = None
-        if filters is not None:
+        if "filters" in kwargs and kwargs["filters"] is not None:
+            filters = kwargs["filters"]
             if ("search_query" in filters and filters["search_query"] is not None) and (
                 "where_clause" in filters and filters["where_clause"] is not None
             ):
@@ -109,7 +109,6 @@ class Metric(ABC):
             data_source=self.data_source,
         )
 
-    @abstractmethod
     def _generate_metric_value(self) -> float:
         pass
 
@@ -143,25 +142,20 @@ class FieldMetrics(Metric, ABC):
     def __init__(
         self,
         name: str,
-        metric_type: MetricsType,
         data_source: DataSource,
-        field_name: str,
-        table_name: Optional[str] = None,
-        index_name: Optional[str] = None,
-        filters: Dict = None,
+        metric_type: MetricsType,
         metric_logger: MetricLogger = None,
+        **kwargs,
     ):
         super().__init__(
             name=name,
             data_source=data_source,
-            table_name=table_name,
-            index_name=index_name,
             metric_type=metric_type,
-            filters=filters,
             metric_logger=metric_logger,
+            **kwargs,
         )
-
-        self.field_name = field_name
+        if "field_name" in kwargs:
+            self.field_name = kwargs["field_name"]
 
     @property
     def get_field_name(self):
