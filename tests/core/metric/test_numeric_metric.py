@@ -22,7 +22,7 @@ from datachecks.core.datasource.opensearch import \
     OpenSearchSearchIndexDataSource
 from datachecks.core.datasource.postgres import PostgresSQLDatasource
 from datachecks.core.metric.base import MetricsType
-from datachecks.core.metric.numeric_metric import (DocumentCountMetric,
+from datachecks.core.metric.numeric_metric import (DocumentCountMetric, MinMetric,
                                                    MaxMetric, AvgMetric, RowCountMetric)
 from tests.utils import create_opensearch_client, create_postgres_connection
 
@@ -149,6 +149,62 @@ class TestRowCountMetric:
         )
         row_value = row.get_value()
         assert row_value["value"] == 3
+
+@pytest.mark.usefixtures("setup_data", "postgres_datasource", "opensearch_datasource")
+class TestMinColumnValueMetric:
+    def test_should_return_min_column_value_postgres_without_filter(
+        self, postgres_datasource: PostgresSQLDatasource
+    ):
+        row = MinMetric(
+            name="min_metric_test",
+            data_source=postgres_datasource,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.MIN,
+            field_name="age",
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 30
+
+    def test_should_return_min_column_value_postgres_with_filter(
+        self, postgres_datasource: PostgresSQLDatasource
+    ):
+        row = MinMetric(
+            name="min_metric_test_1",
+            data_source=postgres_datasource,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.MIN,
+            field_name="age",
+            filters={"where_clause": "age >= 100 AND age <= 200"},
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 110
+
+    def test_should_return_min_column_value_opensearch_without_filter(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        row = MinMetric(
+            name="min_metric_test",
+            data_source=opensearch_datasource,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.MIN,
+            field_name="age",
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 30
+
+    def test_should_return_min_column_value_opensearch_with_filter(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        row = MinMetric(
+            name="min_metric_test_1",
+            data_source=opensearch_datasource,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.MIN,
+            field_name="age",
+            filters={"search_query": '{"range": {"age": {"gte": 100, "lte": 200}}}'},
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 110
 
 
 @pytest.mark.usefixtures("setup_data", "postgres_datasource", "opensearch_datasource")

@@ -67,6 +67,16 @@ class SearchIndexDataSource(DataSource):
         :return: count of documents
         """
         raise NotImplementedError("query_get_document_count method is not implemented")
+    
+    def query_get_min(self, index_name: str, field: str, filters: str = None) -> int:
+        """
+        Get the min value
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: min value
+        """
+        raise NotImplementedError("query_get_min method is not implemented")
 
     def query_get_max(self, index_name: str, field: str, filters: str = None) -> int:
         """
@@ -128,6 +138,20 @@ class SQLDatasource(DataSource):
         query = f"SELECT COUNT(*) FROM {table} AS row_count"
         if filters:
             query += f" WHERE {filters}"
+
+        return self.connection.execute(text(query)).fetchone()[0]
+
+    def query_get_min(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the min value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        query = "SELECT MIN({}) FROM {}".format(field, table)
+        if filters:
+            query += " WHERE {}".format(filters)
 
         return self.connection.execute(text(query)).fetchone()[0]
 
