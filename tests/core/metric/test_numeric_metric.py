@@ -27,28 +27,6 @@ from datachecks.core.metric.numeric_metric import (DocumentCountMetric, MinMetri
 from tests.utils import create_opensearch_client, create_postgres_connection
 
 
-@pytest.fixture(scope="class")
-def setup_data(
-    opensearch_client_configuration: DataSourceConnectionConfiguration,
-    pgsql_connection_configuration: DataSourceConnectionConfiguration,
-):
-    opensearch_client = create_opensearch_client(opensearch_client_configuration)
-    postgresql_connection = create_postgres_connection(pgsql_connection_configuration)
-    try:
-        populate_opensearch_datasource(opensearch_client)
-        populate_postgres_datasource(postgresql_connection)
-        yield True
-    except Exception as e:
-        print(e)
-    finally:
-        opensearch_client.indices.delete(index="numeric_metric_test", ignore=[400, 404])
-        postgresql_connection.execute(text("DROP TABLE IF EXISTS numeric_metric_test"))
-        postgresql_connection.commit()
-
-        opensearch_client.close()
-        postgresql_connection.close()
-
-
 def populate_opensearch_datasource(opensearch_client: OpenSearch):
     try:
         opensearch_client.indices.delete(index="numeric_metric_test", ignore=[400, 404])
@@ -93,6 +71,31 @@ def populate_postgres_datasource(postgresql_connection: Connection):
         postgresql_connection.commit()
     except Exception as e:
         print(e)
+
+
+@pytest.fixture(scope="class", autouse=True)
+@pytest.mark.usefixtures(
+    "opensearch_client_configuration", "pgsql_connection_configuration"
+)
+def setup_data(
+    opensearch_client_configuration: DataSourceConnectionConfiguration,
+    pgsql_connection_configuration: DataSourceConnectionConfiguration,
+):
+    opensearch_client = create_opensearch_client(opensearch_client_configuration)
+    postgresql_connection = create_postgres_connection(pgsql_connection_configuration)
+    try:
+        populate_opensearch_datasource(opensearch_client)
+        populate_postgres_datasource(postgresql_connection)
+        yield True
+    except Exception as e:
+        print(e)
+    finally:
+        opensearch_client.indices.delete(index="numeric_metric_test", ignore=[400, 404])
+        postgresql_connection.execute(text("DROP TABLE IF EXISTS numeric_metric_test"))
+        postgresql_connection.commit()
+
+        opensearch_client.close()
+        postgresql_connection.close()
 
 
 @pytest.mark.usefixtures("setup_data", "opensearch_datasource")

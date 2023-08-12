@@ -18,8 +18,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Dict, Optional
 
-from datachecks.core.datasource.base import (DataSource, SearchIndexDataSource,
-                                             SQLDatasource)
+from datachecks.core.datasource.base import DataSource
 from datachecks.core.logger.base import MetricLogger
 
 
@@ -70,7 +69,7 @@ class Metric(ABC):
         table_name: Optional[str] = None,
         index_name: Optional[str] = None,
         filters: Dict = None,
-        metric_logger: MetricLogger = None
+        metric_logger: MetricLogger = None,
     ):
         if index_name is not None and table_name is not None:
             raise ValueError(
@@ -135,7 +134,7 @@ class Metric(ABC):
             self.metric_logger.log(
                 metric_name=self.name,
                 metric_value=metric_value,
-                metric_tags=metric_values
+                metric_tags=metric_values,
             )
         return metric_values
 
@@ -150,7 +149,7 @@ class FieldMetrics(Metric, ABC):
         table_name: Optional[str] = None,
         index_name: Optional[str] = None,
         filters: Dict = None,
-        metric_logger: MetricLogger = None
+        metric_logger: MetricLogger = None,
     ):
         super().__init__(
             name=name,
@@ -159,7 +158,7 @@ class FieldMetrics(Metric, ABC):
             index_name=index_name,
             metric_type=metric_type,
             filters=filters,
-            metric_logger=metric_logger
+            metric_logger=metric_logger,
         )
 
         self.field_name = field_name

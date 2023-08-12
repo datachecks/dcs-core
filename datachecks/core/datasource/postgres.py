@@ -16,7 +16,7 @@ from typing import Any, Dict
 
 from sqlalchemy import URL, create_engine
 
-from datachecks.core.datasource.base import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDatasource
 
 
 class PostgresSQLDatasource(SQLDatasource):
