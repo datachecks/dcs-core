@@ -1,13 +1,27 @@
+#  Copyright 2022-present, the Waterdip Labs Pvt. Ltd.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import json
 import sys
 from typing import Dict
+
 from loguru import logger
 
 from datachecks.core.logger.base import MetricLogger
 
 
 class DefaultLogger(MetricLogger):
-
     def __init__(self, **kwargs):
         super().__init__()
         self.time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -23,7 +37,7 @@ class DefaultLogger(MetricLogger):
             level="INFO",
             enqueue=True,
             serialize=True,
-            filter="datachecks.core.logger.default_logger"
+            filter="datachecks.core.logger.default_logger",
         )
 
     def _loguru_sink_serializer(self, message):
@@ -36,7 +50,9 @@ class DefaultLogger(MetricLogger):
             "logger_name": record["name"],
         }
         if self.time_format.endswith("%fZ"):
-            simplified["@timestamp"] = f"{record['time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4]}Z"
+            simplified[
+                "@timestamp"
+            ] = f"{record['time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4]}Z"
 
         if self.project_name is not None:
             simplified["projectName"] = self.project_name
@@ -47,7 +63,9 @@ class DefaultLogger(MetricLogger):
             if "metric_value" in record["extra"]["extra"]:
                 simplified["metric_value"] = record["extra"]["extra"]["metric_value"]
             if "datasource_name" in record["extra"]["extra"]:
-                simplified["datasource_name"] = record["extra"]["extra"]["datasource_name"]
+                simplified["datasource_name"] = record["extra"]["extra"][
+                    "datasource_name"
+                ]
             if "metric_type" in record["extra"]["extra"]:
                 simplified["metric_type"] = record["extra"]["extra"]["metric_type"]
             if "identity" in record["extra"]["extra"]:
@@ -63,12 +81,8 @@ class DefaultLogger(MetricLogger):
         print(serialized, file=sys.stdout)
 
     def log(
-        self,
-        metric_name: str,
-        metric_value: float,
-        metric_tags: Dict[str, str] = None
+        self, metric_name: str, metric_value: float, metric_tags: Dict[str, str] = None
     ):
-
         logger_extra_value = {
             "metric_value": metric_value,
             "metric_name": metric_name,

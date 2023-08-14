@@ -14,8 +14,8 @@
 
 from typing import Dict, Optional
 
-from datachecks.core.datasource.base import (DataSource, SearchIndexDataSource,
-                                             SQLDatasource)
+from datachecks.core.datasource.search_datasource import SearchIndexDataSource
+from datachecks.core.datasource.sql_datasource import SQLDatasource
 from datachecks.core.metric.base import (FieldMetrics, Metric, MetricIdentity,
                                          MetricsType)
 

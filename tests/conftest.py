@@ -16,6 +16,8 @@ import os
 from dataclasses import asdict
 
 import pytest
+from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning
 
 from datachecks.core.configuration.configuration import \
     DataSourceConnectionConfiguration
@@ -29,6 +31,8 @@ OS_PASSWORD = "admin"
 PSQl_USER_NAME = "postgres"
 PSQl_PASSWORD = "postgres"
 PSQl_DATABASE = "dc_db"
+
+disable_warnings(InsecureRequestWarning)
 
 
 @pytest.fixture(scope="session")

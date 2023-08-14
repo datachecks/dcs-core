@@ -11,9 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from datachecks.core.datasource.base import (SearchIndexDataSource,
-                                             SQLDatasource)
+from datachecks.core.datasource.search_datasource import SearchIndexDataSource
+from datachecks.core.datasource.sql_datasource import SQLDatasource
 from datachecks.core.metric.base import (FieldMetrics, MetricIdentity,
                                          MetricsType)
 

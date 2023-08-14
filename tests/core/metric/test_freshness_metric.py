@@ -29,6 +29,9 @@ TABLE_NAME = "freshness_metric_test_table"
 
 
 @pytest.fixture(scope="class")
+@pytest.mark.usefixtures(
+    "opensearch_client_configuration", "pgsql_connection_configuration"
+)
 def setup_data(
     opensearch_client_configuration: DataSourceConnectionConfiguration,
     pgsql_connection_configuration: DataSourceConnectionConfiguration,
