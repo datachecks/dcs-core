@@ -22,8 +22,8 @@ from datachecks.core.datasource.opensearch import \
     OpenSearchSearchIndexDataSource
 from datachecks.core.datasource.postgres import PostgresSQLDatasource
 from datachecks.core.metric.base import MetricsType
-from datachecks.core.metric.numeric_metric import (DocumentCountMetric, MinMetric,
-                                                   MaxMetric, AvgMetric, RowCountMetric)
+from datachecks.core.metric.numeric_metric import (MinMetric,
+                                                   MaxMetric, AvgMetric)
 from tests.utils import create_opensearch_client, create_postgres_connection
 
 
@@ -97,61 +97,6 @@ def setup_data(
         opensearch_client.close()
         postgresql_connection.close()
 
-
-@pytest.mark.usefixtures("setup_data", "opensearch_datasource")
-class TestDocumentCountMetric:
-    def test_should_return_document_count_metric_without_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
-    ):
-        doc = DocumentCountMetric(
-            name="document_count_metric_test",
-            data_source=opensearch_datasource,
-            index_name="numeric_metric_test",
-            metric_type=MetricsType.DOCUMENT_COUNT,
-        )
-        doc_value = doc.get_value()
-        assert doc_value["value"] == 5
-
-    def test_should_return_document_count_metric_with_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
-    ):
-        doc = DocumentCountMetric(
-            name="document_count_metric_test_1",
-            data_source=opensearch_datasource,
-            index_name="numeric_metric_test",
-            metric_type=MetricsType.DOCUMENT_COUNT,
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
-        )
-        doc_value = doc.get_value()
-        assert doc_value["value"] == 3
-
-
-@pytest.mark.usefixtures("setup_data", "postgres_datasource")
-class TestRowCountMetric:
-    def test_should_return_row_count_metric_without_filter(
-        self, postgres_datasource: PostgresSQLDatasource
-    ):
-        row = RowCountMetric(
-            name="row_count_metric_test",
-            data_source=postgres_datasource,
-            table_name="numeric_metric_test",
-            metric_type=MetricsType.ROW_COUNT,
-        )
-        row_value = row.get_value()
-        assert row_value["value"] == 5
-
-    def test_should_return_row_count_metric_with_filter(
-        self, postgres_datasource: PostgresSQLDatasource
-    ):
-        row = RowCountMetric(
-            name="row_count_metric_test_1",
-            data_source=postgres_datasource,
-            table_name="numeric_metric_test",
-            metric_type=MetricsType.ROW_COUNT,
-            filters={"where_clause": "age >= 30 AND age <= 40"},
-        )
-        row_value = row.get_value()
-        assert row_value["value"] == 3
 
 @pytest.mark.usefixtures("setup_data", "postgres_datasource", "opensearch_datasource")
 class TestMinColumnValueMetric:

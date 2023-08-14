@@ -20,12 +20,14 @@ from sqlalchemy import Connection, text
 
 from datachecks.core.configuration.configuration import \
     DataSourceConnectionConfiguration
+from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
+from datachecks.core.datasource.postgres import PostgresSQLDatasource
 from datachecks.core.metric.base import MetricsType
-from datachecks.core.metric.freshness_metric import FreshnessValueMetric
+from datachecks.core.metric.reliability_metric import FreshnessValueMetric, RowCountMetric, DocumentCountMetric
 from tests.utils import create_opensearch_client, create_postgres_connection
 
-INDEX_NAME = "freshness_metric_test"
-TABLE_NAME = "freshness_metric_test_table"
+INDEX_NAME = "reliability_metric_test"
+TABLE_NAME = "reliability_metric_test_table"
 
 
 @pytest.fixture(scope="class")
@@ -65,6 +67,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
             index=INDEX_NAME,
             body={
                 "name": "thor",
+                "age": 1500,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=10),
             },
         )
@@ -72,6 +75,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
             index=INDEX_NAME,
             body={
                 "name": "captain america",
+                "age": 100,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=3),
             },
         )
@@ -79,6 +83,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
             index=INDEX_NAME,
             body={
                 "name": "iron man",
+                "age": 50,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=4),
             },
         )
@@ -86,6 +91,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
             index=INDEX_NAME,
             body={
                 "name": "hawk eye",
+                "age": 40,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=5),
             },
         )
@@ -93,6 +99,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
             index=INDEX_NAME,
             body={
                 "name": "black widow",
+                "age": 35,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
             },
         )
@@ -106,7 +113,7 @@ def populate_postgres_datasource(postgresql_connection: Connection):
         postgresql_connection.execute(
             text(
                 f"""
-            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (name VARCHAR(50), last_fight timestamp)
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (name VARCHAR(50), last_fight timestamp, age INTEGER)
         """
             )
         )
@@ -114,17 +121,73 @@ def populate_postgres_datasource(postgresql_connection: Connection):
 
         insert_query = f"""
             INSERT INTO {TABLE_NAME} VALUES
-            ('thor', '{(datetime.datetime.utcnow() - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}'),
-            ('captain america', '{(datetime.datetime.utcnow() - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}'),
-            ('iron man', '{(datetime.datetime.utcnow() - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}'),
-            ('hawk eye', '{(datetime.datetime.utcnow() - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}'),
-            ('black widow', '{(datetime.datetime.utcnow() - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}')
+            ('thor', '{(datetime.datetime.utcnow() - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}', 1500),
+            ('captain america', '{(datetime.datetime.utcnow() - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}', 90),
+            ('iron man', '{(datetime.datetime.utcnow() - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}', 50),
+            ('hawk eye', '{(datetime.datetime.utcnow() - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}', 40),
+            ('black widow', '{(datetime.datetime.utcnow() - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35)
         """
 
         postgresql_connection.execute(text(insert_query))
         postgresql_connection.commit()
     except Exception as e:
         print(e)
+
+
+@pytest.mark.usefixtures("setup_data", "opensearch_datasource")
+class TestDocumentCountMetric:
+    def test_should_return_document_count_metric_without_filter(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        doc = DocumentCountMetric(
+            name="document_count_metric_test",
+            data_source=opensearch_datasource,
+            index_name=INDEX_NAME,
+            metric_type=MetricsType.DOCUMENT_COUNT,
+        )
+        doc_value = doc.get_value()
+        assert doc_value["value"] == 5
+
+    def test_should_return_document_count_metric_with_filter(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        doc = DocumentCountMetric(
+            name="document_count_metric_test_1",
+            data_source=opensearch_datasource,
+            index_name=INDEX_NAME,
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
+        )
+        doc_value = doc.get_value()
+        assert doc_value["value"] == 2
+
+
+@pytest.mark.usefixtures("setup_data", "postgres_datasource")
+class TestRowCountMetric:
+    def test_should_return_row_count_metric_without_filter(
+        self, postgres_datasource: PostgresSQLDatasource
+    ):
+        row = RowCountMetric(
+            name="row_count_metric_test",
+            data_source=postgres_datasource,
+            table_name=TABLE_NAME,
+            metric_type=MetricsType.ROW_COUNT,
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 5
+
+    def test_should_return_row_count_metric_with_filter(
+        self, postgres_datasource: PostgresSQLDatasource
+    ):
+        row = RowCountMetric(
+            name="row_count_metric_test_1",
+            data_source=postgres_datasource,
+            table_name=TABLE_NAME,
+            metric_type=MetricsType.ROW_COUNT,
+            filters={"where_clause": "age >= 30 AND age <= 40"},
+        )
+        row_value = row.get_value()
+        assert row_value["value"] == 2
 
 
 @pytest.mark.usefixtures("setup_data", "postgres_datasource", "opensearch_datasource")

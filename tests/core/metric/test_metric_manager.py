@@ -20,7 +20,7 @@ from datachecks.core.configuration.configuration import (
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.metric.base import MetricsType
 from datachecks.core.metric.manager import MetricManager
-from datachecks.core.metric.numeric_metric import DocumentCountMetric
+from datachecks.core.metric.reliability_metric import DocumentCountMetric
 
 OPEN_SEARCH_DATA_SOURCE_NAME = "test_open_search_data_source"
 POSTGRES_DATA_SOURCE_NAME = "test_postgres_data_source"
