@@ -1,4 +1,4 @@
-### Fixes/Implements #18 
+### Fixes/Implements #
 
 ## Description
 
