@@ -1,7 +1,7 @@
 ---
 name: Documentation request
 about: Describe this issue template's purpose here.
-title: "[DOCUMENTATION]"
+title: "docs:"
 labels: documentation
 assignees: ''
 
