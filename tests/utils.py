@@ -15,8 +15,9 @@
 from opensearchpy import OpenSearch
 from sqlalchemy import Connection, create_engine
 
-from datachecks.core.configuration.configuration import \
-    DataSourceConnectionConfiguration
+from datachecks.core.configuration.configuration import (
+    DataSourceConnectionConfiguration,
+)
 
 
 def is_pgsql_responsive(host, port, username, password, database):

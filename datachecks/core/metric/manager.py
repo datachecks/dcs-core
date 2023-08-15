@@ -13,23 +13,35 @@
 #  limitations under the License.
 
 from dataclasses import asdict
-from typing import List
+from typing import Dict, List
 
 from loguru import logger
 
+from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.configuration.configuration import MetricConfiguration
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.logger.base import MetricLogger
-from datachecks.core.metric.numeric_metric import *
-from datachecks.core.metric.reliability_metric import *
+from datachecks.core.metric.base import Metric
+from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in globals
+    AvgMetric,
+    MaxMetric,
+    MinMetric,
+)
+from datachecks.core.metric.reliability_metric import (  # noqa
+    DocumentCountMetric,
+    FreshnessValueMetric,
+    RowCountMetric,
+)
 
 
 class MetricManager:
     METRIC_CLASS_MAPPING = {
         MetricsType.DOCUMENT_COUNT.value: "DocumentCountMetric",
         MetricsType.ROW_COUNT.value: "RowCountMetric",
-        MetricsType.MAX.value: "MaxMetric",
         MetricsType.FRESHNESS.value: "FreshnessValueMetric",
+        MetricsType.MAX.value: "MaxMetric",
+        MetricsType.MIN.value: "MinMetric",
+        MetricsType.AVG.value: "AvgMetric",
     }
 
     def __init__(
@@ -58,11 +70,6 @@ class MetricManager:
                 if metric_config.field:
                     params["field_name"] = metric_config.field
 
-                logger.info(f"==============metric_config: {self.METRIC_CLASS_MAPPING}")
-                logger.info(
-                    f"==============metric_config.metric_type: {metric_config.metric_type}"
-                )
-                # logger.info(globals())
                 metric: Metric = globals()[
                     self.METRIC_CLASS_MAPPING[metric_config.metric_type]
                 ](

@@ -11,10 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDatasource
-from datachecks.core.metric.base import (FieldMetrics, MetricIdentity,
-                                         MetricsType, Metric)
+from datachecks.core.metric.base import FieldMetrics, Metric, MetricIdentity
 
 
 class DocumentCountMetric(Metric):
@@ -56,9 +56,6 @@ class RowCountMetric(Metric):
             data_source=self.data_source,
             table_name=self.table_name,
         )
-
-    def validate_data_source(self):
-        return isinstance(self.data_source, SQLDatasource)
 
     def _generate_metric_value(self):
         if isinstance(self.data_source, SQLDatasource):

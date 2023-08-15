@@ -12,10 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-from datachecks.core.configuration.configuration import \
-    DataSourceConnectionConfiguration
+from datachecks.core.configuration.configuration import (
+    DataSourceConnectionConfiguration,
+)
 from tests.utils import create_opensearch_client, create_postgres_connection
 
 

@@ -14,21 +14,12 @@
 
 import datetime
 import json
-from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Dict, Optional
+from abc import ABC
+from typing import Dict
 
+from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.logger.base import MetricLogger
-
-
-class MetricsType(str, Enum):
-    ROW_COUNT = "row_count"
-    DOCUMENT_COUNT = "document_count"
-    MIN = "min"
-    MAX = "max"
-    AVG = "avg"
-    FRESHNESS = "freshness"
 
 
 class MetricIdentity:
@@ -36,23 +27,27 @@ class MetricIdentity:
     def generate_identity(
         metric_type: MetricsType,
         metric_name: str,
-        data_source: DataSource = None,
+        data_source: DataSource,
         index_name: str = None,
         table_name: str = None,
         field_name: str = None,
     ):
-        identifiers = []
-        if data_source:
-            identifiers.append(data_source.data_source_name)
-        identifiers.append(metric_type.value)
-        identifiers.append(metric_name)
+        """
+        Generate a unique identifier for a metric
+        """
+
+        identifiers = [data_source.data_source_name]
+
         if index_name:
             identifiers.append(index_name)
         elif table_name:
             identifiers.append(table_name)
+
         if field_name:
             identifiers.append(field_name)
 
+        identifiers.append(metric_type.value)
+        identifiers.append(metric_name)
         return ".".join([str(p) for p in identifiers])
 
 
@@ -112,30 +107,29 @@ class Metric(ABC):
     def _generate_metric_value(self) -> float:
         pass
 
-    def get_value(self) -> Dict:
+    def get_metric_value(self) -> MetricValue:
         metric_value = self._generate_metric_value()
-        metric_values = {
-            "identity": self.get_metric_identity(),
-            "metricName": self.name,
-            "metricType": self.metric_type.value,
-            "value": metric_value,
-            "dataSourceName": self.data_source.data_source_name,
-            "@timestamp": datetime.datetime.utcnow().isoformat(),
+        tags = {
+            "metric_name": self.name,
         }
+
+        value = MetricValue(
+            identity=self.get_metric_identity(),
+            metric_type=self.metric_type.value,
+            value=metric_value,
+            timestamp=datetime.datetime.utcnow().isoformat(),
+            data_source=self.data_source.data_source_name,
+            tags=tags,
+        )
         if "index_name" in self.__dict__:
-            metric_values["index_name"] = self.__dict__["index_name"]
+            value.index_name = self.__dict__["index_name"]
         elif "table_name" in self.__dict__:
-            metric_values["table_name"] = self.__dict__["table_name"]
+            value.table_name = self.__dict__["table_name"]
 
         if "field_name" in self.__dict__:
-            metric_values["field_name"] = self.__dict__["field_name"]
-        if self.metric_logger:
-            self.metric_logger.log(
-                metric_name=self.name,
-                metric_value=metric_value,
-                metric_tags=metric_values,
-            )
-        return metric_values
+            value.field_name = self.__dict__["field_name"]
+
+        return value
 
 
 class FieldMetrics(Metric, ABC):
