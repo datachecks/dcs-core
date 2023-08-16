@@ -11,12 +11,24 @@ on:
       - 'releases/**'
 
 jobs:
+  style:
+    name: Check the code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - uses: pre-commit/action@v3.0.0
+
   pytest:
     name: Backend Pytest Job
     strategy:
       matrix:
         python-version: [ "3.8" ,"3.9", "3.10" ]
     runs-on: ubuntu-latest
+    needs:
+      - style
     steps:
       #----------------------------------------------
       #       check-out repo and set-up python

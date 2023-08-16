@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from sqlalchemy import Connection, inspect, text
+from sqlalchemy import Connection, Row, inspect, text
 
 from datachecks.core.datasource.base import DataSource
 
@@ -121,7 +121,7 @@ class SQLDatasource(DataSource):
         Get the time difference
         :param table: name of the index
         :param field: field name of updated time column
-        :return: time difference in milliseconds
+        :return: time difference in seconds
         """
         query = f"""
             SELECT {field} from {table} ORDER BY {field} DESC LIMIT 1;
@@ -130,3 +130,55 @@ class SQLDatasource(DataSource):
         if result:
             return int((datetime.utcnow() - result[0]).total_seconds())
         return 0
+
+    def profiling_sql_aggregates_numeric(
+        self, table_name: str, column_name: str
+    ) -> Dict:
+        column_name = f'"{column_name}"'
+        query = f"""
+            SELECT
+                avg({column_name}) as avg,
+                min({column_name}) as min,
+                max({column_name}) as max,
+                sum({column_name}) as sum,
+                stddev_samp({column_name}) as stddev,
+                var_samp({column_name}) as variance,
+                count(distinct({column_name})) as distinct_count,
+                sum(case when {column_name} is null then 1 else 0 end) as missing_count
+            FROM {table_name}
+            """
+
+        result = self.connection.execute(text(query)).fetchone()
+        return {
+            "avg": result[0],
+            "min": result[1],
+            "max": result[2],
+            "sum": result[3],
+            "stddev": result[4],
+            "variance": result[5],
+            "distinct_count": result[6],
+            "missing_count": result[7],
+        }
+
+    def profiling_sql_aggregates_string(
+        self, table_name: str, column_name: str
+    ) -> Dict:
+        column_name = f'"{column_name}"'
+        query = f"""
+            SELECT
+                count(distinct({column_name})) as distinct_count,
+                sum(case when {column_name} is null then 1 else 0 end) as missing_count,
+                max(length({column_name})) as max_length,
+                min(length({column_name})) as min_length,
+                avg(length({column_name})) as avg_length
+            FROM {table_name}
+            """
+
+        result = self.connection.execute(text(query)).fetchone()
+        return {
+            "distinct_count": result[0],
+            "missing_count": result[1],
+            "max_length": result[2],
+            "min_length": result[3],
+            "avg_length": result[4],
+        }

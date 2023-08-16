@@ -16,10 +16,11 @@ from dataclasses import asdict
 from typing import Dict, List
 
 from datachecks.core.configuration.configuration import (
-    DataSourceConfiguration, DatasourceType)
+    DataSourceConfiguration,
+    DatasourceType,
+)
 from datachecks.core.datasource.base import DataSource
-from datachecks.core.datasource.opensearch import \
-    OpenSearchSearchIndexDataSource
+from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
 from datachecks.core.datasource.postgres import PostgresSQLDatasource
 
 
@@ -31,20 +32,28 @@ class DataSourceManager:
     """
 
     def __init__(self, config: List[DataSourceConfiguration]):
-        self.data_source_configs: List[DataSourceConfiguration] = config
-        self.data_sources: Dict[str, DataSource] = {}
+        self._data_source_configs: List[DataSourceConfiguration] = config
+        self._data_sources: Dict[str, DataSource] = {}
         self._initialize_data_sources()
+
+    @property
+    def get_data_sources(self) -> Dict[str, DataSource]:
+        """
+        Get the data sources
+        :return:
+        """
+        return self._data_sources
 
     def _initialize_data_sources(self):
         """
         Initialize the data sources
         :return:
         """
-        for data_source_config in self.data_source_configs:
-            self.data_sources[data_source_config.name] = self._create_data_source(
+        for data_source_config in self._data_source_configs:
+            self._data_sources[data_source_config.name] = self._create_data_source(
                 data_source_config=data_source_config
             )
-            self.data_sources[data_source_config.name].connect()
+            self._data_sources[data_source_config.name].connect()
 
     @staticmethod
     def _create_data_source(data_source_config: DataSourceConfiguration) -> DataSource:
@@ -72,11 +81,11 @@ class DataSourceManager:
         :param data_source_name:
         :return:
         """
-        return self.data_sources[data_source_name]
+        return self._data_sources[data_source_name]
 
     def get_data_source_names(self) -> List[str]:
         """
         Get the data source names
         :return:
         """
-        return list(self.data_sources.keys())
+        return list(self._data_sources.keys())

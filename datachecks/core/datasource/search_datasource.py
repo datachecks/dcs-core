@@ -41,7 +41,7 @@ class SearchIndexDataSource(DataSource):
         response = self.client.count(index=index_name, body=body)
         return response["count"]
 
-    def query_get_max(self, index_name: str, field: str, filters: str = None) -> int:
+    def query_get_max(self, index_name: str, field: str, filters: Dict = None) -> int:
         """
         Get the max value
         :param index_name: name of the index

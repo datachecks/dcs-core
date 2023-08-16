@@ -13,7 +13,9 @@
 #  limitations under the License.
 
 from datachecks.core.configuration.configuration import (
-    DatasourceType, load_configuration_from_yaml_str)
+    DatasourceType,
+    load_configuration_from_yaml_str,
+)
 
 
 def test_should_read_datasource_config_for_opensearch():

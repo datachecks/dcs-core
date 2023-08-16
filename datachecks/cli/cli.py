@@ -18,8 +18,10 @@ from loguru import logger
 
 from datachecks import Inspect
 from datachecks.__version__ import __version__
-from datachecks.core.configuration.configuration import (Configuration,
-                                                         load_configuration)
+from datachecks.core.configuration.configuration import (
+    Configuration,
+    load_configuration,
+)
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
@@ -51,21 +53,36 @@ def main():
     default=None,
     help="Specify the time format for logging",
 )
+@click.option(
+    "--auto-profile",
+    is_flag=True,
+    help="Specify if the inspection should do auto-profile of all data sources",
+)
 def inspect(
     config_path: Union[str, None] = None,
     application_name: str = "datachecks",
     time_format: str = None,
+    auto_profile: bool = False,
 ):
     """
     Starts the datachecks inspection
     """
     configuration: Configuration = load_configuration(config_path)
-
-    configuration.metric_logger.config["application_name"] = application_name
     if time_format is not None:
         configuration.metric_logger.config["time_format"] = time_format
 
-    inspector = Inspect(configuration=configuration)
+    inspector = Inspect(configuration=configuration, auto_profile=auto_profile)
 
     logger.info("Starting datachecks inspection...")
-    inspector.start()
+    output = inspector.run()
+
+    for ds_name, ds_met in output.metrics.items():
+        logger.info(f"==================={ds_name}==================")
+        for tabel_name, table_met in ds_met.table_metrics.items():
+            logger.info(f"-----------------{tabel_name}-----------------")
+            for met_name, met in table_met.metrics.items():
+                logger.info(f"{met_name}: {met.value}")
+        for index_name, index_met in ds_met.index_metrics.items():
+            logger.info(f"-----------------{index_name}-----------------")
+            for met_name, met in index_met.metrics.items():
+                logger.info(f"{met_name}: {met.value}")

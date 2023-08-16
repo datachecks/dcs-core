@@ -7,5 +7,4 @@ pytest:
 pytest_with_coverage:
 	set -e
 	set -x
-	WD_IS_TESTING = true
 	pytest -p no:warnings --cov ./tests/*

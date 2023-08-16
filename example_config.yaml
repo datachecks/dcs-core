@@ -1,0 +1,53 @@
+# Data sources to query
+data_sources:
+  - name: search_datastore        # Data source name
+    type: opensearch              # Data source type is OpenSearch
+    connection:
+      host: 127.0.0.1
+      port: 9205
+      username: !ENV ${OS_USER}   # Username to use for authentication ENV variables
+      password: !ENV ${OS_PASS}   # Password to use for authentication ENV variables
+  - name: product_db              # Data source name
+    type: postgres                # Data source type is Postgres
+    connection:
+      host: 127.0.0.1
+      port: 5421
+      username: !ENV ${DB1_USER}  # Username to use for authentication ENV variables
+      password: !ENV ${DB1_PASS}  # Password to use for authentication ENV variables
+      database: dc_db_1
+  - name: search_staging_db       # Data source name
+    type: postgres                # Data source type is Postgres
+    connection:
+      host: 127.0.0.1
+      port: 5422
+      username: !ENV ${DB2_USER}  # Username to use for authentication ENV variables
+      password: !ENV ${DB2_PASS}  # Password to use for authentication ENV variables
+      database: dc_db_2
+
+# Metrics to generate
+metrics:
+
+  # Data source reference name
+  search_datastore:
+    count_us_parts:                 # Metric name
+      metric_type: document_count   # Type of metric is DOCUMENT_COUNT
+      index: product_data_us        # Index to query
+      filters:
+        search_query: '{"match_all" : {}}' # Search query to use for filtering
+
+  # Data source name
+  product_db:
+    count_us_parts_valid: # Metric name
+      metric_type: row_count        # Type of metric is ROW_COUNT
+      table: products               # Table to query
+      filters:
+        where_clause: "is_valid is True and country_code = 'US'" # Where clause to use for filtering
+
+  search_staging_db:
+    count_us_parts_valid: # Metric name
+      metric_type: row_count        # Type of metric is ROW_COUNT
+      table: products               # Table to query
+      filters:
+        where_clause: "is_valid is True and country_code = 'US'" # Where clause to use for filtering
+
+

@@ -12,49 +12,91 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
+from unittest.mock import Mock
 
 from datachecks import Configuration, Inspect
-from datachecks.core.configuration.configuration import (
-    DataSourceConfiguration, DataSourceConnectionConfiguration, DatasourceType,
-    MetricConfiguration)
-from datachecks.core.logger.default_logger import DefaultLogger
-from datachecks.core.metric.base import MetricsType
-
-
-@pytest.mark.usefixtures(
-    "opensearch_client_configuration", "pgsql_connection_configuration"
+from datachecks.core.common.models.metric import (
+    DataSourceMetrics,
+    MetricsType,
+    MetricValue,
 )
+from datachecks.core.configuration.configuration import (
+    DataSourceConfiguration,
+    DataSourceConnectionConfiguration,
+    DatasourceType,
+    MetricConfiguration,
+)
+from datachecks.core.datasource.base import DataSource
+from datachecks.core.datasource.manager import DataSourceManager
+
+TABLE_NAME = "inspect_metric_test_table"
+
+
 class TestInspect:
-    def test_should_invoke_default_logger(
-        self,
-        opensearch_client_configuration: DataSourceConnectionConfiguration,
-        pgsql_connection_configuration: DataSourceConnectionConfiguration,
-    ):
-        data_source_name = "test_open_search_data_source"
+    DATA_SOURCE_NAME = "postgres"
+
+    def test_inspect_should_run_without_auto_profile(self, mocker):
+        mock_datasource = Mock(DataSource)
+
+        mock_datasource_manager = Mock(DataSourceManager)
+        mock_datasource_manager.get_data_source_names.return_value = [
+            self.DATA_SOURCE_NAME
+        ]
+
+        mocker.patch(
+            "datachecks.core.datasource.manager.DataSourceManager._initialize_data_sources",
+        )
+        mocker.patch(
+            "datachecks.core.datasource.manager.DataSourceManager.get_data_source_names",
+            return_value=[self.DATA_SOURCE_NAME],
+        )
+        mocker.patch(
+            "datachecks.core.inspect.Inspect._base_data_source_metrics",
+            return_value={
+                self.DATA_SOURCE_NAME: DataSourceMetrics(
+                    data_source=self.DATA_SOURCE_NAME,
+                )
+            },
+        )
+        mocker.patch(
+            "datachecks.core.datasource.manager.DataSourceManager.get_data_source",
+            return_value=mock_datasource,
+        )
+        mocker.patch(
+            "datachecks.core.metric.base.Metric.get_metric_value",
+            return_value=MetricValue(
+                identity="test_identity",
+                metric_type=MetricsType.ROW_COUNT,
+                timestamp="2020-01-01T00:00:00.000000",
+                data_source=self.DATA_SOURCE_NAME,
+                value=1,
+            ),
+        )
+
         configuration = Configuration(
             data_sources=[
                 DataSourceConfiguration(
-                    name=data_source_name,
+                    name=self.DATA_SOURCE_NAME,
                     type=DatasourceType.POSTGRES,
                     connection_config=DataSourceConnectionConfiguration(
-                        host=pgsql_connection_configuration.host,
-                        port=pgsql_connection_configuration.port,
-                        database=pgsql_connection_configuration.database,
-                        username=pgsql_connection_configuration.username,
-                        password=pgsql_connection_configuration.password,
+                        host="localhost",
+                        port=5432,
+                        database="postgres",
+                        username="postgres",
+                        password="postgres",
                     ),
                 )
             ],
             metrics={
-                data_source_name: [
+                self.DATA_SOURCE_NAME: [
                     MetricConfiguration(
                         name="metric1",
                         metric_type=MetricsType.ROW_COUNT,
-                        table="table1",
+                        table=TABLE_NAME,
                     )
                 ]
             },
         )
         inspect = Inspect(configuration=configuration)
-        assert isinstance(inspect.metric_logger, DefaultLogger)
+        result = inspect.run()
+        assert list(result.metrics.keys()) == [self.DATA_SOURCE_NAME]

@@ -3,6 +3,7 @@ repos:
     rev: v4.4.0
     hooks:
     -   id: check-yaml
+        args: ['--unsafe']
     -   id: end-of-file-fixer
         exclude_types: [text, jupyter]
     -   id: trailing-whitespace
@@ -28,6 +29,7 @@ repos:
     rev: 5.12.0
     hooks:
     -   id: isort
+        args: ["--profile", "black"]
 
 -   repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
     rev: v9.4.0

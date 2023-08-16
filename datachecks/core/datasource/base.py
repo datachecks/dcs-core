@@ -22,11 +22,18 @@ class DataSource(ABC):
     """
 
     NUMERIC_PYTHON_TYPES_FOR_PROFILING = ["int", "float"]
-    TEXT_PYTHON_TYPES_FOR_PROFILING = ["str", "bool"]
+    TEXT_PYTHON_TYPES_FOR_PROFILING = ["str"]
 
     def __init__(self, data_source_name: str, data_connection: Dict):
-        self.data_source_name: str = data_source_name
+        self._data_source_name: str = data_source_name
         self.data_connection: Dict = data_connection
+
+    @property
+    def data_source_name(self) -> str:
+        """
+        Get the data source name
+        """
+        return self._data_source_name
 
     def connect(self) -> Any:
         """
