@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from dateutil import parser
 
@@ -25,10 +25,51 @@ class SearchIndexDataSource(DataSource):
     Abstract class for search index data sources
     """
 
+    FIELD_TYPE_MAPPING = {
+        "text": str,
+        "keyword": str,
+        "date": datetime,
+        "long": int,
+        "integer": int,
+        "short": int,
+        "byte": int,
+        "double": float,
+        "float": float,
+        "half_float": float,
+        "boolean": bool,
+        "binary": str,
+        "nested": dict,
+    }
+
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
 
         self.client = None
+
+    def query_get_index_metadata(self) -> List[str]:
+        """
+        Get the index metadata
+        :return: query for index metadata
+        """
+        return [index for index in self.client.indices.get("*")]
+
+    def query_get_field_metadata(self, index_name: str) -> Dict[str, str]:
+        """
+        Get the field metadata
+        :param index_name: name of the index
+        :return: query for field metadata
+        """
+        results_: Dict[str, str] = {}
+        mappings = self.client.indices.get_mapping(index=index_name)
+        properties = mappings[index_name]["mappings"]["properties"]
+
+        for field, value in properties.items():
+            if "type" in value:
+                results_[field] = self.FIELD_TYPE_MAPPING[value["type"]]
+            elif "properties" in value:
+                results_[field] = self.FIELD_TYPE_MAPPING["nested"]
+
+        return results_
 
     def query_get_document_count(self, index_name: str, filters: Dict = None) -> int:
         """

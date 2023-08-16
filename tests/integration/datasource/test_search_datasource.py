@@ -134,3 +134,21 @@ class TestSQLDatasourceQueries:
     ):
         diff = opensearch_datasource.query_get_time_diff(INDEX_NAME, "last_fight")
         assert diff >= 24 * 3600 * 3
+
+    def test_index_field_metadata(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        index_field_metadata = opensearch_datasource.query_get_field_metadata(
+            INDEX_NAME
+        )
+
+        assert index_field_metadata["name"] == str
+        assert index_field_metadata["age"] == int
+        assert index_field_metadata["last_fight"] == datetime.datetime
+
+    def test_index_metadata(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        indices = opensearch_datasource.query_get_index_metadata()
+
+        assert INDEX_NAME in indices
