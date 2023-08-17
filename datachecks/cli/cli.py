@@ -16,12 +16,8 @@ from typing import Union
 import click
 from loguru import logger
 
-from datachecks import Inspect
 from datachecks.__version__ import __version__
-from datachecks.core.configuration.configuration import (
-    Configuration,
-    load_configuration,
-)
+from datachecks.core import Configuration, Inspect, load_configuration
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
@@ -41,35 +37,18 @@ def main():
     help="Specify the file path for configuration",
 )
 @click.option(
-    "-A",
-    "--application-name",
-    required=False,
-    default="datachecks",
-    help="Specify the application name for logging",
-)
-@click.option(
-    "--time-format",
-    required=False,
-    default=None,
-    help="Specify the time format for logging",
-)
-@click.option(
     "--auto-profile",
     is_flag=True,
     help="Specify if the inspection should do auto-profile of all data sources",
 )
 def inspect(
     config_path: Union[str, None] = None,
-    application_name: str = "datachecks",
-    time_format: str = None,
     auto_profile: bool = False,
 ):
     """
     Starts the datachecks inspection
     """
     configuration: Configuration = load_configuration(config_path)
-    if time_format is not None:
-        configuration.metric_logger.config["time_format"] = time_format
 
     inspector = Inspect(configuration=configuration, auto_profile=auto_profile)
 

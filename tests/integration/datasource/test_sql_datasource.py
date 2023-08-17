@@ -18,7 +18,7 @@ import pytest
 from loguru import logger
 from sqlalchemy import text
 
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
 from datachecks.core.datasource.postgres import PostgresSQLDatasource

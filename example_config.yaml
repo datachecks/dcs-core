@@ -26,28 +26,19 @@ data_sources:
 
 # Metrics to generate
 metrics:
-
-  # Data source reference name
-  search_datastore:
-    count_us_parts:                 # Metric name
-      metric_type: document_count   # Type of metric is DOCUMENT_COUNT
-      index: product_data_us        # Index to query
-      filters:
-        search_query: '{"match_all" : {}}' # Search query to use for filtering
-
-  # Data source name
-  product_db:
-    count_us_parts_valid: # Metric name
-      metric_type: row_count        # Type of metric is ROW_COUNT
-      table: products               # Table to query
-      filters:
-        where_clause: "is_valid is True and country_code = 'US'" # Where clause to use for filtering
-
-  search_staging_db:
-    count_us_parts_valid: # Metric name
-      metric_type: row_count        # Type of metric is ROW_COUNT
-      table: products               # Table to query
-      filters:
-        where_clause: "is_valid is True and country_code = 'US'" # Where clause to use for filtering
-
+  - name: count_us_parts
+    metric_type: document_count
+    resource: search_datastore.product_data_us
+    filters:
+      where: '{"match_all" : {}}'
+  - name: count_us_parts_valid
+    metric_type: row_count
+    resource: product_db.products
+    filters:
+      where: "is_valid is True and country_code = 'US'"
+  - name: count_us_parts_valid
+    metric_type: row_count
+    resource: search_staging_db.products
+    filters:
+      where: "is_valid is True and country_code = 'US'"
 

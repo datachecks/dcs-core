@@ -17,10 +17,10 @@ from typing import Dict, List
 
 from loguru import logger
 
+from datachecks.core.common.models.configuration import MetricConfiguration
+from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.configuration.configuration import MetricConfiguration
 from datachecks.core.datasource.manager import DataSourceManager
-from datachecks.core.logger.base import MetricLogger
 from datachecks.core.metric.base import Metric
 from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in globals
     AvgMetric,
@@ -46,16 +46,47 @@ class MetricManager:
 
     def __init__(
         self,
-        metric_config: Dict[str, List[MetricConfiguration]],
+        metric_config: Dict[str, MetricConfiguration],
         data_source_manager: DataSourceManager,
-        metric_logger: MetricLogger = None,
     ):
         self.data_source_manager = data_source_manager
         self.metrics: Dict[str, Metric] = {}
-        self.metric_logger: MetricLogger = metric_logger
         self._build_metrics(config=metric_config)
 
-    def _build_metrics(self, config: Dict[str, List[MetricConfiguration]]):
+    def _build_metrics(self, config: Dict[str, MetricConfiguration]):
+        for metric_name, metric_config in config.items():
+            if isinstance(metric_config.resource, Field):
+                data_source = metric_config.resource.belongs_to.data_source
+            else:
+                data_source = metric_config.resource.data_source
+            params = {
+                "filters": asdict(metric_config.filters)
+                if metric_config.filters
+                else None,
+            }
+            if isinstance(metric_config.resource, Index):
+                params["index_name"] = metric_config.resource.name
+            if isinstance(metric_config.resource, Table):
+                params["table_name"] = metric_config.resource.name
+            if isinstance(metric_config.resource, Field):
+                params["field_name"] = metric_config.resource.name
+                if isinstance(metric_config.resource.belongs_to, Table):
+                    params["table_name"] = metric_config.resource.belongs_to.name
+                elif isinstance(metric_config.resource.belongs_to, Index):
+                    params["index_name"] = metric_config.resource.belongs_to.name
+
+            metric: Metric = globals()[
+                self.METRIC_CLASS_MAPPING[metric_config.metric_type]
+            ](
+                metric_config.name,
+                self.data_source_manager.get_data_source(data_source),
+                MetricsType(metric_config.metric_type.lower()),
+                **params,
+            )
+
+            self.metrics[metric.get_metric_identity()] = metric
+
+    def _build_metrics1(self, config: Dict[str, List[MetricConfiguration]]):
         for data_source, metric_list in config.items():
             for metric_config in metric_list:
                 params = {
@@ -63,12 +94,16 @@ class MetricManager:
                     if metric_config.filters
                     else None,
                 }
-                if metric_config.index:
-                    params["index_name"] = metric_config.index
-                if metric_config.table:
-                    params["table_name"] = metric_config.table
-                if metric_config.field:
-                    params["field_name"] = metric_config.field
+                if isinstance(metric_config.resource, Index):
+                    params["index_name"] = metric_config.resource.name
+                if isinstance(metric_config.resource, Table):
+                    params["table_name"] = metric_config.resource.name
+                if isinstance(metric_config.resource, Field):
+                    params["field_name"] = metric_config.resource.name
+                    if isinstance(metric_config.resource.belongs_to, Table):
+                        params["table_name"] = metric_config.resource.belongs_to.name
+                    elif isinstance(metric_config.resource.belongs_to, Index):
+                        params["index_name"] = metric_config.resource.belongs_to.name
 
                 metric: Metric = globals()[
                     self.METRIC_CLASS_MAPPING[metric_config.metric_type]
@@ -76,11 +111,9 @@ class MetricManager:
                     metric_config.name,
                     self.data_source_manager.get_data_source(data_source),
                     MetricsType(metric_config.metric_type.lower()),
-                    self.metric_logger,
                     **params,
                 )
 
-                logger.info(metric.__dict__)
                 self.metrics[metric.get_metric_identity()] = metric
 
     @property

@@ -13,91 +13,10 @@
 #  limitations under the License.
 from unittest.mock import Mock
 
-import pytest
-from opensearchpy import OpenSearch
-from sqlalchemy import Connection, text
-
 from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.configuration.configuration import (
-    DataSourceConnectionConfiguration,
-)
-from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
-from datachecks.core.datasource.postgres import PostgresSQLDatasource
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDatasource
 from datachecks.core.metric.numeric_metric import AvgMetric, MaxMetric, MinMetric
-from tests.utils import create_opensearch_client, create_postgres_connection
-
-
-def populate_opensearch_datasource(opensearch_client: OpenSearch):
-    try:
-        opensearch_client.indices.delete(index="numeric_metric_test", ignore=[400, 404])
-        opensearch_client.indices.create(index="numeric_metric_test")
-        opensearch_client.index(
-            index="numeric_metric_test", body={"name": "thor", "age": 501}
-        )
-        opensearch_client.index(
-            index="numeric_metric_test", body={"name": "captain america", "age": 110}
-        )
-        opensearch_client.index(
-            index="numeric_metric_test", body={"name": "iron man", "age": 35}
-        )
-        opensearch_client.index(
-            index="numeric_metric_test", body={"name": "hawk eye", "age": 31}
-        )
-        opensearch_client.index(
-            index="numeric_metric_test", body={"name": "black widow", "age": 30}
-        )
-        opensearch_client.indices.refresh(index="numeric_metric_test")
-    except Exception as e:
-        print(e)
-
-
-def populate_postgres_datasource(postgresql_connection: Connection):
-    try:
-        postgresql_connection.execute(
-            text(
-                """
-            CREATE TABLE IF NOT EXISTS numeric_metric_test (name VARCHAR(50), age INT)
-        """
-            )
-        )
-        postgresql_connection.execute(
-            text(
-                """
-            INSERT INTO numeric_metric_test VALUES
-            ('thor', 501), ('captain america', 110), ('iron man', 35), ('hawk eye', 31), ('black widow', 30)
-        """
-            )
-        )
-        postgresql_connection.commit()
-    except Exception as e:
-        print(e)
-
-
-@pytest.fixture(scope="class")
-@pytest.mark.usefixtures(
-    "opensearch_client_configuration", "pgsql_connection_configuration"
-)
-def setup_data(
-    opensearch_client_configuration: DataSourceConnectionConfiguration,
-    pgsql_connection_configuration: DataSourceConnectionConfiguration,
-):
-    opensearch_client = create_opensearch_client(opensearch_client_configuration)
-    postgresql_connection = create_postgres_connection(pgsql_connection_configuration)
-    try:
-        populate_opensearch_datasource(opensearch_client)
-        populate_postgres_datasource(postgresql_connection)
-        yield True
-    except Exception as e:
-        print(e)
-    finally:
-        opensearch_client.indices.delete(index="numeric_metric_test", ignore=[400, 404])
-        postgresql_connection.execute(text("DROP TABLE IF EXISTS numeric_metric_test"))
-        postgresql_connection.commit()
-
-        opensearch_client.close()
-        postgresql_connection.close()
 
 
 class TestMinColumnValueMetric:

@@ -19,7 +19,7 @@ import pytest
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
 from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource

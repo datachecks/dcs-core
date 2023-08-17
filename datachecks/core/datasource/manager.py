@@ -15,7 +15,7 @@
 from dataclasses import asdict
 from typing import Dict, List
 
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     DataSourceConfiguration,
     DatasourceType,
 )
@@ -31,8 +31,8 @@ class DataSourceManager:
 
     """
 
-    def __init__(self, config: List[DataSourceConfiguration]):
-        self._data_source_configs: List[DataSourceConfiguration] = config
+    def __init__(self, config: Dict[str, DataSourceConfiguration]):
+        self._data_source_configs: Dict[str, DataSourceConfiguration] = config
         self._data_sources: Dict[str, DataSource] = {}
         self._initialize_data_sources()
 
@@ -49,7 +49,7 @@ class DataSourceManager:
         Initialize the data sources
         :return:
         """
-        for data_source_config in self._data_source_configs:
+        for name, data_source_config in self._data_source_configs.items():
             self._data_sources[data_source_config.name] = self._create_data_source(
                 data_source_config=data_source_config
             )

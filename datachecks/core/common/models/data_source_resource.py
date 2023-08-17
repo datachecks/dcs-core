@@ -12,8 +12,35 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datachecks.core.configuration.configuration_parser import (
-    Configuration,
-    load_configuration,
-)
-from datachecks.core.inspect import Inspect
+from dataclasses import dataclass
+from typing import Optional, Union
+
+
+@dataclass
+class Table:
+    """
+    Database Table resource
+    """
+
+    data_source: str
+    name: str
+
+
+@dataclass
+class Index:
+    """
+    Search Index resource
+    """
+
+    data_source: str
+    name: str
+
+
+@dataclass
+class Field:
+    """
+    Search Field resource
+    """
+
+    belongs_to: Union[Table, Index]
+    name: str

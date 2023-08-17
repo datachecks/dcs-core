@@ -15,7 +15,7 @@
 from opensearchpy import OpenSearch
 from sqlalchemy import Connection, create_engine
 
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
 

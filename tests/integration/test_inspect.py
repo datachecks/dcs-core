@@ -17,15 +17,14 @@ import pytest
 from opensearchpy import OpenSearch
 from sqlalchemy import Connection, text
 
-from datachecks import Configuration, Inspect
-from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
     DatasourceType,
     MetricConfiguration,
 )
-from datachecks.core.logger.default_logger import DefaultLogger
+from datachecks.core.common.models.data_source_resource import Table
+from datachecks.core.common.models.metric import MetricsType
 from tests.utils import create_opensearch_client, create_postgres_connection
 
 INDEX_NAME = "inspect_metric_test"
@@ -160,32 +159,12 @@ class TestInspect:
             )
         ]
         self.metrics = {
-            self.data_source_name: [
-                MetricConfiguration(
-                    name="metric1",
-                    metric_type=MetricsType.ROW_COUNT,
-                    table=TABLE_NAME,
-                )
-            ]
+            "metric1": MetricConfiguration(
+                name="metric1",
+                metric_type=MetricsType.ROW_COUNT,
+                resource=Table(
+                    name=TABLE_NAME,
+                    data_source=self.DATA_SOURCE_NAME,
+                ),
+            )
         }
-
-    def test_should_invoke_default_logger(
-        self,
-        opensearch_client_configuration: DataSourceConnectionConfiguration,
-        pgsql_connection_configuration: DataSourceConnectionConfiguration,
-    ):
-        configuration = Configuration(
-            data_sources=self.data_source_configuration,
-            metrics=self.metrics,
-        )
-        inspect = Inspect(configuration=configuration)
-        assert isinstance(inspect.metric_logger, DefaultLogger)
-
-    # def test_should_run_without_auto_profile(self):
-    #     configuration = Configuration(
-    #         data_sources=self.data_source_configuration,
-    #         metrics=self.metrics,
-    #     )
-    #     inspect = Inspect(configuration=configuration, auto_profile=False)
-    #     p = inspect.run()
-    #     assert list(p.keys()) == "self.data_source_name"
