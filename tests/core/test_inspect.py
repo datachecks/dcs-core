@@ -63,6 +63,10 @@ class TestInspect:
             return_value=mock_datasource,
         )
         mocker.patch(
+            "datachecks.core.inspect.InspectOutput.get_inspect_info",
+            return_value={},
+        )
+        mocker.patch(
             "datachecks.core.metric.base.Metric.get_metric_value",
             return_value=MetricValue(
                 identity="test_identity",

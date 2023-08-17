@@ -121,12 +121,12 @@ class Metric(ABC):
             data_source=self.data_source.data_source_name,
             tags=tags,
         )
-        if "index_name" in self.__dict__:
+        if "index_name" in self.__dict__ and self.__dict__["index_name"] is not None:
             value.index_name = self.__dict__["index_name"]
-        elif "table_name" in self.__dict__:
+        elif "table_name" in self.__dict__ and self.__dict__["table_name"] is not None:
             value.table_name = self.__dict__["table_name"]
 
-        if "field_name" in self.__dict__:
+        if "field_name" in self.__dict__ and self.__dict__["field_name"] is not None:
             value.field_name = self.__dict__["field_name"]
 
         return value

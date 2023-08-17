@@ -11,10 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import time
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
 import requests
+from loguru import logger
 
 from datachecks.core.common.models.metric import (
     DataSourceMetrics,
@@ -29,6 +31,12 @@ from datachecks.core.datasource.sql_datasource import SQLDatasource
 from datachecks.core.logger.default_logger import DefaultLogger
 from datachecks.core.metric.manager import MetricManager
 from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
+from datachecks.core.utils.tracking import (
+    create_inspect_event_json,
+    is_tracking_enabled,
+    send_event_json,
+)
+from datachecks.core.utils.utils import truncate_error
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning
@@ -38,6 +46,24 @@ requests.packages.urllib3.disable_warnings(
 @dataclass
 class InspectOutput:
     metrics: Dict[str, DataSourceMetrics]
+
+    def get_inspect_info(self):
+        metrics_count, datasource_count = 0, 0
+        table_count, index_count = 0, 0
+        for ds_met in self.metrics.values():
+            datasource_count = datasource_count + 1
+            for table_met in ds_met.table_metrics.values():
+                table_count = table_count + 1
+                metrics_count = metrics_count + len(list(table_met.metrics.values()))
+            for index_met in ds_met.index_metrics.values():
+                index_count = index_count + 1
+                metrics_count = metrics_count + len(list(index_met.metrics.values()))
+        return {
+            "metrics_count": metrics_count,
+            "datasource_count": datasource_count,
+            "table_count": table_count,
+            "index_count": index_count,
+        }
 
 
 class Inspect:
@@ -151,9 +177,9 @@ class Inspect:
             ]
             table_name = result.table_name
             index_name = result.index_name
-
+            logger.info(result)
             # If the index name is present, add the result to the index name
-            if index_name:
+            if index_name is not None:
                 if index_name not in data_source_metrics.index_metrics:
                     data_source_metrics.index_metrics[index_name] = IndexMetrics(
                         index_name=index_name, data_source=data_source_name, metrics={}
@@ -163,7 +189,7 @@ class Inspect:
                 ] = result
 
             # If the table name is present, add the result to the table name
-            elif table_name:
+            if table_name is not None:
                 if table_name not in data_source_metrics.table_metrics:
                     data_source_metrics.table_metrics[table_name] = TableMetrics(
                         table_name=table_name, data_source=data_source_name, metrics={}
@@ -176,19 +202,41 @@ class Inspect:
         """
         This method starts the inspection process.
         """
+        start = time.monotonic()
+        error = None
+        inspect_info = None
+        try:
+            datasource_metrics: Dict[
+                str, DataSourceMetrics
+            ] = self._base_data_source_metrics()
 
-        datasource_metrics: Dict[
-            str, DataSourceMetrics
-        ] = self._base_data_source_metrics()
+            # generate metric values for custom metrics
+            metric_values: List[MetricValue] = []
 
-        # generate metric values for custom metrics
-        metric_values: List[MetricValue] = []
-        for metric in self.metric_manager.metrics.values():
-            metric_values.append(metric.get_metric_value())
-        self._prepare_results(metric_values, datasource_metrics)
+            for metric in self.metric_manager.metrics.values():
+                metric_values.append(metric.get_metric_value())
+            self._prepare_results(metric_values, datasource_metrics)
 
-        # generate metric values for profile metrics
-        if self._auto_profile:
-            self._generate_data_source_profile_metrics(datasource_metrics)
+            # generate metric values for profile metrics
+            if self._auto_profile:
+                self._generate_data_source_profile_metrics(datasource_metrics)
 
-        return InspectOutput(metrics=datasource_metrics)
+            output = InspectOutput(metrics=datasource_metrics)
+            inspect_info = output.get_inspect_info()
+            return output
+        except Exception as ex:
+            logger.error(f"Error while running inspection: {ex}")
+            error = ex
+        finally:
+            end = time.monotonic()
+            logger.info(f"Inspection took {end - start} seconds")
+            err_message = truncate_error(repr(error))
+            if is_tracking_enabled():
+                event_json = create_inspect_event_json(
+                    runtime_seconds=(end - start),
+                    inspect_info=inspect_info,
+                    error=err_message,
+                )
+                send_event_json(event_json)
+            if error:
+                logger.error(error)
