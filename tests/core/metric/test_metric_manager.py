@@ -13,13 +13,15 @@
 #  limitations under the License.
 from unittest.mock import Mock
 
-from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.configuration.configuration import (
+from datachecks.core.common.models.configuration import (
     MetricConfiguration,
     MetricsFilterConfiguration,
 )
+from datachecks.core.common.models.data_source_resource import Field, Index, Table
+from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.manager import DataSourceManager
+from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.metric.base import FieldMetrics
 from datachecks.core.metric.manager import MetricManager
 from datachecks.core.metric.reliability_metric import DocumentCountMetric
@@ -37,15 +39,14 @@ class TestMetricManager:
         datasource_manager.get_data_source.return_value = mock_datasource
 
         metric_name, index_name = "test_document_count_metric", "test_index"
-        metric_config = {
-            "metric_type": "document_count",
-            "name": metric_name,
-            "index": index_name,
-        }
 
-        metric_config = MetricConfiguration(**metric_config)
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            resource=Index(name=index_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+        )
         metric_manager = MetricManager(
-            metric_config={OPEN_SEARCH_DATA_SOURCE_NAME: [metric_config]},
+            metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
         )
 
@@ -57,7 +58,7 @@ class TestMetricManager:
         assert metric.index_name == "test_index"
 
     def test_should_create_document_count_metric_with_filter(self):
-        mock_datasource = Mock(DataSource)
+        mock_datasource = Mock(SearchIndexDataSource)
         mock_datasource.data_source_name.return_value = OPEN_SEARCH_DATA_SOURCE_NAME
 
         datasource_manager = Mock(DataSourceManager)
@@ -65,17 +66,16 @@ class TestMetricManager:
 
         metric_name, index_name = "test_document_count_metric", "test_index"
 
-        metric_config = {
-            "metric_type": "document_count",
-            "name": metric_name,
-            "index": index_name,
-        }
-        filters = {"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'}
+        filters = {"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'}
 
-        metric_config = MetricConfiguration(**metric_config)
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            resource=Index(name=index_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+        )
         metric_config.filters = MetricsFilterConfiguration(**filters)
         metric_manager = MetricManager(
-            metric_config={OPEN_SEARCH_DATA_SOURCE_NAME: [metric_config]},
+            metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
         )
 
@@ -95,15 +95,14 @@ class TestMetricManager:
         datasource_manager.get_data_source.return_value = mock_datasource
 
         metric_name, table_name = "test_row_count_metric", "test_table"
-        metric_config = {
-            "metric_type": "row_count",
-            "name": metric_name,
-            "table": table_name,
-        }
 
-        metric_config = MetricConfiguration(**metric_config)
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.ROW_COUNT,
+            resource=Table(name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+        )
         metric_manager = MetricManager(
-            metric_config={POSTGRES_DATA_SOURCE_NAME: [metric_config]},
+            metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
         )
 
@@ -121,16 +120,18 @@ class TestMetricManager:
         datasource_manager.get_data_source.return_value = mock_datasource
 
         metric_name, table_name = "test_row_count_metric", "test_table"
-        metric_config = {
-            "metric_type": "row_count",
-            "name": metric_name,
-            "table": table_name,
-        }
-        filters = {"where_clause": "age > 30"}
-        metric_config = MetricConfiguration(**metric_config)
+
+        filters = {"where": "age > 30"}
+
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.ROW_COUNT,
+            resource=Table(name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+        )
+
         metric_config.filters = MetricsFilterConfiguration(**filters)
         metric_manager = MetricManager(
-            metric_config={POSTGRES_DATA_SOURCE_NAME: [metric_config]},
+            metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
         )
 
@@ -148,16 +149,19 @@ class TestMetricManager:
         datasource_manager.get_data_source.return_value = mock_datasource
 
         metric_name, table_name, field_name = "test_max_metric", "test_table", "age"
-        metric_config = {
-            "metric_type": "max",
-            "name": metric_name,
-            "table": table_name,
-            "field": field_name,
-        }
 
-        metric_config = MetricConfiguration(**metric_config)
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.MAX,
+            resource=Field(
+                name=field_name,
+                belongs_to=Table(
+                    name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME
+                ),
+            ),
+        )
         metric_manager = MetricManager(
-            metric_config={POSTGRES_DATA_SOURCE_NAME: [metric_config]},
+            metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
         )
 

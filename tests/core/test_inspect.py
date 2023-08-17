@@ -14,17 +14,19 @@
 
 from unittest.mock import Mock
 
-from datachecks import Configuration, Inspect
-from datachecks.core.common.models.metric import (
-    DataSourceMetrics,
-    MetricsType,
-    MetricValue,
-)
-from datachecks.core.configuration.configuration import (
+from datachecks.core import Inspect
+from datachecks.core.common.models.configuration import (
+    Configuration,
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
     DatasourceType,
     MetricConfiguration,
+)
+from datachecks.core.common.models.data_source_resource import Table
+from datachecks.core.common.models.metric import (
+    DataSourceMetrics,
+    MetricsType,
+    MetricValue,
 )
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.manager import DataSourceManager
@@ -78,8 +80,8 @@ class TestInspect:
         )
 
         configuration = Configuration(
-            data_sources=[
-                DataSourceConfiguration(
+            data_sources={
+                self.DATA_SOURCE_NAME: DataSourceConfiguration(
                     name=self.DATA_SOURCE_NAME,
                     type=DatasourceType.POSTGRES,
                     connection_config=DataSourceConnectionConfiguration(
@@ -90,15 +92,16 @@ class TestInspect:
                         password="postgres",
                     ),
                 )
-            ],
+            },
             metrics={
-                self.DATA_SOURCE_NAME: [
-                    MetricConfiguration(
-                        name="metric1",
-                        metric_type=MetricsType.ROW_COUNT,
-                        table=TABLE_NAME,
-                    )
-                ]
+                "metric1": MetricConfiguration(
+                    name="metric1",
+                    metric_type=MetricsType.ROW_COUNT,
+                    resource=Table(
+                        name=TABLE_NAME,
+                        data_source=self.DATA_SOURCE_NAME,
+                    ),
+                )
             },
         )
         inspect = Inspect(configuration=configuration)

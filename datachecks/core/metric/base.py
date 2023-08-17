@@ -15,11 +15,11 @@
 import datetime
 import json
 from abc import ABC
-from typing import Dict
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.datasource.base import DataSource
-from datachecks.core.logger.base import MetricLogger
+from datachecks.core.datasource.search_datasource import SearchIndexDataSource
+from datachecks.core.datasource.sql_datasource import SQLDatasource
 
 
 class MetricIdentity:
@@ -61,7 +61,6 @@ class Metric(ABC):
         name: str,
         data_source: DataSource,
         metric_type: MetricsType,
-        metric_logger: MetricLogger = None,
         **kwargs,
     ):
         if "index_name" in kwargs and "table_name" in kwargs:
@@ -84,18 +83,12 @@ class Metric(ABC):
         self.filter_query = None
         if "filters" in kwargs and kwargs["filters"] is not None:
             filters = kwargs["filters"]
-            if ("search_query" in filters and filters["search_query"] is not None) and (
-                "where_clause" in filters and filters["where_clause"] is not None
-            ):
-                raise ValueError(
-                    "Please give a value for search_query or where_clause (but not both)"
-                )
 
-            if "search_query" in filters and filters["search_query"] is not None:
-                self.filter_query = json.loads(filters["search_query"])
-            elif "where_clause" in filters:
-                self.filter_query = filters["where_clause"]
-        self.metric_logger = metric_logger
+            if "where" in filters and filters["where"] is not None:
+                if isinstance(data_source, SearchIndexDataSource):
+                    self.filter_query = json.loads(filters["where"])
+                elif isinstance(data_source, SQLDatasource):
+                    self.filter_query = filters["where"]
 
     def get_metric_identity(self):
         return MetricIdentity.generate_identity(
@@ -138,14 +131,12 @@ class FieldMetrics(Metric, ABC):
         name: str,
         data_source: DataSource,
         metric_type: MetricsType,
-        metric_logger: MetricLogger = None,
         **kwargs,
     ):
         super().__init__(
             name=name,
             data_source=data_source,
             metric_type=metric_type,
-            metric_logger=metric_logger,
             **kwargs,
         )
         if "field_name" in kwargs:

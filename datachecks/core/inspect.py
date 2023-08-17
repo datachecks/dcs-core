@@ -18,17 +18,16 @@ from typing import Dict, List, Union
 import requests
 from loguru import logger
 
+from datachecks.core.common.models.configuration import Configuration
 from datachecks.core.common.models.metric import (
     DataSourceMetrics,
     IndexMetrics,
     MetricValue,
     TableMetrics,
 )
-from datachecks.core.configuration.configuration import Configuration
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.datasource.sql_datasource import SQLDatasource
-from datachecks.core.logger.default_logger import DefaultLogger
 from datachecks.core.metric.manager import MetricManager
 from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
 from datachecks.core.utils.tracking import (
@@ -78,20 +77,9 @@ class Inspect:
 
         self._auto_profile = auto_profile
 
-        self.metric_logger = None
-
-        if self.configuration.metric_logger:
-            if self.configuration.metric_logger.type == "default":
-                self.metric_logger = DefaultLogger(
-                    **self.configuration.metric_logger.config
-                    if self.configuration.metric_logger.config
-                    else {}
-                )
-
         self.metric_manager = MetricManager(
             metric_config=configuration.metrics,
             data_source_manager=self.data_source_manager,
-            metric_logger=self.metric_logger,
         )
 
     def _base_data_source_metrics(self) -> Dict[str, DataSourceMetrics]:
