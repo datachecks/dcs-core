@@ -147,3 +147,63 @@ class SearchIndexDataSource(DataSource):
             return int(now - last_updated)
 
         return 0
+
+    def profiling_search_aggregates_numeric(self, index_name: str, field: str) -> Dict:
+        """
+        Get the aggregates for a numeric field
+        :param index_name: name of the index
+        :param field: field name
+        :return: aggregates
+        """
+
+        query = {
+            "aggs": {
+                "stats": {"extended_stats": {"field": field}},
+                "distinct_count": {"cardinality": {"field": field}},
+                "missing_count": {"missing": {"field": field}},
+            }
+        }
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+
+        return {
+            "avg": response["stats"]["avg"],
+            "min": response["stats"]["min"],
+            "max": response["stats"]["max"],
+            "sum": response["stats"]["sum"],
+            "stddev": response["stats"]["std_deviation"],
+            "variance": response["stats"]["variance"],
+            "distinct_count": response["distinct_count"]["value"],
+            "missing_count": response["missing_count"]["doc_count"],
+        }
+
+    def profiling_search_aggregates_string(self, index_name: str, field: str) -> Dict:
+        """
+        Get the aggregates for a text field
+        :param index_name: name of the index
+        :param field: field name
+        :return: aggregates
+        """
+        script = {
+            "script": {
+                "source": f"params._source.containsKey('{field}')? params._source.{field}.length(): 0"
+            }
+        }
+        query = {
+            "aggs": {
+                "max_length": {"max": script},
+                "min_length": {"min": script},
+                "avg_length": {"avg": script},
+                "distinct_count": {"cardinality": {"field": f"{field}.keyword"}},
+                "missing_count": {"missing": {"field": f"{field}.keyword"}},
+            }
+        }
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+
+        return {
+            "distinct_count": response["distinct_count"]["value"],
+            "missing_count": response["missing_count"]["doc_count"],
+            "max_length": response["max_length"]["value"],
+            "min_length": response["min_length"]["value"],
+            "avg_length": response["avg_length"]["value"],
+        }

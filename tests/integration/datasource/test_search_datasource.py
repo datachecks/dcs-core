@@ -152,3 +152,29 @@ class TestSQLDatasourceQueries:
         indices = opensearch_datasource.query_get_index_metadata()
 
         assert INDEX_NAME in indices
+
+    def test_should_return_numeric_profile(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        profile = opensearch_datasource.profiling_search_aggregates_numeric(
+            INDEX_NAME, "age"
+        )
+
+        assert profile["min"] == 35
+        assert profile["max"] == 1500
+        assert profile["avg"] == 345
+        assert profile["sum"] == 1725
+        assert profile["distinct_count"] == 5
+        assert profile["missing_count"] == 0
+
+    def test_should_return_text_profile(
+        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+    ):
+        profile = opensearch_datasource.profiling_search_aggregates_string(
+            INDEX_NAME, "name"
+        )
+        assert profile["distinct_count"] == 5
+        assert profile["missing_count"] == 0
+        assert profile["max_length"] == 15
+        assert profile["min_length"] == 4
+        assert profile["avg_length"] == 9.2
