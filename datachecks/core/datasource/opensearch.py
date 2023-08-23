@@ -17,6 +17,7 @@ from typing import Dict
 from dateutil import parser
 from opensearchpy import OpenSearch
 
+from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 
 
@@ -32,21 +33,27 @@ class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
         """
         Connect to the data source
         """
-
-        auth = (
-            self.data_connection.get("username"),
-            self.data_connection.get("password"),
-        )
-        host = self.data_connection.get("host")
-        port = int(self.data_connection.get("port"))
-        self.client = OpenSearch(
-            hosts=[{"host": host, "port": port}],
-            http_auth=auth,
-            use_ssl=True,
-            verify_certs=False,
-            ca_certs=False,
-        )
-        return self.client
+        try:
+            auth = (
+                self.data_connection.get("username"),
+                self.data_connection.get("password"),
+            )
+            host = self.data_connection.get("host")
+            port = int(self.data_connection.get("port"))
+            self.client = OpenSearch(
+                hosts=[{"host": host, "port": port}],
+                http_auth=auth,
+                use_ssl=True,
+                verify_certs=False,
+                ca_certs=False,
+            )
+            if not self.client.ping():
+                raise Exception("Failed to connect to OpenSearch data source")
+            return self.client
+        except Exception as e:
+            raise DataChecksDataSourcesConnectionError(
+                f"Failed to connect to OpenSearch data source: [{str(e)}]"
+            )
 
     def close(self):
         """

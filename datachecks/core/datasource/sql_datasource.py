@@ -25,11 +25,11 @@ class SQLDatasource(DataSource):
     Abstract class for SQL data sources
     """
 
-    def __init__(self, data_source_name: str, data_source_properties: Dict):
-        super().__init__(data_source_name, data_source_properties)
+    def __init__(self, data_source_name: str, data_connection: Dict):
+        super().__init__(data_source_name, data_connection)
 
         self.connection: Union[Connection, None] = None
-        self.database: str = data_source_properties.get("database")
+        self.database: str = data_connection.get("database")
 
     def is_connected(self) -> bool:
         """

@@ -16,25 +16,31 @@ from typing import Any, Dict
 
 from sqlalchemy import URL, create_engine
 
+from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.core.datasource.sql_datasource import SQLDatasource
 
 
 class PostgresSQLDatasource(SQLDatasource):
-    def __init__(self, data_source_name: str, data_source_properties: Dict):
-        super().__init__(data_source_name, data_source_properties)
+    def __init__(self, data_source_name: str, data_connection: Dict):
+        super().__init__(data_source_name, data_connection)
 
     def connect(self) -> Any:
         """
         Connect to the data source
         """
-        url = URL.create(
-            drivername="postgresql",
-            username=self.data_connection.get("username"),
-            password=self.data_connection.get("password"),
-            host=self.data_connection.get("host"),
-            port=self.data_connection.get("port"),
-            database=self.data_connection.get("database"),
-        )
-        engine = create_engine(url)
-        self.connection = engine.connect()
-        return self.connection
+        try:
+            url = URL.create(
+                drivername="postgresql",
+                username=self.data_connection.get("username"),
+                password=self.data_connection.get("password"),
+                host=self.data_connection.get("host"),
+                port=self.data_connection.get("port"),
+                database=self.data_connection.get("database"),
+            )
+            engine = create_engine(url)
+            self.connection = engine.connect()
+            return self.connection
+        except Exception as e:
+            raise DataChecksDataSourcesConnectionError(
+                message=f"Failed to connect to PostgresSQL data source: [{str(e)}]"
+            )

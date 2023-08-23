@@ -29,7 +29,7 @@ metrics:
   - name: count_us_parts
     metric_type: document_count
     resource: search_datastore.product_data_us
-    filters:
+    filter:
       where: '{"match_all" : {}}'
   - name: count_us_parts_valid
     metric_type: row_count

@@ -15,7 +15,11 @@
 import datetime
 import json
 from abc import ABC
+from typing import Union
 
+from loguru import logger
+
+from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
@@ -100,29 +104,42 @@ class Metric(ABC):
     def _generate_metric_value(self) -> float:
         pass
 
-    def get_metric_value(self) -> MetricValue:
-        metric_value = self._generate_metric_value()
-        tags = {
-            "metric_name": self.name,
-        }
+    def get_metric_value(self) -> Union[MetricValue, None]:
+        try:
+            metric_value = self._generate_metric_value()
+            tags = {
+                "metric_name": self.name,
+            }
 
-        value = MetricValue(
-            identity=self.get_metric_identity(),
-            metric_type=self.metric_type.value,
-            value=metric_value,
-            timestamp=datetime.datetime.utcnow().isoformat(),
-            data_source=self.data_source.data_source_name,
-            tags=tags,
-        )
-        if "index_name" in self.__dict__ and self.__dict__["index_name"] is not None:
-            value.index_name = self.__dict__["index_name"]
-        elif "table_name" in self.__dict__ and self.__dict__["table_name"] is not None:
-            value.table_name = self.__dict__["table_name"]
+            value = MetricValue(
+                identity=self.get_metric_identity(),
+                metric_type=self.metric_type.value,
+                value=metric_value,
+                timestamp=datetime.datetime.utcnow().isoformat(),
+                data_source=self.data_source.data_source_name,
+                tags=tags,
+            )
+            if (
+                "index_name" in self.__dict__
+                and self.__dict__["index_name"] is not None
+            ):
+                value.index_name = self.__dict__["index_name"]
+            elif (
+                "table_name" in self.__dict__
+                and self.__dict__["table_name"] is not None
+            ):
+                value.table_name = self.__dict__["table_name"]
 
-        if "field_name" in self.__dict__ and self.__dict__["field_name"] is not None:
-            value.field_name = self.__dict__["field_name"]
+            if (
+                "field_name" in self.__dict__
+                and self.__dict__["field_name"] is not None
+            ):
+                value.field_name = self.__dict__["field_name"]
 
-        return value
+            return value
+        except Exception as e:
+            logger.error(f"Failed to generate metric {self.name}: {str(e)}")
+            return None
 
 
 class FieldMetrics(Metric, ABC):

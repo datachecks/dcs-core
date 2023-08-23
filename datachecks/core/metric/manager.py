@@ -61,7 +61,7 @@ class MetricManager:
                 data_source = metric_config.resource.data_source
             params = {
                 "filters": asdict(metric_config.filters)
-                if metric_config.filters
+                if metric_config.filters is not None
                 else None,
             }
             if isinstance(metric_config.resource, Index):
@@ -86,35 +86,8 @@ class MetricManager:
 
             self.metrics[metric.get_metric_identity()] = metric
 
-    def _build_metrics1(self, config: Dict[str, List[MetricConfiguration]]):
-        for data_source, metric_list in config.items():
-            for metric_config in metric_list:
-                params = {
-                    "filters": asdict(metric_config.filters)
-                    if metric_config.filters
-                    else None,
-                }
-                if isinstance(metric_config.resource, Index):
-                    params["index_name"] = metric_config.resource.name
-                if isinstance(metric_config.resource, Table):
-                    params["table_name"] = metric_config.resource.name
-                if isinstance(metric_config.resource, Field):
-                    params["field_name"] = metric_config.resource.name
-                    if isinstance(metric_config.resource.belongs_to, Table):
-                        params["table_name"] = metric_config.resource.belongs_to.name
-                    elif isinstance(metric_config.resource.belongs_to, Index):
-                        params["index_name"] = metric_config.resource.belongs_to.name
-
-                metric: Metric = globals()[
-                    self.METRIC_CLASS_MAPPING[metric_config.metric_type]
-                ](
-                    metric_config.name,
-                    self.data_source_manager.get_data_source(data_source),
-                    MetricsType(metric_config.metric_type.lower()),
-                    **params,
-                )
-
-                self.metrics[metric.get_metric_identity()] = metric
+    def add_metric(self, metric: Metric):
+        self.metrics[metric.get_metric_identity()] = metric
 
     @property
     def get_metrics(self):
