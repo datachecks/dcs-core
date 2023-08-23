@@ -1,6 +1,6 @@
 site_name: ""
 site_url: https://waterdipai.github.io/datachecks/
-repo_url: https://github.com/Waterdipai/datachecks
+repo_url: https://github.com/waterdipai/datachecks
 repo_name: waterdipai/datachecks
 edit_uri: blob/main/docs/
 theme:
@@ -53,7 +53,20 @@ markdown_extensions:
   - admonition
   - pymdownx.details
 nav:
-  - Welcome to Datachecks: index.md
+  - Introduction:
+    - Welcome to Datachecks: index.md
+    - Getting Started: getting_started.md
+  - Integrations:
+    - Transactional Databases:
+      - Postgres: integrations/postgres.md
+    - Search Engines:
+      - OpenSearch: integrations/opensearch.md
+  - Metrics:
+      - Reliability Metrics: metrics/reliability.md
+      - Numeric Distribution Metrics: metrics/numeric_distribution.md
+      - Uniqueness Metrics: metrics/uniqueness.md
+      - Completeness Metrics: metrics/completeness.md
+      - Combined Metrics: metrics/combined.md
 
 extra:
   generator: true
@@ -62,7 +75,7 @@ extra:
       link: https://github.com/waterdipai/datachecks
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/waterdip
-    - icon: fontawesome/brands/slack
-      link: https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/NpGGhYM4
 
 copyright: "&copy; 2023 BY WATERDIP LABS"
