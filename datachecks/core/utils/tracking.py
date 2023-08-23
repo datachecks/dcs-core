@@ -27,6 +27,8 @@ from uuid import uuid4
 import requests
 from loguru import logger
 
+from datachecks.core.utils.utils import truncate_error
+
 TRACKING_DISABLED = os.environ.get("DISABLE_DCS_ANONYMOUS_TELEMETRY", False)
 TRACK_URL = "https://hosted.rudderlabs.com/v1/track"
 TOKEN = "2U4Bsait5XpEyHnbFtJSjig7KH8"
@@ -44,6 +46,24 @@ def get_anonymous_id():
     if dcs_anonymous_id is None:
         dcs_anonymous_id = str(uuid4())
     return dcs_anonymous_id
+
+
+def create_error_event(
+    exception: Exception,
+):
+    error = truncate_error(repr(exception))
+    return {
+        "event": "dcs_error",
+        "properties": {
+            "distinct_id": get_anonymous_id(),
+            "token": TOKEN,
+            "time": time(),
+            "os_type": os.name,
+            "os_version": platform.platform(),
+            "python_version": f"{platform.python_version()}/{platform.python_implementation()}",
+            "error": error,
+        },
+    }
 
 
 def create_inspect_event_json(

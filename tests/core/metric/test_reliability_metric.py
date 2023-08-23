@@ -16,6 +16,7 @@ from unittest.mock import Mock
 
 import pytest
 
+from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDatasource
@@ -93,7 +94,7 @@ class TestRowCountMetric:
         assert metric_value.metric_type == MetricsType.ROW_COUNT
         assert metric_value.timestamp is not None
 
-    def test_should_raise_exception_wrong_datasource_provided(self):
+    def test_should_return_none_wrong_datasource_provided(self):
         mock_data_source = Mock(spec=SearchIndexDataSource)
         mock_data_source.data_source_name = "test_data_source"
 
@@ -104,8 +105,7 @@ class TestRowCountMetric:
             table_name="test_table",
             filters={"where_clause": "age >= 30 AND age <= 40"},
         )
-        with pytest.raises(ValueError):
-            row_count_metric.get_metric_value()
+        assert row_count_metric.get_metric_value() is None
 
 
 class TestFreshnessValueMetric:
@@ -141,7 +141,7 @@ class TestFreshnessValueMetric:
         assert metric_value.value == 3601
         assert metric_value.timestamp is not None
 
-    def test_should_raise_test_if_wrong_datasource_type(self):
+    def test_should_return_none_if_wrong_datasource_type(self):
         mock_data_source = Mock(spec=str)
         mock_data_source.data_source_name = "test_data_source"
 
@@ -152,6 +152,4 @@ class TestFreshnessValueMetric:
             index_name="test_index",
             field_name="test_field",
         )
-
-        with pytest.raises(ValueError):
-            freshness_metric.get_metric_value()
+        assert freshness_metric.get_metric_value() is None

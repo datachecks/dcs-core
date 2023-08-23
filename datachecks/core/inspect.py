@@ -11,7 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import sys
 import time
+import traceback
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
@@ -31,6 +33,7 @@ from datachecks.core.datasource.sql_datasource import SQLDatasource
 from datachecks.core.metric.manager import MetricManager
 from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
 from datachecks.core.utils.tracking import (
+    create_error_event,
     create_inspect_event_json,
     is_tracking_enabled,
     send_event_json,
@@ -72,15 +75,24 @@ class Inspect:
         auto_profile: bool = False,
     ):
         self.configuration = configuration
-        self.data_source_manager = DataSourceManager(configuration.data_sources)
-        self.data_source_names = self.data_source_manager.get_data_source_names()
-
         self._auto_profile = auto_profile
 
-        self.metric_manager = MetricManager(
-            metric_config=configuration.metrics,
-            data_source_manager=self.data_source_manager,
-        )
+        try:
+            self.data_source_manager = DataSourceManager(configuration.data_sources)
+            self.data_source_names = self.data_source_manager.get_data_source_names()
+            self.metric_manager = MetricManager(
+                metric_config=configuration.metrics,
+                data_source_manager=self.data_source_manager,
+            )
+        except Exception as ex:
+            logger.error(f"Error while initializing Inspect: {ex}")
+            if is_tracking_enabled():
+                event_json = create_error_event(
+                    exception=ex,
+                )
+                send_event_json(event_json)
+            traceback.print_exc(file=sys.stdout)
+            raise ex
 
     def _base_data_source_metrics(self) -> Dict[str, DataSourceMetrics]:
         data_sources: Dict[str, DataSource] = self.data_source_manager.get_data_sources
@@ -202,7 +214,9 @@ class Inspect:
             metric_values: List[MetricValue] = []
 
             for metric in self.metric_manager.metrics.values():
-                metric_values.append(metric.get_metric_value())
+                metric_value = metric.get_metric_value()
+                if metric_value is not None:
+                    metric_values.append(metric_value)
             self._prepare_results(metric_values, datasource_metrics)
 
             # generate metric values for profile metrics
@@ -214,6 +228,7 @@ class Inspect:
             return output
         except Exception as ex:
             logger.error(f"Error while running inspection: {ex}")
+            traceback.print_exc(file=sys.stdout)
             error = ex
         finally:
             end = time.monotonic()

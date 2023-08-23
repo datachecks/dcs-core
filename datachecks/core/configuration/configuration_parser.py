@@ -14,6 +14,7 @@
 
 from typing import Dict, List, Union
 
+from datachecks.core.common.errors import DataChecksConfigurationError
 from datachecks.core.common.models.configuration import (
     Configuration,
     DataSourceConfiguration,
@@ -115,10 +116,10 @@ def parse_metric_configurations(
                 data_source_type=data_source_configuration.type,
                 metric_type=metric_type,
             ),
-            filters=metric_yaml_configuration.get("filter"),
+            filters=metric_yaml_configuration.get("filters", None),
         )
         if "filters" in metric_yaml_configuration:
-            metric_configuration.filter = MetricsFilterConfiguration(
+            metric_configuration.filters = MetricsFilterConfiguration(
                 where=metric_yaml_configuration["filters"]["where"]
             )
         metric_configurations[metric_configuration.name] = metric_configuration
@@ -142,15 +143,19 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
     """
     Load configuration from a yaml string
     """
-
-    config_dict: Dict = parse_config(data=yaml_string)
-    data_source_configurations = parse_data_source_yaml_configurations(
-        data_source_yaml_configurations=config_dict["data_sources"]
-    )
-    metric_configurations = parse_metric_configurations(
-        data_source_configurations=data_source_configurations,
-        metric_yaml_configurations=config_dict["metrics"],
-    )
-    return Configuration(
-        data_sources=data_source_configurations, metrics=metric_configurations
-    )
+    try:
+        config_dict: Dict = parse_config(data=yaml_string)
+        data_source_configurations = parse_data_source_yaml_configurations(
+            data_source_yaml_configurations=config_dict["data_sources"]
+        )
+        metric_configurations = parse_metric_configurations(
+            data_source_configurations=data_source_configurations,
+            metric_yaml_configurations=config_dict["metrics"],
+        )
+        return Configuration(
+            data_sources=data_source_configurations, metrics=metric_configurations
+        )
+    except Exception as ex:
+        raise DataChecksConfigurationError(
+            message=f"Failed to parse configuration: {str(ex)}"
+        )

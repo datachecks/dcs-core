@@ -112,7 +112,7 @@ def postgres_datasource(
 ) -> PostgresSQLDatasource:
     source = PostgresSQLDatasource(
         data_source_name="postgresql",
-        data_source_properties=asdict(pgsql_connection_configuration),
+        data_connection=asdict(pgsql_connection_configuration),
     )
     source.connect()
     yield source
