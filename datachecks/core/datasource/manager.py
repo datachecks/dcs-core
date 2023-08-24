@@ -70,7 +70,7 @@ class DataSourceManager:
         elif data_source_config.type == DatasourceType.POSTGRES:
             return PostgresSQLDatasource(
                 data_source_name=data_source_config.name,
-                data_source_properties=asdict(data_source_config.connection_config),
+                data_connection=asdict(data_source_config.connection_config),
             )
         else:
             raise ValueError(f"Unsupported data source type: {data_source_config.type}")

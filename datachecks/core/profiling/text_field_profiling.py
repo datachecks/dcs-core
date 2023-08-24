@@ -53,7 +53,7 @@ class TextSQLFieldProfiler:
             metric_value = MetricValue(
                 value=value,
                 identity=MetricIdentity.generate_identity(
-                    metric_name="profile",
+                    metric_name="",
                     metric_type=MetricsType(key),
                     data_source=self._data_source,
                     table_name=self._table_name,
@@ -61,7 +61,7 @@ class TextSQLFieldProfiler:
                 ),
                 metric_type=MetricsType(key),
                 timestamp=timestamp,
-                data_source=self._data_source._data_source_name,
+                data_source=self._data_source.data_source_name,
                 table_name=self._table_name,
                 field_name=self._field_name,
             )

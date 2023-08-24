@@ -24,6 +24,7 @@ theme:
       quote: fontawesome/solid/quote-left
   features:
     - navigation.expand
+    - navigation.sections
     - toc.follow
   palette:
     - scheme: default

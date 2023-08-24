@@ -51,7 +51,8 @@ class MetricIdentity:
             identifiers.append(field_name)
 
         identifiers.append(metric_type.value)
-        identifiers.append(metric_name)
+        if metric_name:
+            identifiers.append(metric_name)
         return ".".join([str(p) for p in identifiers])
 
 
