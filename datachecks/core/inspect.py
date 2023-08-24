@@ -15,6 +15,7 @@ import sys
 import time
 import traceback
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, List, Union
 
 import requests
@@ -76,7 +77,7 @@ class Inspect:
     ):
         self.configuration = configuration
         self._auto_profile = auto_profile
-
+        self.execution_time_taken = 0
         try:
             self.data_source_manager = DataSourceManager(configuration.data_sources)
             self.data_source_names = self.data_source_manager.get_data_source_names()
@@ -177,7 +178,6 @@ class Inspect:
             ]
             table_name = result.table_name
             index_name = result.index_name
-            logger.info(result)
             # If the index name is present, add the result to the index name
             if index_name is not None:
                 if index_name not in data_source_metrics.index_metrics:
@@ -202,7 +202,7 @@ class Inspect:
         """
         This method starts the inspection process.
         """
-        start = time.monotonic()
+        start = datetime.now()
         error = None
         inspect_info = None
         try:
@@ -231,12 +231,13 @@ class Inspect:
             traceback.print_exc(file=sys.stdout)
             error = ex
         finally:
-            end = time.monotonic()
-            logger.info(f"Inspection took {end - start} seconds")
+            end = datetime.now()
+            self.execution_time_taken = round((end - start).total_seconds(), 3)
+            logger.info(f"Inspection took {self.execution_time_taken} seconds")
             err_message = truncate_error(repr(error))
             if is_tracking_enabled():
                 event_json = create_inspect_event_json(
-                    runtime_seconds=(end - start),
+                    runtime_seconds=self.execution_time_taken,
                     inspect_info=inspect_info,
                     error=err_message,
                 )

@@ -87,7 +87,7 @@ class DataSourceProfiling:
             table_row_count = self._datasource.query_get_row_count(table=table)
             return MetricValue(
                 identity=MetricIdentity.generate_identity(
-                    metric_name="profile",
+                    metric_name="",
                     metric_type=MetricsType.ROW_COUNT,
                     data_source=self._datasource,
                     table_name=table,

@@ -11,15 +11,24 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 import sys
 import traceback
+import warnings
 from typing import Union
 
 import click
 from loguru import logger
+from rich import print
+from rich.table import Table
 
 from datachecks.__version__ import __version__
 from datachecks.core import Configuration, Inspect, load_configuration
+from datachecks.core.inspect import InspectOutput
+
+logger.remove()
+logger.add(sys.stderr, level="WARNING")
+warnings.filterwarnings("ignore")
 
 
 @click.version_option(package_name="datachecks", prog_name="datachecks")
@@ -44,31 +53,62 @@ def main():
     help="Specify if the inspection should do auto-profile of all data sources",
 )
 def inspect(
-    config_path: Union[str, None] = None,
+    config_path: Union[str, None],
     auto_profile: bool = False,
 ):
     """
     Starts the datachecks inspection
     """
     try:
+        is_file_exists = os.path.isfile(config_path)
+        if not is_file_exists:
+            raise Exception(
+                f"Invalid value for '-C' / '--config-path': File '{config_path}' does not exist."
+            )
         configuration: Configuration = load_configuration(config_path)
 
         inspector = Inspect(configuration=configuration, auto_profile=auto_profile)
 
-        logger.info("Starting datachecks inspection...")
-        output = inspector.run()
+        print("Starting [bold blue]datachecks[/bold blue] inspection...", ":zap:")
+        output: InspectOutput = inspector.run()
 
-        for ds_name, ds_met in output.metrics.items():
-            logger.info(f"==================={ds_name}==================")
-            for tabel_name, table_met in ds_met.table_metrics.items():
-                logger.info(f"-----------------{tabel_name}-----------------")
-                for met_name, met in table_met.metrics.items():
-                    logger.info(f"{met_name}: {met.value}")
-            for index_name, index_met in ds_met.index_metrics.items():
-                logger.info(f"-----------------{index_name}-----------------")
-                for met_name, met in index_met.metrics.items():
-                    logger.info(f"{met_name}: {met.value}")
+        print("[bold green]Inspection completed successfully![/bold green] :tada:")
+        print(f"Inspection took {inspector.execution_time_taken} seconds")
+
+        print(_build_metric_cli_table(output))
+        sys.exit(0)
 
     except Exception as e:
         logger.error(f"Failed to run datachecks inspection: {str(e)}")
-        traceback.print_exc(file=sys.stdout)
+        sys.exit(1)
+
+
+def _build_metric_cli_table(inspect_output: InspectOutput):
+    table = Table(
+        title="List of Generated Metrics", show_header=True, header_style="bold blue"
+    )
+
+    table.add_column("Data Source", justify="right", style="cyan", no_wrap=True)
+    table.add_column("Metric Type", style="magenta")
+    table.add_column("Metric Identifier", style="magenta")
+    table.add_column("Value", justify="right", style="green")
+
+    for data_source_name, ds_metrics in inspect_output.metrics.items():
+        for tabel_name, table_metrics in ds_metrics.table_metrics.items():
+            for metric_identifier, metric in table_metrics.metrics.items():
+                table.add_row(
+                    f"{data_source_name}",
+                    f"{metric.metric_type}",
+                    f"{metric_identifier}",
+                    f"{metric.value}",
+                )
+        for index_name, index_metrics in ds_metrics.index_metrics.items():
+            for metric_identifier, metric in index_metrics.metrics.items():
+                table.add_row(
+                    f"{data_source_name}",
+                    f"{metric.metric_type}",
+                    f"{metric_identifier}",
+                    f"{metric.value}",
+                )
+
+    return table

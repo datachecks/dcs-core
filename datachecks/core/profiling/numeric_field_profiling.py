@@ -61,7 +61,7 @@ class NumericSQLFieldProfiler:
             metric_value = MetricValue(
                 value=value,
                 identity=MetricIdentity.generate_identity(
-                    metric_name="profile",
+                    metric_name="",
                     metric_type=MetricsType(key),
                     data_source=self._data_source,
                     table_name=self._table_name,
