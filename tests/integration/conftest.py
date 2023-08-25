@@ -22,8 +22,8 @@ from urllib3.exceptions import InsecureRequestWarning
 from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
-from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
-from datachecks.core.datasource.postgres import PostgresSQLDatasource
+from datachecks.integrations.databases.opensearch import OpenSearchDataSource
+from datachecks.integrations.databases.postgres import PostgresDatasource
 from tests.utils import is_opensearch_responsive, is_pgsql_responsive
 
 OS_USER_NAME = "admin"
@@ -96,8 +96,8 @@ def pgsql_connection_configuration(
 @pytest.fixture(scope="class")
 def opensearch_datasource(
     opensearch_client_configuration,
-) -> OpenSearchSearchIndexDataSource:
-    source = OpenSearchSearchIndexDataSource(
+) -> OpenSearchDataSource:
+    source = OpenSearchDataSource(
         data_source_name="opensearch",
         data_connection=asdict(opensearch_client_configuration),
     )
@@ -109,8 +109,8 @@ def opensearch_datasource(
 @pytest.fixture(scope="class")
 def postgres_datasource(
     pgsql_connection_configuration: DataSourceConnectionConfiguration,
-) -> PostgresSQLDatasource:
-    source = PostgresSQLDatasource(
+) -> PostgresDatasource:
+    source = PostgresDatasource(
         data_source_name="postgresql",
         data_connection=asdict(pgsql_connection_configuration),
     )

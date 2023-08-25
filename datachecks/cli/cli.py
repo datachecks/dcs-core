@@ -79,7 +79,7 @@ def inspect(
         sys.exit(0)
 
     except Exception as e:
-        logger.error(f"Failed to run datachecks inspection: {str(e)}")
+        print(f"[bold red]Failed to run datachecks inspection: {str(e)} [/bold red]")
         sys.exit(1)
 
 

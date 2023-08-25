@@ -20,7 +20,7 @@ from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.core.datasource.sql_datasource import SQLDatasource
 
 
-class PostgresSQLDatasource(SQLDatasource):
+class PostgresDatasource(SQLDatasource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
 

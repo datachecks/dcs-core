@@ -20,7 +20,7 @@ from opensearchpy import OpenSearch
 from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
-from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
+from datachecks.integrations.databases.opensearch import OpenSearchDataSource
 from tests.utils import create_opensearch_client
 
 INDEX_NAME = "reliability_metric_test"
@@ -98,7 +98,7 @@ def setup_data(
 @pytest.mark.usefixtures("setup_data", "opensearch_datasource")
 class TestSQLDatasourceQueries:
     def test_should_return_avg_with_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         avg = opensearch_datasource.query_get_avg(
             INDEX_NAME, "age", {"match": {"name": "thor"}}
@@ -106,7 +106,7 @@ class TestSQLDatasourceQueries:
         assert avg == 1500
 
     def test_should_return_min_with_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         min_value_age = opensearch_datasource.query_get_min(
             INDEX_NAME, "age", {"match_all": {}}
@@ -114,7 +114,7 @@ class TestSQLDatasourceQueries:
         assert min_value_age == 35
 
     def test_should_return_max_with_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         max_value_age = opensearch_datasource.query_get_max(
             INDEX_NAME, "age", {"match_all": {}}
@@ -122,7 +122,7 @@ class TestSQLDatasourceQueries:
         assert max_value_age == 1500
 
     def test_should_return_document_count_with_filter(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         count = opensearch_datasource.query_get_document_count(
             INDEX_NAME, {"match_all": {}}
@@ -130,14 +130,12 @@ class TestSQLDatasourceQueries:
         assert count == 5
 
     def test_should_calculate_time_diff_in_second(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         diff = opensearch_datasource.query_get_time_diff(INDEX_NAME, "last_fight")
         assert diff >= 24 * 3600 * 3
 
-    def test_index_field_metadata(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
-    ):
+    def test_index_field_metadata(self, opensearch_datasource: OpenSearchDataSource):
         index_field_metadata = opensearch_datasource.query_get_field_metadata(
             INDEX_NAME
         )
@@ -146,15 +144,13 @@ class TestSQLDatasourceQueries:
         assert index_field_metadata["age"] == int
         assert index_field_metadata["last_fight"] == datetime.datetime
 
-    def test_index_metadata(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
-    ):
+    def test_index_metadata(self, opensearch_datasource: OpenSearchDataSource):
         indices = opensearch_datasource.query_get_index_metadata()
 
         assert INDEX_NAME in indices
 
     def test_should_return_numeric_profile(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         profile = opensearch_datasource.profiling_search_aggregates_numeric(
             INDEX_NAME, "age"
@@ -168,7 +164,7 @@ class TestSQLDatasourceQueries:
         assert profile["missing_count"] == 0
 
     def test_should_return_text_profile(
-        self, opensearch_datasource: OpenSearchSearchIndexDataSource
+        self, opensearch_datasource: OpenSearchDataSource
     ):
         profile = opensearch_datasource.profiling_search_aggregates_string(
             INDEX_NAME, "name"

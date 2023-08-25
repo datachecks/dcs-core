@@ -27,8 +27,8 @@ python = ">=3.8,<4.0"
 click = "^8.1.5"
 pyyaml = "^6.0"
 requests = "^2.31.0"
+sqlalchemy = "^2.0.19"
 opensearch-py = { version="^2.2.0", optional=true }
-sqlalchemy = { version="^2.0.19", optional=true }
 psycopg2 = { version="^2.9.6", optional=true }
 python-dateutil = "^2.8.2"
 loguru = "^0.7.0"
@@ -51,7 +51,7 @@ mkdocs-material = "^8.5.6"
 
 [tool.poetry.extras]
 # When adding, update also: README + dev deps just above
-postgres = ["psycopg2", "sqlalchemy"]
+postgres = ["psycopg2"]
 opensearch = ["opensearch-py"]
 
 [tool.poetry.scripts]

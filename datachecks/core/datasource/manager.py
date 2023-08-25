@@ -11,17 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import importlib
 from dataclasses import asdict
 from typing import Dict, List
 
-from datachecks.core.common.models.configuration import (
-    DataSourceConfiguration,
-    DatasourceType,
-)
+from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
+from datachecks.core.common.models.configuration import DataSourceConfiguration
 from datachecks.core.datasource.base import DataSource
-from datachecks.core.datasource.opensearch import OpenSearchSearchIndexDataSource
-from datachecks.core.datasource.postgres import PostgresSQLDatasource
 
 
 class DataSourceManager:
@@ -30,6 +26,11 @@ class DataSourceManager:
     This class is responsible for managing the data sources.
 
     """
+
+    DATA_SOURCE_CLASS_NAME_MAPPER = {
+        "opensearch": "OpenSearchDatasource",
+        "postgres": "PostgresDatasource",
+    }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):
         self._data_source_configs: Dict[str, DataSourceConfiguration] = config
@@ -55,25 +56,30 @@ class DataSourceManager:
             )
             self._data_sources[data_source_config.name].connect()
 
-    @staticmethod
-    def _create_data_source(data_source_config: DataSourceConfiguration) -> DataSource:
+    def _create_data_source(
+        self, data_source_config: DataSourceConfiguration
+    ) -> DataSource:
         """
         Create a data source
         :param data_source_config: data source configuration
         :return: data source
         """
-        if data_source_config.type == DatasourceType.OPENSEARCH:
-            return OpenSearchSearchIndexDataSource(
-                data_source_name=data_source_config.name,
-                data_connection=asdict(data_source_config.connection_config),
+        data_source_name = data_source_config.name
+        data_source_type = data_source_config.type
+        try:
+            module_name = f"datachecks.integrations.databases.{data_source_config.type}"
+            module = importlib.import_module(module_name)
+            data_source_class = self.DATA_SOURCE_CLASS_NAME_MAPPER[
+                data_source_config.type
+            ]
+            data_source_class = getattr(module, data_source_class)
+            return data_source_class(
+                data_source_name, asdict(data_source_config.connection_config)
             )
-        elif data_source_config.type == DatasourceType.POSTGRES:
-            return PostgresSQLDatasource(
-                data_source_name=data_source_config.name,
-                data_connection=asdict(data_source_config.connection_config),
+        except ModuleNotFoundError as e:
+            raise DataChecksDataSourcesConnectionError(
+                f'Failed to initiate data source type "{data_source_type}" [{str(e)}]'
             )
-        else:
-            raise ValueError(f"Unsupported data source type: {data_source_config.type}")
 
     def get_data_source(self, data_source_name: str) -> DataSource:
         """
