@@ -21,7 +21,7 @@ from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 
 
-class OpenSearchSearchIndexDataSource(SearchIndexDataSource):
+class OpenSearchDataSource(SearchIndexDataSource):
     """
     OpenSearch data source
     """

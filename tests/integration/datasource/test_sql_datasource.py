@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import datetime
-import time
 
 import pytest
 from loguru import logger
@@ -21,7 +20,7 @@ from sqlalchemy import text
 from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
-from datachecks.core.datasource.postgres import PostgresSQLDatasource
+from datachecks.integrations.databases.postgres import PostgresDatasource
 from tests.utils import create_postgres_connection
 
 OPEN_SEARCH_DATA_SOURCE_NAME = "test_open_search_data_source"
@@ -78,7 +77,7 @@ class TestSQLDataSourceTableColumnMetadata:
 
             postgresql_connection.close()
 
-    def test_table_column_metadata(self, postgres_datasource: PostgresSQLDatasource):
+    def test_table_column_metadata(self, postgres_datasource: PostgresDatasource):
         table_column_metadata = postgres_datasource.query_get_column_metadata(
             table_name=self.TABEL_NAME
         )
@@ -96,7 +95,7 @@ class TestSQLDataSourceTableColumnMetadata:
         assert table_column_metadata["short_name"] == "str"
         assert table_column_metadata["house_locations"] == "list"
 
-    def test_table_metadata(self, postgres_datasource: PostgresSQLDatasource):
+    def test_table_metadata(self, postgres_datasource: PostgresDatasource):
         tables = postgres_datasource.query_get_table_metadata()
 
         assert self.TABEL_NAME in tables
@@ -150,7 +149,7 @@ class TestSQLDatasourceQueries:
             postgresql_connection.close()
 
     def test_should_return_numeric_profile(
-        self, postgres_datasource: PostgresSQLDatasource
+        self, postgres_datasource: PostgresDatasource
     ):
         profile = postgres_datasource.profiling_sql_aggregates_numeric(
             self.TABLE_NAME, "age"
@@ -160,9 +159,7 @@ class TestSQLDatasourceQueries:
         assert profile["avg"] == 343
         assert profile["sum"] == 1715
 
-    def test_should_return_text_profile(
-        self, postgres_datasource: PostgresSQLDatasource
-    ):
+    def test_should_return_text_profile(self, postgres_datasource: PostgresDatasource):
         profile = postgres_datasource.profiling_sql_aggregates_string(
             self.TABLE_NAME, "name"
         )
@@ -171,7 +168,7 @@ class TestSQLDatasourceQueries:
         assert profile["max_length"] == 15
 
     def test_should_return_avg_with_filter(
-        self, postgres_datasource: PostgresSQLDatasource
+        self, postgres_datasource: PostgresDatasource
     ):
         result = postgres_datasource.query_get_avg(
             table=self.TABLE_NAME,
@@ -181,7 +178,7 @@ class TestSQLDatasourceQueries:
         assert result == 767.5
 
     def test_should_return_min_with_filter(
-        self, postgres_datasource: PostgresSQLDatasource
+        self, postgres_datasource: PostgresDatasource
     ):
         result = postgres_datasource.query_get_min(
             table=self.TABLE_NAME,
@@ -191,7 +188,7 @@ class TestSQLDatasourceQueries:
         assert result == 35
 
     def test_should_return_max_with_filter(
-        self, postgres_datasource: PostgresSQLDatasource
+        self, postgres_datasource: PostgresDatasource
     ):
         result = postgres_datasource.query_get_max(
             table=self.TABLE_NAME,
@@ -201,13 +198,13 @@ class TestSQLDatasourceQueries:
         assert result == 1500
 
     def test_should_return_time_diff_in_second(
-        self, postgres_datasource: PostgresSQLDatasource
+        self, postgres_datasource: PostgresDatasource
     ):
         time_diff = postgres_datasource.query_get_time_diff(
             self.TABLE_NAME, field="last_fight"
         )
         assert time_diff >= 3 * 24 * 3600
 
-    def test_should_return_row_count(self, postgres_datasource: PostgresSQLDatasource):
+    def test_should_return_row_count(self, postgres_datasource: PostgresDatasource):
         row_count = postgres_datasource.query_get_row_count(self.TABLE_NAME)
         assert row_count == 5
