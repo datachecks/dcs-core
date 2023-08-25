@@ -116,6 +116,20 @@ class SQLDatasource(DataSource):
 
         return self.connection.execute(text(query)).fetchone()[0]
 
+    def query_get_variance(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the variance value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        query = "SELECT ROUND(VAR_SAMP({}),2) FROM {}".format(field, table)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return self.connection.execute(text(query)).fetchone()[0]
+
     def query_get_time_diff(self, table: str, field: str) -> int:
         """
         Get the time difference

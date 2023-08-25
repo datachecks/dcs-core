@@ -121,6 +121,14 @@ class TestSQLDatasourceQueries:
         )
         assert max_value_age == 1500
 
+    def test_should_return_variance_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        variance = opensearch_datasource.query_get_variance(
+            INDEX_NAME, "age", {"match_all": {}}
+        )
+        assert variance == 417550.0
+
     def test_should_return_document_count_with_filter(
         self, opensearch_datasource: OpenSearchDataSource
     ):

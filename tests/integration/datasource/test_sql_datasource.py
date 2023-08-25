@@ -197,6 +197,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1500
 
+    def test_should_return_variance_with_filter(
+        self, postgres_datasource: PostgresDatasource
+    ):
+        result = postgres_datasource.query_get_variance(
+            table=self.TABLE_NAME,
+            field="age",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == 1073112.5
+
     def test_should_return_time_diff_in_second(
         self, postgres_datasource: PostgresDatasource
     ):
