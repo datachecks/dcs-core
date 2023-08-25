@@ -26,6 +26,7 @@ from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in
     AvgMetric,
     MaxMetric,
     MinMetric,
+    VarianceMetric,
 )
 from datachecks.core.metric.reliability_metric import (  # noqa
     DocumentCountMetric,
@@ -42,6 +43,7 @@ class MetricManager:
         MetricsType.MAX.value: "MaxMetric",
         MetricsType.MIN.value: "MinMetric",
         MetricsType.AVG.value: "AvgMetric",
+        MetricsType.VARIANCE.value: "VarianceMetric",
     }
 
     def __init__(

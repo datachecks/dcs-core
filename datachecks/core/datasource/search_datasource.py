@@ -127,6 +127,23 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)
         return round(response["aggregations"]["avg_value"]["value"], 2)
 
+    def query_get_variance(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> int:
+        """
+        Get the variance value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"stats": {"extended_stats": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+        return round(response["stats"]["variance_sampling"], 2)
+
     def query_get_time_diff(self, index_name: str, field: str) -> int:
         """
         Get the time difference
@@ -171,7 +188,7 @@ class SearchIndexDataSource(DataSource):
             "max": response["stats"]["max"],
             "sum": response["stats"]["sum"],
             "stddev": response["stats"]["std_deviation"],
-            "variance": response["stats"]["variance"],
+            "variance": response["stats"]["variance_sampling"],
             "distinct_count": response["distinct_count"]["value"],
             "missing_count": response["missing_count"]["doc_count"],
         }
