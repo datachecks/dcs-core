@@ -15,7 +15,7 @@
 
 from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.base import FieldMetrics, MetricIdentity
 
 
@@ -36,7 +36,7 @@ class MinMetric(FieldMetrics):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_min(
                 table=self.table_name,
                 field=self.field_name,
@@ -69,7 +69,7 @@ class MaxMetric(FieldMetrics):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_max(
                 table=self.table_name,
                 field=self.field_name,
@@ -102,7 +102,7 @@ class AvgMetric(FieldMetrics):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_avg(
                 table=self.table_name,
                 field=self.field_name,
@@ -135,7 +135,7 @@ class VarianceMetric(FieldMetrics):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_variance(
                 table=self.table_name,
                 field=self.field_name,

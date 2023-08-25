@@ -15,7 +15,7 @@ from unittest.mock import Mock
 
 from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.numeric_metric import (
     AvgMetric,
     MaxMetric,
@@ -26,7 +26,7 @@ from datachecks.core.metric.numeric_metric import (
 
 class TestMinColumnValueMetric:
     def test_should_return_min_column_value_postgres_without_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_min.return_value = 13
 
@@ -41,7 +41,7 @@ class TestMinColumnValueMetric:
         assert row_value.value == 13
 
     def test_should_return_min_column_value_postgres_with_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_min.return_value = 13
 
@@ -91,7 +91,7 @@ class TestMinColumnValueMetric:
 
 class TestMaxColumnValueMetric:
     def test_should_return_max_column_value_postgres_without_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_max.return_value = 51
 
@@ -106,7 +106,7 @@ class TestMaxColumnValueMetric:
         assert row_value.value == 51
 
     def test_should_return_max_column_value_postgres_with_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_max.return_value = 51
 
@@ -155,7 +155,7 @@ class TestMaxColumnValueMetric:
 
 class TestAvgColumnValueMetric:
     def test_should_return_avg_column_value_postgres_without_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_avg.return_value = 1.3
 
@@ -170,7 +170,7 @@ class TestAvgColumnValueMetric:
         assert row_value.value == 1.3
 
     def test_should_return_avg_column_value_postgres_with_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_avg.return_value = 1.3
 
@@ -219,7 +219,7 @@ class TestAvgColumnValueMetric:
 
 class TestVarianceColumnValueMetric:
     def test_should_return_variance_column_value_postgres_without_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_variance.return_value = 4380976080
 
@@ -234,7 +234,7 @@ class TestVarianceColumnValueMetric:
         assert row_value.value == 4380976080
 
     def test_should_return_variance_column_value_postgres_with_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_variance.return_value = 4380976080
 

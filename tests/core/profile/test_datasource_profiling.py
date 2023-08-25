@@ -16,7 +16,7 @@ from unittest.mock import Mock
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.common.models.profile import NumericFieldProfile, TextFieldProfile
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
 
 
@@ -36,7 +36,7 @@ class TestFieldProfiling:
                 ),
             ),
         )
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name.return_value = "test_data_source"
         mock_data_source.query_get_table_metadata.return_value = ["test_table"]
         mock_data_source.query_get_column_metadata.return_value = {"test_field": "int"}
@@ -64,7 +64,7 @@ class TestFieldProfiling:
             ),
         )
 
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name.return_value = "test_data_source"
         mock_data_source.query_get_table_metadata.return_value = ["test_table"]
         mock_data_source.query_get_column_metadata.return_value = {"test_field": "str"}

@@ -20,7 +20,7 @@ from datachecks.core.common.models.data_source_resource import Field, Index, Tab
 from datachecks.core.common.models.metric import MetricsType
 
 
-class DatasourceType(str, Enum):
+class DataSourceType(str, Enum):
     OPENSEARCH = "opensearch"
     ELASTICSEARCH = "elasticsearch"
     POSTGRES = "postgres"
@@ -54,7 +54,7 @@ class DataSourceConfiguration:
     """
 
     name: str
-    type: DatasourceType
+    type: DataSourceType
     connection_config: DataSourceConnectionConfiguration
 
 

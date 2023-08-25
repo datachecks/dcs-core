@@ -30,7 +30,7 @@ from datachecks.core.common.models.metric import (
 )
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.manager import DataSourceManager
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.manager import MetricManager
 from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
 from datachecks.core.utils.tracking import (
@@ -117,7 +117,7 @@ class Inspect:
 
         # Iterate over all the data sources
         for data_source_name, data_source in data_sources.items():
-            if isinstance(data_source, SQLDatasource):
+            if isinstance(data_source, SQLDataSource):
                 data_source_metrics: DataSourceMetrics = base_datasource_metrics[
                     data_source_name
                 ]

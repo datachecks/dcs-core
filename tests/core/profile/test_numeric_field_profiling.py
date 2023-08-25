@@ -14,13 +14,13 @@
 
 from unittest.mock import Mock
 
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.profiling.numeric_field_profiling import NumericSQLFieldProfiler
 
 
 class TestNumericSQLFieldProfiler:
     def test_should_generate_numeric_sql_field_profiler(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_table_metadata.return_value = ["test_table"]
         mock_data_source.query_get_column_metadata.return_value = {"test_field": "int"}
@@ -55,7 +55,7 @@ class TestNumericSQLFieldProfiler:
         assert field_profile.missing_count.value == 0
 
     def test_should_handle_null_values(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_table_metadata.return_value = ["test_table"]
         mock_data_source.query_get_column_metadata.return_value = {"test_field": "int"}

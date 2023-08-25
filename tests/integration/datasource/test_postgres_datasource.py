@@ -15,11 +15,11 @@
 import pytest
 
 from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.integrations.databases.postgres import PostgresDatasource
+from datachecks.integrations.databases.postgres import PostgresDataSource
 
 
 def test_should_throw_exception_when_postgres_connect_fail():
-    datasource = PostgresDatasource(
+    datasource = PostgresDataSource(
         data_source_name="test_postgres_data_source",
         data_connection={
             "username": "postgres",

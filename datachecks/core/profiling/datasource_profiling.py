@@ -21,7 +21,7 @@ from datachecks.core.common.models.metric import (
     TableMetrics,
 )
 from datachecks.core.datasource.base import DataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.base import MetricIdentity
 from datachecks.core.profiling.numeric_field_profiling import NumericSQLFieldProfiler
 from datachecks.core.profiling.text_field_profiling import TextSQLFieldProfiler
@@ -38,7 +38,7 @@ class DataSourceProfiling:
         :param data_source: The data source for which field profiles are to be generated.
         """
         self._datasource = data_source
-        if isinstance(data_source, SQLDatasource):
+        if isinstance(data_source, SQLDataSource):
             self._tables: List[str] = data_source.query_get_table_metadata()
             self._field_meta_data: Dict[str, Dict[str, str]] = {}
             for table in self._tables:
@@ -83,7 +83,7 @@ class DataSourceProfiling:
         return list_of_metric
 
     def _generate_sql_table_row_count(self, table: str) -> MetricValue:
-        if isinstance(self._datasource, SQLDatasource):
+        if isinstance(self._datasource, SQLDataSource):
             table_row_count = self._datasource.query_get_row_count(table=table)
             return MetricValue(
                 identity=MetricIdentity.generate_identity(
@@ -106,7 +106,7 @@ class DataSourceProfiling:
         This method generates a numeric field profile for a given field.
         """
         profiles = []
-        if isinstance(self._datasource, SQLDatasource):
+        if isinstance(self._datasource, SQLDataSource):
             profiler = NumericSQLFieldProfiler(
                 data_source=self._datasource,
                 table_name=table,
@@ -125,7 +125,7 @@ class DataSourceProfiling:
         """
         profiles = []
 
-        if isinstance(self._datasource, SQLDatasource):
+        if isinstance(self._datasource, SQLDataSource):
             profiler = TextSQLFieldProfiler(
                 data_source=self._datasource,
                 table_name=table,
@@ -140,7 +140,7 @@ class DataSourceProfiling:
         """
         This method generates field profiles for a given data source.
         """
-        if isinstance(self._datasource, SQLDatasource):
+        if isinstance(self._datasource, SQLDataSource):
             return self._generate_sql_data_source_profiles()
         else:
             raise NotImplementedError(

@@ -28,8 +28,8 @@ class DataSourceManager:
     """
 
     DATA_SOURCE_CLASS_NAME_MAPPER = {
-        "opensearch": "OpenSearchDatasource",
-        "postgres": "PostgresDatasource",
+        "opensearch": "OpenSearchDataSource",
+        "postgres": "PostgresDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):
