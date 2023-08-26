@@ -120,8 +120,8 @@ from datachecks.core import load_configuration, Inspect
 
 if __name__ == "__main__":
     inspect = Inspect(load_configuration("dcs_config.yaml"))
-    generated_metrics = inspect.run()
-    print(generated_metrics)
+    inspect_output = inspect.run()
+    print(inspect_output.metrics)
     # User the metrics to send or store somewhere
     # It can be sent to elk or any time series database
 ```

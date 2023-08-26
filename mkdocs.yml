@@ -57,6 +57,9 @@ nav:
   - Introduction:
     - Welcome to Datachecks: index.md
     - Getting Started: getting_started.md
+  - Configuration:
+      - Metric Configuration: configuration/metric_configuration.md
+      - DataSource Configuration: configuration/datasource_configuration.md
   - Integrations:
     - Transactional Databases:
       - Postgres: integrations/postgres.md
@@ -67,7 +70,11 @@ nav:
       - Numeric Distribution Metrics: metrics/numeric_distribution.md
       - Uniqueness Metrics: metrics/uniqueness.md
       - Completeness Metrics: metrics/completeness.md
-      - Combined Metrics: metrics/combined.md
+      - Special Metrics:
+        - Combined Metrics: metrics/combined.md
+  - Support:
+    - Contact: support/contact.md
+    - Telemetry: support/usage_analytics.md
 
 extra:
   generator: true
