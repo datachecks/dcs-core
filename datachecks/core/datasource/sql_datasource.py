@@ -20,7 +20,7 @@ from sqlalchemy import Connection, Row, inspect, text
 from datachecks.core.datasource.base import DataSource
 
 
-class SQLDatasource(DataSource):
+class SQLDataSource(DataSource):
     """
     Abstract class for SQL data sources
     """

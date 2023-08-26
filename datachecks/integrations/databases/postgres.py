@@ -17,10 +17,10 @@ from typing import Any, Dict
 from sqlalchemy import URL, create_engine
 
 from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 
 
-class PostgresDatasource(SQLDatasource):
+class PostgresDataSource(SQLDataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
 
@@ -37,7 +37,12 @@ class PostgresDatasource(SQLDatasource):
                 port=self.data_connection.get("port"),
                 database=self.data_connection.get("database"),
             )
-            engine = create_engine(url)
+            schema = self.data_connection.get("schema")
+            engine = create_engine(
+                url,
+                connect_args={"options": f"-csearch_path={schema}"},
+                isolation_level="AUTOCOMMIT",
+            )
             self.connection = engine.connect()
             return self.connection
         except Exception as e:

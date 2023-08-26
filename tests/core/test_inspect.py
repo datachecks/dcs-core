@@ -19,7 +19,7 @@ from datachecks.core.common.models.configuration import (
     Configuration,
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
-    DatasourceType,
+    DataSourceType,
     MetricConfiguration,
 )
 from datachecks.core.common.models.data_source_resource import Table
@@ -83,7 +83,7 @@ class TestInspect:
             data_sources={
                 self.DATA_SOURCE_NAME: DataSourceConfiguration(
                     name=self.DATA_SOURCE_NAME,
-                    type=DatasourceType.POSTGRES,
+                    type=DataSourceType.POSTGRES,
                     connection_config=DataSourceConnectionConfiguration(
                         host="localhost",
                         port=5432,

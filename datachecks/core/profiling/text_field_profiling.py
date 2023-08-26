@@ -17,14 +17,14 @@ from typing import Dict
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.common.models.profile import TextFieldProfile
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.base import MetricIdentity
 
 
 class TextSQLFieldProfiler:
     def __init__(
         self,
-        data_source: SQLDatasource,
+        data_source: SQLDataSource,
         table_name: str,
         field_name: str,
         data_type: str,

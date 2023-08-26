@@ -23,7 +23,7 @@ from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType, MetricValue
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 
 
 class MetricIdentity:
@@ -92,7 +92,7 @@ class Metric(ABC):
             if "where" in filters and filters["where"] is not None:
                 if isinstance(data_source, SearchIndexDataSource):
                     self.filter_query = json.loads(filters["where"])
-                elif isinstance(data_source, SQLDatasource):
+                elif isinstance(data_source, SQLDataSource):
                     self.filter_query = filters["where"]
 
     def get_metric_identity(self):

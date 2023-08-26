@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from datachecks.core.common.models.configuration import DatasourceType
+from datachecks.core.common.models.configuration import DataSourceType
 from datachecks.core.configuration.configuration_parser import (
     load_configuration_from_yaml_str,
 )
@@ -31,7 +31,7 @@ def test_should_read_datasource_config_for_opensearch():
         resource: test.index1
     """
     configuration = load_configuration_from_yaml_str(yaml_string)
-    assert configuration.data_sources["test"].type == DatasourceType.OPENSEARCH
+    assert configuration.data_sources["test"].type == DataSourceType.OPENSEARCH
 
 
 def test_should_read_datasource_config_for_postgres():
@@ -48,4 +48,4 @@ def test_should_read_datasource_config_for_postgres():
         resource: test.table1
     """
     configuration = load_configuration_from_yaml_str(yaml_string)
-    assert configuration.data_sources["test"].type == DatasourceType.POSTGRES
+    assert configuration.data_sources["test"].type == DataSourceType.POSTGRES

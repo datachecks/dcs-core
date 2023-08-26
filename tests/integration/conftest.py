@@ -23,7 +23,7 @@ from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
 from datachecks.integrations.databases.opensearch import OpenSearchDataSource
-from datachecks.integrations.databases.postgres import PostgresDatasource
+from datachecks.integrations.databases.postgres import PostgresDataSource
 from tests.utils import is_opensearch_responsive, is_pgsql_responsive
 
 OS_USER_NAME = "admin"
@@ -109,8 +109,8 @@ def opensearch_datasource(
 @pytest.fixture(scope="class")
 def postgres_datasource(
     pgsql_connection_configuration: DataSourceConnectionConfiguration,
-) -> PostgresDatasource:
-    source = PostgresDatasource(
+) -> PostgresDataSource:
+    source = PostgresDataSource(
         data_source_name="postgresql",
         data_connection=asdict(pgsql_connection_configuration),
     )

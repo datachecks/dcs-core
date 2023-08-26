@@ -19,7 +19,7 @@ import pytest
 from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.reliability_metric import (
     DocumentCountMetric,
     FreshnessValueMetric,
@@ -62,7 +62,7 @@ class TestDocumentCountMetric:
 
 class TestRowCountMetric:
     def test_should_get_row_count_metric_from_sql_datasource_with_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_row_count.return_value = 10
 
@@ -79,7 +79,7 @@ class TestRowCountMetric:
         assert metric_value.timestamp is not None
 
     def test_should_get_row_count_metric_from_sql_datasource_without_filter(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_row_count.return_value = 10
 
@@ -110,7 +110,7 @@ class TestRowCountMetric:
 
 class TestFreshnessValueMetric:
     def test_should_get_freshness_value_from_sql_datasource(self):
-        mock_data_source = Mock(spec=SQLDatasource)
+        mock_data_source = Mock(spec=SQLDataSource)
         mock_data_source.data_source_name = "test_data_source"
         mock_data_source.query_get_time_diff.return_value = 3600
 

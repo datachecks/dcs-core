@@ -19,7 +19,7 @@ from datachecks.core.common.models.configuration import (
     Configuration,
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
-    DatasourceType,
+    DataSourceType,
     MetricConfiguration,
     MetricsFilterConfiguration,
 )
@@ -36,7 +36,7 @@ def parse_data_source_yaml_configurations(
         name_ = data_source_yaml_configuration["name"]
         data_source_configuration = DataSourceConfiguration(
             name=name_,
-            type=DatasourceType(data_source_yaml_configuration["type"].lower()),
+            type=DataSourceType(data_source_yaml_configuration["type"].lower()),
             connection_config=DataSourceConnectionConfiguration(
                 host=data_source_yaml_configuration["connection"]["host"],
                 port=data_source_yaml_configuration["connection"]["port"],
@@ -79,9 +79,9 @@ def _parse_resource_field(resource_str: str, belongs_to: str) -> Field:
 
 
 def _metric_resource_parser(
-    resource_str: str, data_source_type: DatasourceType, metric_type: MetricsType
+    resource_str: str, data_source_type: DataSourceType, metric_type: MetricsType
 ) -> Union[Table, Index, Field]:
-    if data_source_type in [DatasourceType.OPENSEARCH, DatasourceType.ELASTICSEARCH]:
+    if data_source_type in [DataSourceType.OPENSEARCH, DataSourceType.ELASTICSEARCH]:
         if metric_type in [MetricsType.FRESHNESS, MetricsType.DOCUMENT_COUNT]:
             return _parse_resource_index(resource_str)
         else:

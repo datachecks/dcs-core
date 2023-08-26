@@ -20,7 +20,7 @@ from sqlalchemy import Connection, text
 from datachecks.core.common.models.configuration import (
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
-    DatasourceType,
+    DataSourceType,
     MetricConfiguration,
 )
 from datachecks.core.common.models.data_source_resource import Table
@@ -148,7 +148,7 @@ class TestInspect:
         self.data_source_configuration = [
             DataSourceConfiguration(
                 name=self.data_source_name,
-                type=DatasourceType.POSTGRES,
+                type=DataSourceType.POSTGRES,
                 connection_config=DataSourceConnectionConfiguration(
                     host=pgsql_connection_configuration.host,
                     port=pgsql_connection_configuration.port,

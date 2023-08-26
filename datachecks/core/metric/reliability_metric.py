@@ -13,7 +13,7 @@
 #  limitations under the License.
 from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDatasource
+from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.base import FieldMetrics, Metric, MetricIdentity
 
 
@@ -58,7 +58,7 @@ class RowCountMetric(Metric):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_row_count(
                 table=self.table_name,
                 filters=self.filter_query if self.filter_query else None,
@@ -83,7 +83,7 @@ class FreshnessValueMetric(FieldMetrics):
         )
 
     def _generate_metric_value(self):
-        if isinstance(self.data_source, SQLDatasource):
+        if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_time_diff(
                 table=self.table_name, field=self.field_name
             )
