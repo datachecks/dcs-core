@@ -10,7 +10,6 @@ Datachecks collects anonymous usage data to help our team improve the tool and t
 We capture one event, when the inspect run is finished. No user data or potentially sensitive information is or ever will be collected. The captured data is limited to:
 
 - Operating System and Python version
-- Types of databases used (postgresql, mysql, etc.)
 - Number of metrics generated
 - Error message, if any, truncated to the first 20 characters.
 
