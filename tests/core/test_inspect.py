@@ -107,3 +107,19 @@ class TestInspect:
         inspect = Inspect(configuration=configuration)
         result = inspect.run()
         assert list(result.metrics.keys()) == [self.DATA_SOURCE_NAME]
+
+    def test_inspect_should_throw_exception_on_configuration(self, mocker):
+        try:
+            metrics = (
+                {
+                    "metric1": MetricConfiguration(
+                        name="metric1",
+                        metric_type=MetricsType.ROW_COUNT,
+                    )
+                },
+            )
+        except Exception as e:
+            assert (
+                str(e)
+                == "Either expression or resource should be provided for a metric"
+            )

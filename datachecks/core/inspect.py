@@ -23,6 +23,7 @@ from loguru import logger
 
 from datachecks.core.common.models.configuration import Configuration
 from datachecks.core.common.models.metric import (
+    CombinedMetrics,
     DataSourceMetrics,
     IndexMetrics,
     MetricValue,
@@ -48,19 +49,24 @@ requests.packages.urllib3.disable_warnings(
 
 @dataclass
 class InspectOutput:
-    metrics: Dict[str, DataSourceMetrics]
+    metrics: Dict[str, Union[DataSourceMetrics, CombinedMetrics]]
 
     def get_inspect_info(self):
-        metrics_count, datasource_count = 0, 0
+        metrics_count, datasource_count, combined_metrics_count = 0, 0, 0
         table_count, index_count = 0, 0
         for ds_met in self.metrics.values():
-            datasource_count = datasource_count + 1
-            for table_met in ds_met.table_metrics.values():
-                table_count = table_count + 1
-                metrics_count = metrics_count + len(list(table_met.metrics.values()))
-            for index_met in ds_met.index_metrics.values():
-                index_count = index_count + 1
+            if isinstance(ds_met, DataSourceMetrics):
+                datasource_count = datasource_count + 1
+                for table_met in ds_met.table_metrics.values():
+                    table_count = table_count + 1
+                    metrics_count = metrics_count + len(
+                        list(table_met.metrics.values())
+                    )
+                for index_met in ds_met.index_metrics.values():
+                    index_count = index_count + 1
                 metrics_count = metrics_count + len(list(index_met.metrics.values()))
+            else:
+                metrics_count += 1
         return {
             "metrics_count": metrics_count,
             "datasource_count": datasource_count,
@@ -159,7 +165,8 @@ class Inspect:
     @staticmethod
     def _prepare_results(
         results: List[MetricValue],
-        base_datasource_metrics: Dict[str, DataSourceMetrics],
+        base_datasource_metrics: Dict[str, DataSourceMetrics] = None,
+        combined_metrics: Dict[str, CombinedMetrics] = None,
     ):
         """
         prepare_results is a function that prepares the
@@ -167,36 +174,48 @@ class Inspect:
         args:
             results: List[MetricValue]
             base_datasource_metrics: Dict[str, DataSourceMetrics]
+
         returns:
-            Dict[str, DataSourceMetrics]
+            Dict[str, Union[DataSourceMetrics,CombinedMetrics]]
         """
+        if base_datasource_metrics is not None:
+            for result in results:
+                data_source_name = result.data_source
+                data_source_metrics: DataSourceMetrics = base_datasource_metrics[
+                    data_source_name
+                ]
+                table_name = result.table_name
+                index_name = result.index_name
+                # If the index name is present, add the result to the index name
+                if index_name is not None:
+                    if index_name not in data_source_metrics.index_metrics:
+                        data_source_metrics.index_metrics[index_name] = IndexMetrics(
+                            index_name=index_name,
+                            data_source=data_source_name,
+                            metrics={},
+                        )
+                    data_source_metrics.index_metrics[index_name].metrics[
+                        result.identity
+                    ] = result
 
-        for result in results:
-            data_source_name = result.data_source
-            data_source_metrics: DataSourceMetrics = base_datasource_metrics[
-                data_source_name
-            ]
-            table_name = result.table_name
-            index_name = result.index_name
-            # If the index name is present, add the result to the index name
-            if index_name is not None:
-                if index_name not in data_source_metrics.index_metrics:
-                    data_source_metrics.index_metrics[index_name] = IndexMetrics(
-                        index_name=index_name, data_source=data_source_name, metrics={}
-                    )
-                data_source_metrics.index_metrics[index_name].metrics[
-                    result.identity
-                ] = result
+                # If the table name is present, add the result to the table name
+                if table_name is not None:
+                    if table_name not in data_source_metrics.table_metrics:
+                        data_source_metrics.table_metrics[table_name] = TableMetrics(
+                            table_name=table_name,
+                            data_source=data_source_name,
+                            metrics={},
+                        )
+                    data_source_metrics.table_metrics[table_name].metrics[
+                        result.identity
+                    ] = result
 
-            # If the table name is present, add the result to the table name
-            if table_name is not None:
-                if table_name not in data_source_metrics.table_metrics:
-                    data_source_metrics.table_metrics[table_name] = TableMetrics(
-                        table_name=table_name, data_source=data_source_name, metrics={}
-                    )
-                data_source_metrics.table_metrics[table_name].metrics[
-                    result.identity
-                ] = result
+        else:
+            for result in results:
+                expression = result.expression
+                combined_metrics[expression] = CombinedMetrics(
+                    expression=expression, metrics={result.identity: result}
+                )
 
     def run(self) -> InspectOutput:
         """
@@ -209,22 +228,37 @@ class Inspect:
             datasource_metrics: Dict[
                 str, DataSourceMetrics
             ] = self._base_data_source_metrics()
-
+            combined_metrics: Dict[str, CombinedMetrics] = {}
             # generate metric values for custom metrics
             metric_values: List[MetricValue] = []
+            combined_metric_values: List[MetricValue] = []
 
             for metric in self.metric_manager.metrics.values():
                 metric_value = metric.get_metric_value()
                 if metric_value is not None:
                     metric_values.append(metric_value)
-            self._prepare_results(metric_values, datasource_metrics)
+
+            for combined_metric in self.metric_manager.combined.values():
+                metric_value = combined_metric.get_metric_value(
+                    metric_values=metric_values
+                )
+                if metric_value is not None:
+                    combined_metric_values.append(metric_value)
+
+            self._prepare_results(
+                metric_values, base_datasource_metrics=datasource_metrics
+            )
+            self._prepare_results(
+                combined_metric_values, combined_metrics=combined_metrics
+            )
 
             # generate metric values for profile metrics
             if self._auto_profile:
                 self._generate_data_source_profile_metrics(datasource_metrics)
 
-            output = InspectOutput(metrics=datasource_metrics)
+            output = InspectOutput(metrics={**datasource_metrics, **combined_metrics})
             inspect_info = output.get_inspect_info()
+
             return output
         except Exception as ex:
             logger.error(f"Error while running inspection: {ex}")
