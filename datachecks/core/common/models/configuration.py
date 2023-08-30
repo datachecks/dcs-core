@@ -75,8 +75,15 @@ class MetricConfiguration:
 
     name: str
     metric_type: MetricsType
-    resource: Union[Table, Index, Field]
+    expression: Optional[str] = None
+    resource: Optional[Union[Table, Index, Field]] = None
     filters: Optional[MetricsFilterConfiguration] = None
+
+    def __post_init__(self):
+        if self.expression is None and self.resource is None:
+            raise ValueError(
+                "Either expression or resource should be provided for a metric"
+            )
 
 
 @dataclass

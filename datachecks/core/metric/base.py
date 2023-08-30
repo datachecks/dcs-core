@@ -15,7 +15,7 @@
 import datetime
 import json
 from abc import ABC
-from typing import Union
+from typing import Dict, Optional, Union
 
 from loguru import logger
 
@@ -31,7 +31,8 @@ class MetricIdentity:
     def generate_identity(
         metric_type: MetricsType,
         metric_name: str,
-        data_source: DataSource,
+        data_source: DataSource = None,
+        expression: str = None,
         index_name: str = None,
         table_name: str = None,
         field_name: str = None,
@@ -40,13 +41,14 @@ class MetricIdentity:
         Generate a unique identifier for a metric
         """
 
-        identifiers = [data_source.data_source_name]
+        identifiers = []
 
+        if data_source is not None:
+            identifiers.append(data_source.data_source_name)
         if index_name:
             identifiers.append(index_name)
         elif table_name:
             identifiers.append(table_name)
-
         if field_name:
             identifiers.append(field_name)
 
@@ -64,27 +66,36 @@ class Metric(ABC):
     def __init__(
         self,
         name: str,
-        data_source: DataSource,
         metric_type: MetricsType,
+        data_source: DataSource = None,
+        expression: str = None,
         **kwargs,
     ):
-        if "index_name" in kwargs and "table_name" in kwargs:
-            if kwargs["index_name"] is not None and kwargs["table_name"] is not None:
-                raise ValueError(
-                    "Please give a value for table_name or index_name (but not both)"
-                )
-        if "index_name" not in kwargs and "table_name" not in kwargs:
-            raise ValueError("Please give a value for table_name or index_name")
+        if metric_type == MetricsType.COMBINED:
+            if expression is None:
+                raise ValueError("Please give an expression for combined metric")
+        else:
+            if "index_name" in kwargs and "table_name" in kwargs:
+                if (
+                    kwargs["index_name"] is not None
+                    and kwargs["table_name"] is not None
+                ):
+                    raise ValueError(
+                        "Please give a value for table_name or index_name (but not both)"
+                    )
+            if "index_name" not in kwargs and "table_name" not in kwargs:
+                raise ValueError("Please give a value for table_name or index_name")
 
-        self.index_name, self.table_name = None, None
-        if "index_name" in kwargs:
-            self.index_name = kwargs["index_name"]
-        if "table_name" in kwargs:
-            self.table_name = kwargs["table_name"]
+            self.index_name, self.table_name = None, None
+            if "index_name" in kwargs:
+                self.index_name = kwargs["index_name"]
+            if "table_name" in kwargs:
+                self.table_name = kwargs["table_name"]
 
         self.name: str = name
-        self.data_source = data_source
         self.metric_type = metric_type
+        self.data_source = data_source
+        self.expression = expression
         self.filter_query = None
         if "filters" in kwargs and kwargs["filters"] is not None:
             filters = kwargs["filters"]
@@ -96,18 +107,19 @@ class Metric(ABC):
                     self.filter_query = filters["where"]
 
     def get_metric_identity(self):
-        return MetricIdentity.generate_identity(
+        MetricIdentity.generate_identity(
             metric_type=self.metric_type,
             metric_name=self.name,
             data_source=self.data_source,
+            expression=self.expression,
         )
 
-    def _generate_metric_value(self) -> float:
+    def _generate_metric_value(self, **kwargs) -> float:
         pass
 
-    def get_metric_value(self) -> Union[MetricValue, None]:
+    def get_metric_value(self, **kwargs) -> Union[MetricValue, None]:
         try:
-            metric_value = self._generate_metric_value()
+            metric_value = self._generate_metric_value(**kwargs)
             tags = {
                 "metric_name": self.name,
             }
@@ -147,13 +159,15 @@ class FieldMetrics(Metric, ABC):
     def __init__(
         self,
         name: str,
-        data_source: DataSource,
         metric_type: MetricsType,
+        data_source: Optional[DataSource] = None,
+        expression: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(
             name=name,
             data_source=data_source,
+            expression=expression,
             metric_type=metric_type,
             **kwargs,
         )

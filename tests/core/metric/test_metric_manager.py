@@ -208,3 +208,28 @@ class TestMetricManager:
             assert metric.metric_type == MetricsType.VARIANCE
             assert metric.table_name == "test_table"
             assert metric.field_name == "age"
+
+    def test_should_create_combined_metric(self):
+        datasource_manager = Mock(DataSourceManager)
+
+        metric_name, expression = (
+            "test_combined_metric",
+            "mul(test_max_metric, test_variance_metric)",
+        )
+
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.COMBINED,
+            expression=expression,
+        )
+        metric_manager = MetricManager(
+            metric_config={metric_name: metric_config},
+            data_source_manager=datasource_manager,
+        )
+
+        metric = list(metric_manager.combined.values())[0]
+
+        if isinstance(metric, FieldMetrics):
+            assert metric.name == metric_name
+            assert metric.metric_type == MetricsType.COMBINED
+            assert metric.expression == expression

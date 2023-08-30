@@ -14,6 +14,8 @@
 
 from typing import Dict, List, Union
 
+from pyparsing import Forward, Group, Suppress, Word, alphas, delimitedList, nums
+
 from datachecks.core.common.errors import DataChecksConfigurationError
 from datachecks.core.common.models.configuration import (
     Configuration,
@@ -100,29 +102,42 @@ def parse_metric_configurations(
     metric_configurations: Dict[str, MetricConfiguration] = {}
 
     for metric_yaml_configuration in metric_yaml_configurations:
-        resource_str = metric_yaml_configuration["resource"]
-        data_source_name = resource_str.split(".")[0]
-        data_source_configuration: DataSourceConfiguration = data_source_configurations[
-            data_source_name
-        ]
-
         metric_type = MetricsType(metric_yaml_configuration["metric_type"].lower())
 
-        metric_configuration = MetricConfiguration(
-            name=metric_yaml_configuration["name"],
-            metric_type=MetricsType(metric_yaml_configuration["metric_type"].lower()),
-            resource=_metric_resource_parser(
-                resource_str=resource_str,
-                data_source_type=data_source_configuration.type,
-                metric_type=metric_type,
-            ),
-            filters=metric_yaml_configuration.get("filters", None),
-        )
-        if "filters" in metric_yaml_configuration:
-            metric_configuration.filters = MetricsFilterConfiguration(
-                where=metric_yaml_configuration["filters"]["where"]
+        if metric_type == MetricsType.COMBINED:
+            expression_str = metric_yaml_configuration["expression"]
+            metric_configuration = MetricConfiguration(
+                name=metric_yaml_configuration["name"],
+                metric_type=MetricsType(
+                    metric_yaml_configuration["metric_type"].lower()
+                ),
+                expression=expression_str,
             )
-        metric_configurations[metric_configuration.name] = metric_configuration
+            metric_configurations[metric_configuration.name] = metric_configuration
+        else:
+            resource_str = metric_yaml_configuration["resource"]
+            data_source_name = resource_str.split(".")[0]
+            data_source_configuration: DataSourceConfiguration = (
+                data_source_configurations[data_source_name]
+            )
+
+            metric_configuration = MetricConfiguration(
+                name=metric_yaml_configuration["name"],
+                metric_type=MetricsType(
+                    metric_yaml_configuration["metric_type"].lower()
+                ),
+                resource=_metric_resource_parser(
+                    resource_str=resource_str,
+                    data_source_type=data_source_configuration.type,
+                    metric_type=metric_type,
+                ),
+                filters=metric_yaml_configuration.get("filter"),
+            )
+            if "filters" in metric_yaml_configuration:
+                metric_configuration.filter = MetricsFilterConfiguration(
+                    where=metric_yaml_configuration["filters"]["where"]
+                )
+            metric_configurations[metric_configuration.name] = metric_configuration
 
     return metric_configurations
 

@@ -33,6 +33,7 @@ psycopg2 = { version="^2.9.6", optional=true }
 python-dateutil = "^2.8.2"
 loguru = "^0.7.0"
 rich = "^13.5.2"
+pyparsing = "^3.1.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.3"

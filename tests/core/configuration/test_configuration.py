@@ -49,3 +49,43 @@ def test_should_read_datasource_config_for_postgres():
     """
     configuration = load_configuration_from_yaml_str(yaml_string)
     assert configuration.data_sources["test"].type == DataSourceType.POSTGRES
+
+
+def test_should_read_expression_config():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "postgres"
+        connection:
+          host: "localhost"
+          port: 5432
+    metrics:
+      - name: test_combined_metric
+        metric_type: combined
+        expression: mul(1, 2)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.metrics["test_combined_metric"].metric_type == "combined"
+    assert configuration.metrics["test_combined_metric"].expression == "mul(1, 2)"
+
+
+def test_should_throw_exception_on_invalid_datasource_type():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "invalid"
+        connection:
+          host: "localhost"
+          port: 5432
+    metrics:
+      - name: test_combined_metric
+        metric_type: combined
+        expression: mul(1, 2)
+    """
+    try:
+        configuration = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert (
+            str(e)
+            == "Failed to parse configuration: 'invalid' is not a valid DataSourceType"
+        )
