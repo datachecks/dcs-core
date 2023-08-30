@@ -73,6 +73,14 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
             },
         )
+        opensearch_client.index(
+            index=INDEX_NAME,
+            body={
+                "name": "clark kent",
+                "age": 35,
+                "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
+            },
+        )
         opensearch_client.indices.refresh(index=INDEX_NAME)
     except Exception as e:
         print(e)
@@ -103,6 +111,7 @@ class TestSQLDatasourceQueries:
         avg = opensearch_datasource.query_get_avg(
             INDEX_NAME, "age", {"match": {"name": "thor"}}
         )
+
         assert avg == 1500
 
     def test_should_return_min_with_filter(
@@ -127,7 +136,7 @@ class TestSQLDatasourceQueries:
         variance = opensearch_datasource.query_get_variance(
             INDEX_NAME, "age", {"match_all": {}}
         )
-        assert variance == 417550.0
+        assert variance == 350056.67
 
     def test_should_return_document_count_with_filter(
         self, opensearch_datasource: OpenSearchDataSource
@@ -135,7 +144,15 @@ class TestSQLDatasourceQueries:
         count = opensearch_datasource.query_get_document_count(
             INDEX_NAME, {"match_all": {}}
         )
-        assert count == 5
+        assert count == 6
+
+    def test_should_return_duplicate_count_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        count = opensearch_datasource.query_get_duplicate_count(
+            INDEX_NAME, "age", {"match_all": {}}
+        )
+        assert count == 1
 
     def test_should_calculate_time_diff_in_second(
         self, opensearch_datasource: OpenSearchDataSource
@@ -152,6 +169,15 @@ class TestSQLDatasourceQueries:
         assert index_field_metadata["age"] == int
         assert index_field_metadata["last_fight"] == datetime.datetime
 
+    def test_should_return_field_type(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        field_type = opensearch_datasource.query_get_field_type(
+            index_name=INDEX_NAME,
+            field="age",
+        )
+        assert field_type == int
+
     def test_index_metadata(self, opensearch_datasource: OpenSearchDataSource):
         indices = opensearch_datasource.query_get_index_metadata()
 
@@ -166,8 +192,8 @@ class TestSQLDatasourceQueries:
 
         assert profile["min"] == 35
         assert profile["max"] == 1500
-        assert profile["avg"] == 345
-        assert profile["sum"] == 1725
+        assert profile["avg"] == 293.3333333333333
+        assert profile["sum"] == 1760.0
         assert profile["distinct_count"] == 5
         assert profile["missing_count"] == 0
 
@@ -177,8 +203,8 @@ class TestSQLDatasourceQueries:
         profile = opensearch_datasource.profiling_search_aggregates_string(
             INDEX_NAME, "name"
         )
-        assert profile["distinct_count"] == 5
+        assert profile["distinct_count"] == 6
         assert profile["missing_count"] == 0
         assert profile["max_length"] == 15
         assert profile["min_length"] == 4
-        assert profile["avg_length"] == 9.2
+        assert profile["avg_length"] == 9.333333333333334

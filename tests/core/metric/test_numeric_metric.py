@@ -18,6 +18,7 @@ from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.numeric_metric import (
     AvgMetric,
+    DuplicateCountMetric,
     MaxMetric,
     MinMetric,
     VarianceMetric,
@@ -279,3 +280,67 @@ class TestVarianceColumnValueMetric:
         )
         row_value = row.get_metric_value()
         assert row_value.value == 4380976080
+
+
+class TestDuplicateCountColumnValueMetric:
+    def test_should_return_duplicate_count_value_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_duplicate_count.return_value = 0
+
+        row = DuplicateCountMetric(
+            name="duplicate_count_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.DUPLICATE_COUNT,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 0
+
+    def test_should_return_duplicate_count_value_postgres_with_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_duplicate_count.return_value = 0
+
+        row = DuplicateCountMetric(
+            name="duplicate_count_metric_test_1",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.DUPLICATE_COUNT,
+            field_name="age",
+            filters={"where_clause": "age >= 30 AND age <= 200"},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 0
+
+    def test_should_return_duplicate_count_value_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_duplicate_count.return_value = 0
+
+        row = DuplicateCountMetric(
+            name="duplicate_count_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.DUPLICATE_COUNT,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 0
+
+    def test_should_return_duplicate_count_value_opensearch_with_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_duplicate_count.return_value = 0
+
+        row = DuplicateCountMetric(
+            name="duplicate_count_metric_test_1",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.DUPLICATE_COUNT,
+            field_name="age",
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 0

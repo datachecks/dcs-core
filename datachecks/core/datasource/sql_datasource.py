@@ -196,3 +196,19 @@ class SQLDataSource(DataSource):
             "min_length": result[3],
             "avg_length": result[4],
         }
+
+    def query_get_duplicate_count(
+        self, table: str, field: str, filters: str = None
+    ) -> int:
+        filters = f"WHERE {filters}" if filters else ""
+        query = f"""
+            SELECT
+            count(*) as duplicate_count
+            FROM {table}
+            {filters}
+            GROUP BY {field}
+            HAVING COUNT(*) > 1
+            """
+
+        result = self.connection.execute(text(query)).fetchall()
+        return len(result) if result else 0

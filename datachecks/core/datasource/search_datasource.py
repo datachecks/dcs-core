@@ -71,6 +71,16 @@ class SearchIndexDataSource(DataSource):
 
         return results_
 
+    def query_get_field_type(self, index_name: str, field: str) -> str:
+        """
+        Get the field type
+        :param index_name: name of the index
+        :param field: field name
+        :return: field type
+        """
+        types = self.query_get_field_metadata(index_name=index_name)
+        return types[field]
+
     def query_get_document_count(self, index_name: str, filters: Dict = None) -> int:
         """
         Get the document count
@@ -224,3 +234,30 @@ class SearchIndexDataSource(DataSource):
             "min_length": response["min_length"]["value"],
             "avg_length": response["avg_length"]["value"],
         }
+
+    def query_get_duplicate_count(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> int:
+        """
+        Get the duplicate count
+        :param index_name: name of the index
+        :param field: field name
+        :return: duplicate count
+        """
+        field_type = self.query_get_field_type(index_name=index_name, field=field)
+        query = {
+            "aggs": {
+                "duplicate_count": {
+                    "terms": {
+                        "field": field if field_type != "str" else f"{field}.keyword",
+                        "size": 10000,
+                        "min_doc_count": 2,
+                    },
+                }
+            }
+        }
+        if filters:
+            query["query"] = filters
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+
+        return len(response["duplicate_count"]["buckets"])
