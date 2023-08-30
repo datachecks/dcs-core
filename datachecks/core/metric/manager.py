@@ -25,6 +25,7 @@ from datachecks.core.metric.base import Metric
 from datachecks.core.metric.combined_metric import CombinedMetric
 from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in globals
     AvgMetric,
+    DistinctCountMetric,
     DuplicateCountMetric,
     MaxMetric,
     MinMetric,
@@ -50,6 +51,7 @@ class MetricManager:
         MetricsType.COMBINED.value: "CombinedMetric",
         MetricsType.DUPLICATE_COUNT.value: "DuplicateCountMetric",
         MetricsType.NULL_COUNT.value: "NullCountMetric",
+        MetricsType.DISTINCT_COUNT.value: "DistinctCountMetric",
     }
 
     def __init__(

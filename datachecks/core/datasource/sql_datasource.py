@@ -142,6 +142,22 @@ class SQLDataSource(DataSource):
             query += " AND {}".format(filters)
         return self.connection.execute(text(query)).fetchone()[0]
 
+    def query_get_distinct_count(
+        self, table: str, field: str, filters: str = None
+    ) -> int:
+        """
+        Get the distinct count value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, table)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return self.connection.execute(text(query)).fetchone()[0]
+
     def query_get_time_diff(self, table: str, field: str) -> int:
         """
         Get the time difference

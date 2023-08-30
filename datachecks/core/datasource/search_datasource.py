@@ -154,6 +154,23 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)["aggregations"]
         return round(response["stats"]["variance_sampling"], 2)
 
+    def query_get_distinct_count(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> int:
+        """
+        Get the distinct count value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"distinct_count": {"cardinality": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+        return response["distinct_count"]["value"]
+
     def query_get_time_diff(self, index_name: str, field: str) -> int:
         """
         Get the time difference

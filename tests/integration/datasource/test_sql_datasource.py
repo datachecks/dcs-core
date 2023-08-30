@@ -228,6 +228,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1
 
+    def test_should_return_distinct_count_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_distinct_count(
+            table=self.TABLE_NAME,
+            field="age",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == 2
+
     def test_should_return_time_diff_in_second(
         self, postgres_datasource: PostgresDataSource
     ):
