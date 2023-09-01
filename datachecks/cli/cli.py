@@ -88,34 +88,34 @@ def _build_metric_cli_table(inspect_output: InspectOutput):
     table = Table(
         title="List of Generated Metrics", show_header=True, header_style="bold blue"
     )
-    table.add_column("Data Source", justify="right", style="cyan", no_wrap=True)
+    table.add_column("Metric Name", style="cyan", no_wrap=True)
+    table.add_column("Data Source", style="magenta")
     table.add_column("Metric Type", style="magenta")
-    table.add_column("Metric Identifier", style="magenta")
     table.add_column("Value", justify="right", style="green")
     for data_source_name, ds_metrics in inspect_output.metrics.items():
         if isinstance(ds_metrics, DataSourceMetrics):
             for tabel_name, table_metrics in ds_metrics.table_metrics.items():
                 for metric_identifier, metric in table_metrics.metrics.items():
                     table.add_row(
+                        f"{metric.tags.get('metric_name')}",
                         f"{data_source_name}",
                         f"{metric.metric_type}",
-                        f"{metric_identifier}",
                         f"{metric.value}",
                     )
             for index_name, index_metrics in ds_metrics.index_metrics.items():
                 for metric_identifier, metric in index_metrics.metrics.items():
                     table.add_row(
+                        f"{metric.tags.get('metric_name')}",
                         f"{data_source_name}",
                         f"{metric.metric_type}",
-                        f"{metric_identifier}",
                         f"{metric.value}",
                     )
         else:
             for metric_identifier, metric in ds_metrics.metrics.items():
                 table.add_row(
+                    f"{metric.tags.get('metric_name')}",
                     f"",
                     f"{metric.metric_type}",
-                    f"{metric_identifier}",
                     f"{metric.value}",
                 )
 
