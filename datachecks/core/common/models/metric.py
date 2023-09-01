@@ -32,6 +32,7 @@ class MetricsType(str, Enum):
     VARIANCE = "variance"
     DISTINCT_COUNT = "distinct_count"
     MISSING_COUNT = "missing_count"
+    DUPLICATE_COUNT = "duplicate_count"
     SKEWNESS = "skewness"
     KURTOSIS = "kurtosis"
     FRESHNESS = "freshness"

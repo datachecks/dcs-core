@@ -14,6 +14,7 @@
 import datetime
 
 import pytest
+from _decimal import Decimal
 from loguru import logger
 from sqlalchemy import text
 
@@ -131,7 +132,8 @@ class TestSQLDatasourceQueries:
                 ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}', 90),
                 ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}', 50),
                 ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}', 40),
-                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35)
+                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35),
+                ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35)
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -156,14 +158,14 @@ class TestSQLDatasourceQueries:
         )
         assert profile["min"] == 35
         assert profile["max"] == 1500
-        assert profile["avg"] == 343
-        assert profile["sum"] == 1715
+        assert profile["sum"] == 1750
+        assert round(profile["avg"], 2) == Decimal("291.67")
 
     def test_should_return_text_profile(self, postgres_datasource: PostgresDataSource):
         profile = postgres_datasource.profiling_sql_aggregates_string(
             self.TABLE_NAME, "name"
         )
-        assert profile["distinct_count"] == 5
+        assert profile["distinct_count"] == 6
         assert profile["missing_count"] == 0
         assert profile["max_length"] == 15
 
@@ -207,6 +209,15 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1073112.5
 
+    def test_should_return_duplicate_count_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_duplicate_count(
+            table=self.TABLE_NAME,
+            field="age",
+        )
+        assert result == 1
+
     def test_should_return_time_diff_in_second(
         self, postgres_datasource: PostgresDataSource
     ):
@@ -217,4 +228,4 @@ class TestSQLDatasourceQueries:
 
     def test_should_return_row_count(self, postgres_datasource: PostgresDataSource):
         row_count = postgres_datasource.query_get_row_count(self.TABLE_NAME)
-        assert row_count == 5
+        assert row_count == 6
