@@ -39,6 +39,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "thor",
                 "age": 1500,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=10),
+                "weight": None,
             },
         )
         opensearch_client.index(
@@ -47,6 +48,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "captain america",
                 "age": 100,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=3),
+                "weight": 80,
             },
         )
         opensearch_client.index(
@@ -55,6 +57,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "iron man",
                 "age": 50,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=4),
+                "weight": 70,
             },
         )
         opensearch_client.index(
@@ -63,6 +66,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "hawk eye",
                 "age": 40,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=5),
+                "weight": 60,
             },
         )
         opensearch_client.index(
@@ -71,6 +75,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "black widow",
                 "age": 35,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
+                "weight": 50,
             },
         )
         opensearch_client.index(
@@ -79,6 +84,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "name": "clark kent",
                 "age": 35,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
+                "weight": 50,
             },
         )
         opensearch_client.indices.refresh(index=INDEX_NAME)
@@ -153,6 +159,15 @@ class TestSQLDatasourceQueries:
             INDEX_NAME, "age", {"match_all": {}}
         )
         assert count == 1
+
+    def test_should_return_null_count_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        result = opensearch_datasource.query_get_null_count(
+            index_name=INDEX_NAME,
+            field="weight",
+        )
+        assert result == 1
 
     def test_should_calculate_time_diff_in_second(
         self, opensearch_datasource: OpenSearchDataSource

@@ -175,6 +175,17 @@ class SearchIndexDataSource(DataSource):
 
         return 0
 
+    def query_get_null_count(self, index_name: str, field: str) -> int:
+        """
+        Get the null count
+        :param index_name: name of the index
+        :param field: field name
+        :return: null count
+        """
+        query = {"query": {"bool": {"must_not": {"exists": {"field": field}}}}}
+        response = self.client.search(index=index_name, body=query)
+        return response["hits"]["total"]["value"]
+
     def profiling_search_aggregates_numeric(self, index_name: str, field: str) -> Dict:
         """
         Get the aggregates for a numeric field
