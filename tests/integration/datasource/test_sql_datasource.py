@@ -119,7 +119,7 @@ class TestSQLDatasourceQueries:
                 text(
                     f"""
                         CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} (
-                            name VARCHAR(50), last_fight timestamp, age INTEGER
+                            name VARCHAR(50), last_fight timestamp, age INTEGER, weight FLOAT
                         )
                     """
                 )
@@ -128,12 +128,12 @@ class TestSQLDatasourceQueries:
             utc_now = datetime.datetime.utcnow()
             insert_query = f"""
                 INSERT INTO {self.TABLE_NAME} VALUES
-                ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}', 1500),
-                ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}', 90),
-                ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}', 50),
-                ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}', 40),
-                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35),
-                ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35)
+                ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}', 1500, NULL),
+                ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}', 90, 80),
+                ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}', 50, 70),
+                ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}', 40, 60),
+                ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35, 50),
+                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35, 50)
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -215,6 +215,16 @@ class TestSQLDatasourceQueries:
         result = postgres_datasource.query_get_duplicate_count(
             table=self.TABLE_NAME,
             field="age",
+        )
+        assert result == 1
+
+    def test_should_return_null_count_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_null_count(
+            table=self.TABLE_NAME,
+            field="weight",
+            filters="name in ('thor', 'black widow')",
         )
         assert result == 1
 

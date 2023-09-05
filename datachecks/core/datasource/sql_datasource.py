@@ -130,6 +130,18 @@ class SQLDataSource(DataSource):
 
         return self.connection.execute(text(query)).fetchone()[0]
 
+    def query_get_null_count(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the null count
+        :param table: table name
+        :param field: column name
+        :return:
+        """
+        query = "SELECT COUNT(*) FROM {} WHERE {} IS NULL".format(table, field)
+        if filters:
+            query += " AND {}".format(filters)
+        return self.connection.execute(text(query)).fetchone()[0]
+
     def query_get_time_diff(self, table: str, field: str) -> int:
         """
         Get the time difference

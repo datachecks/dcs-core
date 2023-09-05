@@ -245,6 +245,42 @@ class TestMetricManager:
             assert metric.table_name == "test_table"
             assert metric.field_name == "age"
 
+    def test_should_create_null_count_metric(self):
+        mock_datasource = Mock(DataSource)
+        mock_datasource.data_source_name.return_value = POSTGRES_DATA_SOURCE_NAME
+
+        datasource_manager = Mock(DataSourceManager)
+        datasource_manager.get_data_source.return_value = mock_datasource
+
+        metric_name, table_name, field_name = (
+            "test_null_count_metric",
+            "test_table",
+            "age",
+        )
+
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.NULL_COUNT,
+            resource=Field(
+                name=field_name,
+                belongs_to=Table(
+                    name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME
+                ),
+            ),
+        )
+        metric_manager = MetricManager(
+            metric_config={metric_name: metric_config},
+            data_source_manager=datasource_manager,
+        )
+
+        metric = list(metric_manager.metrics.values())[0]
+
+        if isinstance(metric, FieldMetrics):
+            assert metric.name == metric_name
+            assert metric.metric_type == MetricsType.NULL_COUNT
+            assert metric.table_name == "test_table"
+            assert metric.field_name == "age"
+
     def test_should_create_combined_metric(self):
         datasource_manager = Mock(DataSourceManager)
 
