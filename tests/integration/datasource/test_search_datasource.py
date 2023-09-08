@@ -174,8 +174,19 @@ class TestSQLDatasourceQueries:
         result = opensearch_datasource.query_get_null_count(
             index_name=INDEX_NAME,
             field="weight",
+            filters={"match_all": {}},
         )
         assert result == 1
+
+    def test_should_return_null_percentage_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        result = opensearch_datasource.query_get_null_percentage(
+            index_name=INDEX_NAME,
+            field="weight",
+            filters={"match_all": {}},
+        )
+        assert round(result, 2) == 20.0
 
     def test_should_calculate_time_diff_in_second(
         self, opensearch_datasource: OpenSearchDataSource

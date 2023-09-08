@@ -30,6 +30,7 @@ from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in
     MaxMetric,
     MinMetric,
     NullCountMetric,
+    NullPercentageMetric,
     VarianceMetric,
 )
 from datachecks.core.metric.reliability_metric import (  # noqa F401 this is used in globals
@@ -52,6 +53,7 @@ class MetricManager:
         MetricsType.DUPLICATE_COUNT.value: "DuplicateCountMetric",
         MetricsType.NULL_COUNT.value: "NullCountMetric",
         MetricsType.DISTINCT_COUNT.value: "DistinctCountMetric",
+        MetricsType.NULL_PERCENTAGE.value: "NullPercentageMetric",
     }
 
     def __init__(

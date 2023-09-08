@@ -135,6 +135,7 @@ class SQLDataSource(DataSource):
         Get the null count
         :param table: table name
         :param field: column name
+        :param filters: filter condition
         :return:
         """
         query = "SELECT COUNT(*) FROM {} WHERE {} IS NULL".format(table, field)
@@ -157,6 +158,28 @@ class SQLDataSource(DataSource):
             query += " WHERE {}".format(filters)
 
         return self.connection.execute(text(query)).fetchone()[0]
+
+    def query_get_null_percentage(
+        self, table: str, field: str, filters: str = None
+    ) -> int:
+        """
+        Get the null percentage
+         :param table: table name
+         :param field: column name
+         :param filters: filter condition
+         :return:
+        """
+        query = "SELECT SUM(CASE WHEN {} IS NULL THEN 1 ELSE 0 END) AS null_count, COUNT(*) AS total_count FROM {}".format(
+            field, table
+        )
+
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        result = self.connection.execute(text(query)).fetchone()
+        if result:
+            return round((result[0] / result[1]) * 100, 2)
+        return 0
 
     def query_get_time_diff(self, table: str, field: str) -> int:
         """
