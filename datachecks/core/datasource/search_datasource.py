@@ -192,16 +192,48 @@ class SearchIndexDataSource(DataSource):
 
         return 0
 
-    def query_get_null_count(self, index_name: str, field: str) -> int:
+    def query_get_null_count(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> int:
         """
         Get the null count
         :param index_name: name of the index
         :param field: field name
+        :param filters: optional filter
         :return: null count
         """
         query = {"query": {"bool": {"must_not": {"exists": {"field": field}}}}}
+        if filters:
+            query["query"]["bool"]["filter"] = filters
         response = self.client.search(index=index_name, body=query)
         return response["hits"]["total"]["value"]
+
+    def query_get_null_percentage(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> float:
+        """
+        Get the null percentage
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: null percentage
+        """
+        query = {
+            "size": 0,
+            "aggs": {
+                "null_count": {"missing": {"field": field}},
+                "total_count": {"value_count": {"field": field}},
+            },
+        }
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+        return round(
+            (response["null_count"]["doc_count"] / response["total_count"]["value"])
+            * 100,
+            2,
+        )
 
     def profiling_search_aggregates_numeric(self, index_name: str, field: str) -> Dict:
         """

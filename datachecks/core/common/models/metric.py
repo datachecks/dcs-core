@@ -34,6 +34,7 @@ class MetricsType(str, Enum):
     MISSING_COUNT = "missing_count"
     DUPLICATE_COUNT = "duplicate_count"
     NULL_COUNT = "null_count"
+    NULL_PERCENTAGE = "null_percentage"
     SKEWNESS = "skewness"
     KURTOSIS = "kurtosis"
     FRESHNESS = "freshness"

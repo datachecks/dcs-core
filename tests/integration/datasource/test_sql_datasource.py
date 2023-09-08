@@ -238,6 +238,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 2
 
+    def test_should_return_null_percentage_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_null_percentage(
+            table=self.TABLE_NAME,
+            field="weight",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert round(result, 2) == 50.0
+
     def test_should_return_time_diff_in_second(
         self, postgres_datasource: PostgresDataSource
     ):
