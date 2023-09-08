@@ -144,6 +144,14 @@ class TestSQLDatasourceQueries:
         )
         assert variance == 350056.67
 
+    def test_should_return_distinct_count_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        distinct_count = opensearch_datasource.query_get_distinct_count(
+            INDEX_NAME, "age", {"match_all": {}}
+        )
+        assert distinct_count == 5
+
     def test_should_return_document_count_with_filter(
         self, opensearch_datasource: OpenSearchDataSource
     ):

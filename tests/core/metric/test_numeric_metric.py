@@ -18,6 +18,7 @@ from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.numeric_metric import (
     AvgMetric,
+    DistinctCountMetric,
     DuplicateCountMetric,
     MaxMetric,
     MinMetric,
@@ -409,3 +410,67 @@ class TestNullCountColumnValueMetric:
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
+
+
+class TestDistinctCountColumnValueMetric:
+    def test_should_return_distinct_count_column_value_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_distinct_count.return_value = 100
+
+        row = DistinctCountMetric(
+            name="distinct_count_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.DISTINCT_COUNT,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 100
+
+    def test_should_return_distinct_count_column_value_postgres_with_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_distinct_count.return_value = 50
+
+        row = DistinctCountMetric(
+            name="distinct_count_metric_test_1",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.DISTINCT_COUNT,
+            field_name="age",
+            filters={"where_clause": "age >= 30 AND age <= 200"},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 50
+
+    def test_should_return_distinct_count_column_value_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_distinct_count.return_value = 75
+
+        row = DistinctCountMetric(
+            name="distinct_count_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.DISTINCT_COUNT,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 75
+
+    def test_should_return_distinct_count_column_value_opensearch_with_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_distinct_count.return_value = 30
+
+        row = DistinctCountMetric(
+            name="distinct_count_metric_test_1",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.DISTINCT_COUNT,
+            field_name="age",
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 30
