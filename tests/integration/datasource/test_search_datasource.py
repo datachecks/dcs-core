@@ -31,7 +31,13 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
         opensearch_client.indices.delete(index=INDEX_NAME, ignore=[400, 404])
         opensearch_client.indices.create(
             index=INDEX_NAME,
-            body={"mappings": {"properties": {"last_fight": {"type": "date"}}}},
+            body={
+                "mappings": {
+                    "properties": {
+                        "last_fight": {"type": "date"},
+                    }
+                }
+            },
         )
         opensearch_client.index(
             index=INDEX_NAME,
@@ -40,6 +46,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 1500,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=10),
                 "weight": None,
+                "description": "thor hammer",
             },
         )
         opensearch_client.index(
@@ -49,6 +56,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 100,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=3),
                 "weight": 80,
+                "description": "shield",
             },
         )
         opensearch_client.index(
@@ -58,6 +66,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 50,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=4),
                 "weight": 70,
+                "description": "suit",
             },
         )
         opensearch_client.index(
@@ -67,6 +76,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 40,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=5),
                 "weight": 60,
+                "description": "bow",
             },
         )
         opensearch_client.index(
@@ -76,6 +86,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 35,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
                 "weight": 50,
+                "description": "",
             },
         )
         opensearch_client.index(
@@ -85,6 +96,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "age": 35,
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
                 "weight": 50,
+                "description": "",
             },
         )
         opensearch_client.indices.refresh(index=INDEX_NAME)
@@ -187,6 +199,16 @@ class TestSQLDatasourceQueries:
             filters={"match_all": {}},
         )
         assert round(result, 2) == 20.0
+
+    def test_should_return_empty_string_count_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        result = opensearch_datasource.query_get_empty_string_count(
+            index_name=INDEX_NAME,
+            field="description",
+            filters={"match": {"name": "black widow"}},
+        )
+        assert result == 1
 
     def test_should_calculate_time_diff_in_second(
         self, opensearch_datasource: OpenSearchDataSource

@@ -235,6 +235,23 @@ class SearchIndexDataSource(DataSource):
             2,
         )
 
+    def query_get_empty_string_count(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> int:
+        """
+        Get the count of empty strings
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: count of empty strings
+        """
+
+        query = {"query": {"bool": {"must": {"match": {f"{field}.keyword": ""}}}}}
+        if filters:
+            query["query"]["bool"]["filter"] = filters
+        response = self.client.search(index=index_name, body=query)
+        return response["hits"]["total"]["value"]
+
     def profiling_search_aggregates_numeric(self, index_name: str, field: str) -> Dict:
         """
         Get the aggregates for a numeric field
