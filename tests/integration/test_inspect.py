@@ -15,7 +15,8 @@ import datetime
 
 import pytest
 from opensearchpy import OpenSearch
-from sqlalchemy import Connection, text
+from sqlalchemy import text
+from sqlalchemy.engine import Connection
 
 from datachecks.core.common.models.configuration import (
     DataSourceConfiguration,

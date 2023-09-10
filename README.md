@@ -78,7 +78,7 @@ Datachecks supports sql and search data sources. Below are the list of supported
 | MS SQL Server                                                     | Transactional Database | :soon:     |
 | [OpenSearch](https://docs.datachecks.io/integrations/opensearch/) | Search Engine          | :thumbsup: |
 | Elasticsearch                                                     | Search Engine          | :soon:     |
-| GCP BigQuery                                                      | Data Warehouse         | :soon:     |
+| [GCP BigQuery](https://docs.datachecks.io/integrations/bigquery/) | Data Warehouse         | :thumbsup: |
 | AWS RedShift                                                      | Data Warehouse         | :soon:     |
 | DataBricks                                                        | Data Warehouse         | :soon:     |
 | Snowflake                                                         | Data Warehouse         | :soon:     |

@@ -15,38 +15,39 @@
 from typing import Any, Dict
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
 
 from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 
 
-class PostgresDataSource(SQLDataSource):
+class BigQueryDataSource(SQLDataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
+        self.project_id = self.data_connection.get("project")
+        self.dataset_id = self.data_connection.get("dataset")
 
     def connect(self) -> Any:
         """
         Connect to the data source
         """
         try:
-            url = URL.create(
-                drivername="postgresql",
-                username=self.data_connection.get("username"),
-                password=self.data_connection.get("password"),
-                host=self.data_connection.get("host"),
-                port=self.data_connection.get("port"),
-                database=self.data_connection.get("database"),
-            )
-            schema = self.data_connection.get("schema")
-            engine = create_engine(
-                url,
-                connect_args={"options": f"-csearch_path={schema}"},
-                isolation_level="AUTOCOMMIT",
-            )
+            credentials_base64 = self.data_connection.get("credentials_base64")
+
+            url = f"bigquery://{self.project_id}/{self.dataset_id}"
+            engine = create_engine(url, credentials_base64=credentials_base64)
             self.connection = engine.connect()
             return self.connection
         except Exception as e:
             raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to PostgresSQL data source: [{str(e)}]"
+                message=f"Failed to connect to BigQuery data source: [{str(e)}]"
             )
+
+    # `retail-search-e6ba`.eventsdataset.wordcount_output
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        return f"`{self.project_id}`.{self.dataset_id}.{table_name}"

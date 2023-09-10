@@ -13,10 +13,10 @@ By consistently tracking these metrics, you gain valuable insights into data dup
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: distinct_count_of_product_categories
-      metric_type: distinct_count
-      resource: product_db.products
-      field_name: product_category
+  - name: distinct_count_of_product_categories
+    metric_type: distinct_count
+    resource: product_db.products
+    field_name: product_category
 ```
 
 

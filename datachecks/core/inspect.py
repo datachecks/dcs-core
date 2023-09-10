@@ -64,7 +64,9 @@ class InspectOutput:
                     )
                 for index_met in ds_met.index_metrics.values():
                     index_count = index_count + 1
-                metrics_count = metrics_count + len(list(index_met.metrics.values()))
+                    metrics_count = metrics_count + len(
+                        list(index_met.metrics.values())
+                    )
             else:
                 metrics_count += 1
         return {

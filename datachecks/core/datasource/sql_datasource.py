@@ -15,7 +15,8 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from sqlalchemy import Connection, Row, inspect, text
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Connection
 
 from datachecks.core.datasource.base import DataSource
 
@@ -39,6 +40,14 @@ class SQLDataSource(DataSource):
 
     def close(self):
         self.connection.close()
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        return f"{table_name}"
 
     def query_get_column_metadata(self, table_name: str) -> Dict[str, str]:
         """
@@ -81,7 +90,9 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        query = "SELECT MAX({}) FROM {}".format(field, table)
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = "SELECT MAX({}) FROM {}".format(field, qualified_table_name)
 
         if filters:
             query += " WHERE {}".format(filters)
@@ -96,7 +107,8 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        query = "SELECT MIN({}) FROM {}".format(field, table)
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT MIN({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -110,7 +122,8 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        query = "SELECT ROUND(AVG({}), 2) FROM {}".format(field, table)
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT ROUND(AVG({}), 2) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -124,7 +137,10 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        query = "SELECT ROUND(VAR_SAMP({}),2) FROM {}".format(field, table)
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT ROUND(VAR_SAMP({}),2) FROM {}".format(
+            field, qualified_table_name
+        )
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -135,9 +151,13 @@ class SQLDataSource(DataSource):
         Get the null count
         :param table: table name
         :param field: column name
+        :param filters: filter condition
         :return:
         """
-        query = "SELECT COUNT(*) FROM {} WHERE {} IS NULL".format(table, field)
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT COUNT(*) FROM {} WHERE {} IS NULL".format(
+            qualified_table_name, field
+        )
         if filters:
             query += " AND {}".format(filters)
         return self.connection.execute(text(query)).fetchone()[0]
@@ -149,8 +169,9 @@ class SQLDataSource(DataSource):
         :param field: field name of updated time column
         :return: time difference in seconds
         """
+        qualified_table_name = self.qualified_table_name(table)
         query = f"""
-            SELECT {field} from {table} ORDER BY {field} DESC LIMIT 1;
+            SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
         """
         result = self.connection.execute(text(query)).fetchone()
         if result:
@@ -161,6 +182,7 @@ class SQLDataSource(DataSource):
         self, table_name: str, column_name: str
     ) -> Dict:
         column_name = f'"{column_name}"'
+        qualified_table_name = self.qualified_table_name(table_name)
         query = f"""
             SELECT
                 avg({column_name}) as avg,
@@ -171,7 +193,7 @@ class SQLDataSource(DataSource):
                 var_samp({column_name}) as variance,
                 count(distinct({column_name})) as distinct_count,
                 sum(case when {column_name} is null then 1 else 0 end) as missing_count
-            FROM {table_name}
+            FROM {qualified_table_name}
             """
 
         result = self.connection.execute(text(query)).fetchone()
@@ -190,6 +212,7 @@ class SQLDataSource(DataSource):
         self, table_name: str, column_name: str
     ) -> Dict:
         column_name = f'"{column_name}"'
+        qualified_table_name = self.qualified_table_name(table_name)
         query = f"""
             SELECT
                 count(distinct({column_name})) as distinct_count,
@@ -197,7 +220,7 @@ class SQLDataSource(DataSource):
                 max(length({column_name})) as max_length,
                 min(length({column_name})) as min_length,
                 avg(length({column_name})) as avg_length
-            FROM {table_name}
+            FROM {qualified_table_name}
             """
 
         result = self.connection.execute(text(query)).fetchone()
@@ -213,10 +236,11 @@ class SQLDataSource(DataSource):
         self, table: str, field: str, filters: str = None
     ) -> int:
         filters = f"WHERE {filters}" if filters else ""
+        qualified_table_name = self.qualified_table_name(table)
         query = f"""
             SELECT
             count(*) as duplicate_count
-            FROM {table}
+            FROM {qualified_table_name}
             {filters}
             GROUP BY {field}
             HAVING COUNT(*) > 1

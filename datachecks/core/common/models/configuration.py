@@ -39,12 +39,15 @@ class DataSourceConnectionConfiguration:
     Connection configuration for a data source
     """
 
-    host: str
-    port: int
-    database: Optional[str]
+    host: Optional[str] = None
+    port: Optional[int] = None
+    database: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
     schema: Optional[str] = "public"
+    project: Optional[str] = None  # BigQuery specific configuration
+    dataset: Optional[str] = None  # BigQuery specific configuration
+    credentials_base64: Optional[str] = None  # BigQuery specific configuration
 
 
 @dataclass

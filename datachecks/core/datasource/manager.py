@@ -30,6 +30,7 @@ class DataSourceManager:
     DATA_SOURCE_CLASS_NAME_MAPPER = {
         "opensearch": "OpenSearchDataSource",
         "postgres": "PostgresDataSource",
+        "bigquery": "BigQueryDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):
