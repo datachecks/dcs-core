@@ -40,12 +40,17 @@ def parse_data_source_yaml_configurations(
             name=name_,
             type=DataSourceType(data_source_yaml_configuration["type"].lower()),
             connection_config=DataSourceConnectionConfiguration(
-                host=data_source_yaml_configuration["connection"]["host"],
-                port=data_source_yaml_configuration["connection"]["port"],
+                host=data_source_yaml_configuration["connection"].get("host"),
+                port=data_source_yaml_configuration["connection"].get("port"),
                 username=data_source_yaml_configuration["connection"].get("username"),
                 password=data_source_yaml_configuration["connection"].get("password"),
                 database=data_source_yaml_configuration["connection"].get("database"),
                 schema=data_source_yaml_configuration["connection"].get("schema"),
+                project=data_source_yaml_configuration["connection"].get("project"),
+                dataset=data_source_yaml_configuration["connection"].get("dataset"),
+                credentials_base64=data_source_yaml_configuration["connection"].get(
+                    "credentials_base64"
+                ),
             ),
         )
         data_source_configurations[name_] = data_source_configuration

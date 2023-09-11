@@ -1,10 +1,6 @@
 # **Numeric Distribution Metrics**
 
-Numeric distribution metrics serve as vital tools for ensuring the ongoing integrity of your data. These metrics offer valuable insights into the distribution of values within your datasets, aiding in data quality assurance.
-
-By consistently monitoring these metrics, you gain a deeper understanding of how your data behaves. This knowledge empowers you to make informed decisions regarding data cleansing, anomaly detection, and overall data quality improvement.
-
-Furthermore, numeric distribution metrics are your early warning system. They help pinpoint outliers and anomalies, allowing you to address potential data issues before they escalate into significant problems in your data pipelines.
+Numeric Distribution metrics detect changes in the numeric distribution of values, including outliers, variance, skew and more
 
 
 ## **Average**
@@ -55,11 +51,11 @@ metrics:
 
 ```yaml title="dcs_config.yaml"
 - name: max_price_of_products_with_high_rating
-      metric_type: max
-      resource: product_db.products
-      field_name: price
-      filters:
-        where: "rating > 4"
+  metric_type: max
+  resource: product_db.products
+  field_name: price
+  filters:
+    where: "rating > 4"
 ```
 
 ## **Variance**
@@ -70,58 +66,20 @@ Variance in data quality measures the degree of variability or dispersion in a d
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: variance_of_price
-      metric_type: variance
-      resource: product_db.products
-      field_name: price
+- name: variance_of_price
+  metric_type: variance
+  resource: product_db.products
+  field_name: price
 ```
 
 ## **Skew**
-
-Skew metric in data quality measures the extent of asymmetry or distortion in the distribution of data values. It helps assess the balance and uniformity of data distribution.
-
-**Example**
-
-```yaml title="dcs_config.yaml"
-
-```
+**Coming Soon..**
 
 ## **Kurtosis**
-
-Kurtosis is a data quality metric that measures the level of peakedness or flatness of a dataset's probability distribution in a geometric space.
-
-**Example**
-
-```yaml title="dcs_config.yaml"
-
-```
-
-## **Sum**
-
-The sum metric in data quality measures the accuracy and consistency of numerical data by assessing the total of a specific attribute across different records.
-
-**Example**
-
-```yaml title="dcs_config.yaml"
-
-```
+**Coming Soon..**
 
 ## **Geometric Mean**
-
-The geometric mean metric in data quality is a statistical measure that calculates the nth root of the product of n data values, often used to assess the central tendency of a dataset
-
-**Example**
-
-```yaml title="dcs_config.yaml"
-
-```
+**Coming Soon..**
 
 ## **Harmonic Mean**
-
-The Harmonic mean metric in data quality is a statistical measure used to assess the quality of data by calculating the reciprocal of the average of the reciprocals of data values.
-
-**Example**
-
-```yaml title="dcs_config.yaml"
-
-```
+**Coming Soon..**

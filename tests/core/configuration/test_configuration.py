@@ -34,6 +34,24 @@ def test_should_read_datasource_config_for_opensearch():
     assert configuration.data_sources["test"].type == DataSourceType.OPENSEARCH
 
 
+def test_should_read_datasource_config_for_bigquery():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "bigquery"
+        connection:
+          project: "test-project"
+          dataset: "test_dataset"
+          credentials_base64: "asda...="
+    metrics:
+      - name: test_metric
+        metric_type: row_count
+        resource: test.table1
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.data_sources["test"].type == DataSourceType.BIGQUERY
+
+
 def test_should_read_datasource_config_for_postgres():
     yaml_string = """
     data_sources:

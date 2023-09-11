@@ -1,4 +1,8 @@
 # **PostgreSQL**
+## Install Dependencies
+```bash
+pip install datachecks[postgres]
+```
 
 ## Create a user
 

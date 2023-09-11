@@ -13,7 +13,8 @@
 #  limitations under the License.
 
 from opensearchpy import OpenSearch
-from sqlalchemy import Connection, create_engine
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Connection
 
 from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
@@ -79,7 +80,8 @@ def create_postgres_connection(
         f"{pgsql_connection_configuration.password}@"
         f"{pgsql_connection_configuration.host}:"
         f"{pgsql_connection_configuration.port}/"
-        f"{pgsql_connection_configuration.database}"
+        f"{pgsql_connection_configuration.database}",
+        future=True,
     )
     connection = engine.connect()
     return connection

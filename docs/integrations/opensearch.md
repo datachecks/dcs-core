@@ -1,5 +1,10 @@
 # **OpenSearch**
 
+## Install Dependencies
+```bash
+pip install datachecks[opensearch]
+```
+
 ## Define DataSource Connection in Configuration File
 
 OpenSearch data source can be defined as below in the config file.

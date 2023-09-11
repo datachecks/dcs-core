@@ -63,6 +63,8 @@ nav:
   - Integrations:
     - Transactional Databases:
       - Postgres: integrations/postgres.md
+    - Data Warehouses:
+      - BigQuery: integrations/bigquery.md
     - Search Engines:
       - OpenSearch: integrations/opensearch.md
   - Metrics:
