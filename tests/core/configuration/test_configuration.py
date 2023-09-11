@@ -52,6 +52,27 @@ def test_should_read_datasource_config_for_bigquery():
     assert configuration.data_sources["test"].type == DataSourceType.BIGQUERY
 
 
+def test_should_read_datasource_config_for_databricks():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "databricks"
+        connection:
+          host: "test-project"
+          port: 443
+          schema: "test_schema"
+          catalog: "test_catalog"
+          http_path: "sql/protocolv1/o/0/0101-0101010101010101/0101-0101010101010101"
+          token: "asda...="
+    metrics:
+      - name: test_metric
+        metric_type: row_count
+        resource: test.table1
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.data_sources["test"].type == DataSourceType.DATABRICKS
+
+
 def test_should_read_datasource_config_for_postgres():
     yaml_string = """
     data_sources:

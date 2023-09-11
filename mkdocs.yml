@@ -65,6 +65,7 @@ nav:
       - Postgres: integrations/postgres.md
     - Data Warehouses:
       - BigQuery: integrations/bigquery.md
+      - DataBricks: integrations/databricks.md
     - Search Engines:
       - OpenSearch: integrations/opensearch.md
   - Metrics:
