@@ -31,6 +31,7 @@ class DataSourceManager:
         "opensearch": "OpenSearchDataSource",
         "postgres": "PostgresDataSource",
         "bigquery": "BigQueryDataSource",
+        "databricks": "DatabricksDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):

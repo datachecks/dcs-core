@@ -80,7 +80,7 @@ Datachecks supports sql and search data sources. Below are the list of supported
 | Elasticsearch                                                     | Search Engine          | :soon:     |
 | [GCP BigQuery](https://docs.datachecks.io/integrations/bigquery/) | Data Warehouse         | :thumbsup: |
 | AWS RedShift                                                      | Data Warehouse         | :soon:     |
-| DataBricks                                                        | Data Warehouse         | :soon:     |
+| [DataBricks](https://docs.datachecks.io/integrations/databricks/) | Data Warehouse         | :thumbsup: |
 | Snowflake                                                         | Data Warehouse         | :soon:     |
 
 ## Metric Types

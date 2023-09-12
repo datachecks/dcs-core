@@ -44,10 +44,15 @@ class DataSourceConnectionConfiguration:
     database: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
-    schema: Optional[str] = "public"
+    schema: Optional[str] = None
+
     project: Optional[str] = None  # BigQuery specific configuration
     dataset: Optional[str] = None  # BigQuery specific configuration
     credentials_base64: Optional[str] = None  # BigQuery specific configuration
+
+    token: Optional[str] = None  # Databricks specific configuration
+    catalog: Optional[str] = None  # Databricks specific configuration
+    http_path: Optional[str] = None  # Databricks specific configuration
 
 
 @dataclass

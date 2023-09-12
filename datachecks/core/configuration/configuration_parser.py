@@ -51,6 +51,9 @@ def parse_data_source_yaml_configurations(
                 credentials_base64=data_source_yaml_configuration["connection"].get(
                     "credentials_base64"
                 ),
+                token=data_source_yaml_configuration["connection"].get("token"),
+                catalog=data_source_yaml_configuration["connection"].get("catalog"),
+                http_path=data_source_yaml_configuration["connection"].get("http_path"),
             ),
         )
         data_source_configurations[name_] = data_source_configuration
