@@ -68,6 +68,7 @@ nav:
       - DataBricks: integrations/databricks.md
     - Search Engines:
       - OpenSearch: integrations/opensearch.md
+      - ElasticSearch: integrations/elasticsearch.md
   - Metrics:
       - Reliability Metrics: metrics/reliability.md
       - Numeric Distribution Metrics: metrics/numeric_distribution.md

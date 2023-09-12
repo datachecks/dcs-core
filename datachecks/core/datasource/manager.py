@@ -29,6 +29,7 @@ class DataSourceManager:
 
     DATA_SOURCE_CLASS_NAME_MAPPER = {
         "opensearch": "OpenSearchDataSource",
+        "elasticsearch": "ElasticSearchDataSource",
         "postgres": "PostgresDataSource",
         "bigquery": "BigQueryDataSource",
         "databricks": "DatabricksDataSource",

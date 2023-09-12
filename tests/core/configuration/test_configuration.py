@@ -34,6 +34,23 @@ def test_should_read_datasource_config_for_opensearch():
     assert configuration.data_sources["test"].type == DataSourceType.OPENSEARCH
 
 
+def test_should_read_datasource_config_for_elasticsearch():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "elasticsearch"
+        connection:
+          host: "localhost"
+          port: 9200
+    metrics:
+      - name: test_metric
+        metric_type: document_count
+        resource: test.index1
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.data_sources["test"].type == DataSourceType.ELASTICSEARCH
+
+
 def test_should_read_datasource_config_for_bigquery():
     yaml_string = """
     data_sources:
