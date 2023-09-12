@@ -162,6 +162,25 @@ class SQLDataSource(DataSource):
             query += " AND {}".format(filters)
         return self.connection.execute(text(query)).fetchone()[0]
 
+    def query_get_empty_string_count(
+        self, table: str, field: str, filters: str = None
+    ) -> int:
+        """
+        Get the count of empty strings in a column of a table
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of empty strings
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT COUNT(*) FROM {} WHERE {} = ''".format(
+            qualified_table_name, field
+        )
+        if filters:
+            query += " AND {}".format(filters)
+        result = self.connection.execute(text(query)).fetchone()
+        return result[0] if result else 0
+
     def query_get_distinct_count(
         self, table: str, field: str, filters: str = None
     ) -> int:
