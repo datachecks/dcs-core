@@ -40,6 +40,17 @@ services:
     networks:
       - test-postgres
     restart: unless-stopped
+  test-dc-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: test-dc-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - test-elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9210:9200"
+      - "9310:9300"
 
 networks:
   test-opensearch-net:
@@ -47,6 +58,7 @@ networks:
     driver: bridge
 
 volumes:
+  test-elasticsearch-data:
   test-opensearch-data:
   test-postgres:
     driver: local

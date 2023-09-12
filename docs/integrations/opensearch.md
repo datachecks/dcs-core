@@ -20,6 +20,6 @@ data_sources:
     config:
       host: localhost
       port: 9200
-      user: admin
+      username: admin
       password: changeme
 ```
