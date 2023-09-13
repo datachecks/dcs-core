@@ -107,6 +107,26 @@ def test_should_read_datasource_config_for_postgres():
     assert configuration.data_sources["test"].type == DataSourceType.POSTGRES
 
 
+def test_should_read_datasource_config_for_mysql():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "mysql"
+        connection:
+          host: "localhost"
+          port: 3306
+          username: "dbuser"
+          password: "dbpass"
+          database: "dcs_db"
+    metrics:
+      - name: test_metric
+        metric_type: row_count
+        resource: test.table1
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.data_sources["test"].type == DataSourceType.MYSQL
+
+
 def test_should_read_expression_config():
     yaml_string = """
     data_sources:
