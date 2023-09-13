@@ -181,6 +181,29 @@ class SQLDataSource(DataSource):
         result = self.connection.execute(text(query)).fetchone()
         return result[0] if result else 0
 
+    def query_get_empty_string_percentage(
+        self, table: str, field: str, filters: str = None
+    ) -> float:
+        """
+        Get the empty string percentage in a column of a table
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: empty string percentage
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT SUM(CASE WHEN {} = '' THEN 1 ELSE 0 END) AS empty_string_count, COUNT(*) AS total_count FROM {}".format(
+            field, qualified_table_name
+        )
+
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        result = self.connection.execute(text(query)).fetchone()
+        if result and result[1] > 0:
+            return round((result[0] / result[1]) * 100, 2)
+        return 0.0
+
     def query_get_distinct_count(
         self, table: str, field: str, filters: str = None
     ) -> int:
