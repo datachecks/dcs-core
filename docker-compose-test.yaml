@@ -51,6 +51,19 @@ services:
     ports:
       - "9210:9200"
       - "9310:9300"
+  test-dc-mysql:
+    container_name: test-dc-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: dcs_db
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbpass
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - test-dc-mysql:/var/lib/mysql
+    ports:
+      - "3304:3306"
+    restart: unless-stopped
 
 networks:
   test-opensearch-net:
@@ -60,5 +73,6 @@ networks:
 volumes:
   test-elasticsearch-data:
   test-opensearch-data:
+  test-dc-mysql:
   test-postgres:
     driver: local

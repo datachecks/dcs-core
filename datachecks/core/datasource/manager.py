@@ -31,6 +31,7 @@ class DataSourceManager:
         "opensearch": "OpenSearchDataSource",
         "elasticsearch": "ElasticSearchDataSource",
         "postgres": "PostgresDataSource",
+        "mysql": "MysqlDataSource",
         "bigquery": "BigQueryDataSource",
         "databricks": "DatabricksDataSource",
     }

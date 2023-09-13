@@ -63,6 +63,7 @@ nav:
   - Integrations:
     - Transactional Databases:
       - Postgres: integrations/postgres.md
+      - MySQL: integrations/mysql.md
     - Data Warehouses:
       - BigQuery: integrations/bigquery.md
       - DataBricks: integrations/databricks.md
