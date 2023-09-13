@@ -28,6 +28,7 @@ from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in
     DistinctCountMetric,
     DuplicateCountMetric,
     EmptyStringCountMetric,
+    EmptyStringPercentageMetric,
     MaxMetric,
     MinMetric,
     NullCountMetric,
@@ -56,6 +57,7 @@ class MetricManager:
         MetricsType.DISTINCT_COUNT.value: "DistinctCountMetric",
         MetricsType.NULL_PERCENTAGE.value: "NullPercentageMetric",
         MetricsType.EMPTY_STRING_COUNT.value: "EmptyStringCountMetric",
+        MetricsType.EMPTY_STRING_PERCENTAGE.value: "EmptyStringPercentageMetric",
     }
 
     def __init__(

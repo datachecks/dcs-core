@@ -210,6 +210,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1
 
+    def test_should_return_empty_string_percentage_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        result = opensearch_datasource.query_get_empty_string_percentage(
+            index_name=INDEX_NAME,
+            field="description",
+            filters={"match": {"name": "black widow"}},
+        )
+        assert result == 100.0
+
     def test_should_calculate_time_diff_in_second(
         self, opensearch_datasource: OpenSearchDataSource
     ):

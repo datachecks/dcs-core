@@ -36,6 +36,7 @@ class MetricsType(str, Enum):
     NULL_COUNT = "null_count"
     NULL_PERCENTAGE = "null_percentage"
     EMPTY_STRING_COUNT = "empty_string_count"
+    EMPTY_STRING_PERCENTAGE = "empty_string_percentage"
     SKEWNESS = "skewness"
     KURTOSIS = "kurtosis"
     FRESHNESS = "freshness"

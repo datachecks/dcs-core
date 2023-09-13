@@ -238,6 +238,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1
 
+    def test_should_return_empty_string_percentage_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_empty_string_percentage(
+            table=self.TABLE_NAME,
+            field="description",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert round(result, 2) == 50.0
+
     def test_should_return_distinct_count_with_filter(
         self, postgres_datasource: PostgresDataSource
     ):

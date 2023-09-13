@@ -252,6 +252,37 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)
         return response["hits"]["total"]["value"]
 
+    def query_get_empty_string_percentage(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> float:
+        """
+        Get the empty string percentage
+        :param index_name: name of the index
+        :param field: field name
+        :param filters: optional filter
+        :return: empty string percentage
+        """
+        query = {
+            "size": 0,
+            "aggs": {
+                "empty_string_count": {
+                    "filter": {"match": {f"{field}.keyword": ""}},
+                },
+                "total_count": {"value_count": {"field": f"{field}.keyword"}},
+            },
+        }
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+        total_count = response["total_count"]["value"]
+        empty_string_count = response["empty_string_count"]["doc_count"]
+
+        if total_count == 0:
+            return 0.0
+
+        return round((empty_string_count / total_count) * 100, 2)
+
     def profiling_search_aggregates_numeric(self, index_name: str, field: str) -> Dict:
         """
         Get the aggregates for a numeric field
