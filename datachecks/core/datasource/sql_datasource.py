@@ -76,7 +76,8 @@ class SQLDataSource(DataSource):
         :param table: name of the table
         :param filters: optional filter
         """
-        query = f"SELECT COUNT(*) FROM {table} AS row_count"
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT COUNT(*) FROM {qualified_table_name} AS row_count"
         if filters:
             query += f" WHERE {filters}"
 
@@ -214,7 +215,8 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, table)
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -230,8 +232,9 @@ class SQLDataSource(DataSource):
          :param filters: filter condition
          :return:
         """
+        qualified_table_name = self.qualified_table_name(table)
         query = "SELECT SUM(CASE WHEN {} IS NULL THEN 1 ELSE 0 END) AS null_count, COUNT(*) AS total_count FROM {}".format(
-            field, table
+            field, qualified_table_name
         )
 
         if filters:
