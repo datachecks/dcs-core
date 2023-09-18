@@ -99,12 +99,11 @@ class Metric(ABC):
         self.filter_query = None
         if "filters" in kwargs and kwargs["filters"] is not None:
             filters = kwargs["filters"]
-
-            if "where" in filters and filters["where"] is not None:
+            if hasattr(filters, "where"):
                 if isinstance(data_source, SearchIndexDataSource):
-                    self.filter_query = json.loads(filters["where"])
+                    self.filter_query = json.loads(filters.where)
                 elif isinstance(data_source, SQLDataSource):
-                    self.filter_query = filters["where"]
+                    self.filter_query = filters.where
 
     def get_metric_identity(self):
         MetricIdentity.generate_identity(

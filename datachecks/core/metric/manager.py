@@ -90,7 +90,7 @@ class MetricManager:
             else:
                 data_source = metric_config.resource.data_source
             params = {
-                "filters": asdict(metric_config.filters)
+                "filters": metric_config.filters
                 if metric_config.filters is not None
                 else None,
             }
@@ -122,9 +122,7 @@ class MetricManager:
     def _build_combined_metrics(self, config: Dict[str, MetricConfiguration]):
         for metric_name, metric_config in config.items():
             params = {
-                "filters": asdict(metric_config.filters)
-                if metric_config.filters
-                else None,
+                "filters": metric_config.filters if metric_config.filters else None,
             }
             metric: Metric = CombinedMetric(
                 name=metric_config.name,

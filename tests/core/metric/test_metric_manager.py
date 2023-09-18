@@ -73,6 +73,7 @@ class TestMetricManager:
             metric_type=MetricsType.DOCUMENT_COUNT,
             resource=Index(name=index_name, data_source=POSTGRES_DATA_SOURCE_NAME),
         )
+
         metric_config.filters = MetricsFilterConfiguration(**filters)
         metric_manager = MetricManager(
             metric_config={metric_name: metric_config},
