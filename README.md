@@ -104,7 +104,7 @@ For additional information and help, you can use one of these channels:
 
 :raised_hands: We greatly appreciate contributions - be it’s a bug fix, new feature, or documentations!
 
-Check out the [contributions guide](https://github.com/waterdipai/datachecks/blob/main/CONTRIBUTING.md) and [open issues](https://github.com/waterdipai/datachceks/issues).
+Check out the [contributions guide](https://github.com/waterdipai/datachecks/blob/main/CONTRIBUTING.md) and [open issues](https://github.com/waterdipai/datachecks/issues).
 
 **Datachecks contributors: :blue_heart:**
 
