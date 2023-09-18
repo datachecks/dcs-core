@@ -92,7 +92,7 @@ def _metric_resource_parser(
     resource_str: str, data_source_type: DataSourceType, metric_type: MetricsType
 ) -> Union[Table, Index, Field]:
     if data_source_type in [DataSourceType.OPENSEARCH, DataSourceType.ELASTICSEARCH]:
-        if metric_type in [MetricsType.FRESHNESS, MetricsType.DOCUMENT_COUNT]:
+        if metric_type in [MetricsType.DOCUMENT_COUNT]:
             return _parse_resource_index(resource_str)
         else:
             return _parse_resource_field(resource_str, "index")
@@ -139,7 +139,7 @@ def parse_metric_configurations(
                     data_source_type=data_source_configuration.type,
                     metric_type=metric_type,
                 ),
-                filters=metric_yaml_configuration.get("filter"),
+                filters=metric_yaml_configuration.get("filters"),
             )
             if "filters" in metric_yaml_configuration:
                 metric_configuration.filter = MetricsFilterConfiguration(
