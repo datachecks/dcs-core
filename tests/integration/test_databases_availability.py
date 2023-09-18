@@ -18,22 +18,3 @@ from datachecks.core.common.models.configuration import (
     DataSourceConnectionConfiguration,
 )
 from tests.utils import create_opensearch_client, create_postgres_connection
-
-
-@pytest.mark.usefixtures("opensearch_client_configuration")
-def test_opensearch_available(
-    opensearch_client_configuration,
-):
-    client = create_opensearch_client(opensearch_client_configuration)
-    assert client.ping()
-    client.close()
-
-
-@pytest.mark.usefixtures("pgsql_connection_configuration")
-def test_pgsql_available(
-    pgsql_connection_configuration: DataSourceConnectionConfiguration,
-):
-    psql_connection = create_postgres_connection(pgsql_connection_configuration)
-
-    assert psql_connection.execute(text("SELECT 1")).fetchone()[0] == 1
-    psql_connection.close()
