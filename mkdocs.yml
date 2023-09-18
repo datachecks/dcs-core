@@ -88,7 +88,7 @@ extra:
       link: https://github.com/waterdipai/datachecks
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/waterdip
-    - icon: fontawesome/brands/discord
-      link: https://discord.gg/NpGGhYM4
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg
 
 copyright: "&copy; 2023 BY WATERDIP LABS"

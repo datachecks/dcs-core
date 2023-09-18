@@ -18,7 +18,7 @@
 **|**
 <a href="https://docs.datachecks.io/">**Docs**</a>
 **|**
-<a href="https://discord.gg/NpGGhYM4/">**Discord**</a>
+<a href="https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg">**Slack**</a>
 **|**
 
 </div>
@@ -97,7 +97,7 @@ Datachecks supports sql and search data sources. Below are the list of supported
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
-* [Discord](https://discord.gg/NpGGhYM4/) \(Live chat with the team, support, discussions, etc.\)
+* [Slack](https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg) \(Live chat with the team, support, discussions, etc.\)
 * [GitHub issues](https://github.com/waterdipai/datachecks/issues) \(Bug reports, feature requests)
 
 ## **Contributions**
