@@ -71,7 +71,9 @@ class DataSourceManager:
         data_source_name = data_source_config.name
         data_source_type = data_source_config.type
         try:
-            module_name = f"datachecks.integrations.databases.{data_source_config.type}"
+            module_name = (
+                f"datachecks.integrations.databases.{data_source_config.type.value}"
+            )
             module = importlib.import_module(module_name)
             data_source_class = self.DATA_SOURCE_CLASS_NAME_MAPPER[
                 data_source_config.type
