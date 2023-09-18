@@ -4,9 +4,9 @@
 
 Open an issue on **[GitHub](https://github.com/waterdipai/datachecks)** to report bugs and ask questions.
 
-### Discord
+### Slack Community
 
-Please join our **[Discord Channel](https://discord.gg/NpGGhYM4/)** to chat and connect.
+Please join our **[Slack Channel](https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg)** to chat and connect.
 
 ### Email
 
