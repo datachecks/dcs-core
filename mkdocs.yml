@@ -23,7 +23,6 @@ theme:
       example: fontawesome/solid/flask
       quote: fontawesome/solid/quote-left
   features:
-#    - navigation.expand
     - navigation.sections
     - toc.follow
   palette:
@@ -82,6 +81,9 @@ nav:
 
 extra:
   generator: true
+  analytics:
+    provider: google
+    property: G-LF0LCJZKCR
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/waterdipai/datachecks
