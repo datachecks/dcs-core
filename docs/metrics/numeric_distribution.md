@@ -12,12 +12,11 @@ Average metrics gauge performance in transitional databases and search engines, 
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: avg_price
-      metric_type: avg
-      resource: product_db.products
-      field_name: price
-      filters:
-        where: "country_code = 'IN'"
+  - name: avg_price
+    metric_type: avg
+    resource: product_db.products.price
+    filters:
+      where: "country_code = 'IN'"
 ```
 
 
@@ -29,10 +28,9 @@ Minimum metrics ensure consistency across transitional databases and search engi
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: min_price
-      metric_type: min
-      resource: product_db.products
-      field_name: price
+  - name: min_price
+    metric_type: min
+    resource: product_db.products.price
 ```
 
 ## **Maximum**
@@ -43,17 +41,15 @@ Maximum metrics gauge the highest values within datasets, helping identify outli
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: max_price
-      metric_type: max
-      resource: product_db.products
-      field_name: price
+  - name: max_price
+    metric_type: max
+    resource: product_db.products.price
 ```
 
 ```yaml title="dcs_config.yaml"
 - name: max_price_of_products_with_high_rating
   metric_type: max
-  resource: product_db.products
-  field_name: price
+  resource: product_db.products.price
   filters:
     where: "rating > 4"
 ```
@@ -68,8 +64,7 @@ Variance in data quality measures the degree of variability or dispersion in a d
 metrics:
 - name: variance_of_price
   metric_type: variance
-  resource: product_db.products
-  field_name: price
+  resource: product_db.products.price
 ```
 
 ## **Skew**

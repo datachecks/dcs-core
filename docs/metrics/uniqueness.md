@@ -15,8 +15,7 @@ By consistently tracking these metrics, you gain valuable insights into data dup
 metrics:
   - name: distinct_count_of_product_categories
     metric_type: distinct_count
-    resource: product_db.products
-    field_name: product_category
+    resource: product_db.products.product_category
 ```
 
 
@@ -27,6 +26,8 @@ Duplicate count is a data quality metric that measures the number of identical o
 **Example**
 
 ```yaml title="dcs_config.yaml"
-
+metrics:
+  - name: distinct_count_of_product_categories
+    metric_type: duplicate_count
+    resource: product_db.products.product_category
 ```
-
