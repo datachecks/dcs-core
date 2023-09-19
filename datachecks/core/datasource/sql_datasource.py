@@ -124,11 +124,11 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = "SELECT ROUND(AVG({}), 2) FROM {}".format(field, qualified_table_name)
+        query = "SELECT AVG({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
-        return self.connection.execute(text(query)).fetchone()[0]
+        return round(self.connection.execute(text(query)).fetchone()[0], 2)
 
     def query_get_variance(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -139,13 +139,11 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = "SELECT ROUND(VAR_SAMP({}),2) FROM {}".format(
-            field, qualified_table_name
-        )
+        query = "SELECT VAR_SAMP({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
-        return self.connection.execute(text(query)).fetchone()[0]
+        return round(self.connection.execute(text(query)).fetchone()[0], 2)
 
     def query_get_null_count(self, table: str, field: str, filters: str = None) -> int:
         """
