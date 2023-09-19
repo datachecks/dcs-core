@@ -15,11 +15,9 @@ Null count metrics gauge missing data, a crucial aspect of completeness metrics,
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: null_count_in_dataset
-      metric_type: null_count
-      resource: product_db.products
-      field_name: first_name
-
+  - name: null_count_in_dataset
+    metric_type: null_count
+    resource: product_db.products.first_name
 ```
 
 
@@ -31,11 +29,9 @@ Null percentage metrics reveal missing data, a vital facet of completeness metri
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: null_percentage_in_dataset
-      metric_type: null_percentage
-      resource: product_db.products
-      field_name: first_name
-
+  - name: null_percentage_in_dataset
+    metric_type: null_percentage
+    resource: product_db.products.first_name
 ```
 
 ## **Empty String**
@@ -46,11 +42,9 @@ Empty string metrics gauge the extent of missing or null values, exposing gaps t
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: empty_string_in_dataset
-      metric_type: empty_string
-      resource: product_db.products
-      field_name: first_name
-
+  - name: empty_string_in_dataset
+    metric_type: empty_string
+    resource: product_db.products.first_name
 ```
 
 ## **Empty String Percentage**
@@ -61,9 +55,7 @@ Empty String Percentage Metrics assess data completeness by measuring the propor
 
 ```yaml title="dcs_config.yaml"
 metrics:
-    - name: empty_string_percentage_in_dataset
-      metric_type: empty_string_percentage
-      resource: product_db.products
-      field_name: first_name
-
+  - name: empty_string_percentage_in_dataset
+    metric_type: empty_string_percentage
+    resource: product_db.products.first_name
 ```
