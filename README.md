@@ -102,7 +102,7 @@ For additional information and help, you can use one of these channels:
 
 ## **Contributions**
 
-:raised_hands: We greatly appreciate contributions - be it’s a bug fix, new feature, or documentations!
+:raised_hands: We greatly appreciate contributions - be it a bug fix, new feature, or documentation!
 
 Check out the [contributions guide](https://github.com/waterdipai/datachecks/blob/main/CONTRIBUTING.md) and [open issues](https://github.com/waterdipai/datachecks/issues).
 
@@ -113,6 +113,7 @@ Check out the [contributions guide](https://github.com/waterdipai/datachecks/blo
 <a href="https://github.com/WeryZebra-Yue"><img src="https://avatars.githubusercontent.com/u/75676675?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/gaurav-wdi"><img src="https://avatars.githubusercontent.com/u/82873511?v=4" width="50" height="50" alt=""/></a>
 <a href="https://github.com/PULAK0717"><img src="https://avatars.githubusercontent.com/u/101057457?v=4" width="50" height="50" alt=""/></a>
+<a href="https://github.com/fabriciodadosbr"><img src="https://avatars.githubusercontent.com/u/96063978?v=4" width="50" height="50" alt=""/></a>
 
 ## Telemetry
 
