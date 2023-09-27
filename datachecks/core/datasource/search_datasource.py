@@ -137,6 +137,21 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)
         return round(response["aggregations"]["avg_value"]["value"], 2)
 
+    def query_get_sum(self, index_name: str, field: str, filters: Dict = None) -> int:
+        """
+        Get the sum value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"sum_value": {"sum": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)
+        return round(response["aggregations"]["sum_value"]["value"], 2)
+
     def query_get_variance(
         self, index_name: str, field: str, filters: Dict = None
     ) -> int:

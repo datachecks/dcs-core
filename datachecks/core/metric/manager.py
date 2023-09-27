@@ -33,6 +33,7 @@ from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in
     MinMetric,
     NullCountMetric,
     NullPercentageMetric,
+    SumMetric,
     VarianceMetric,
 )
 from datachecks.core.metric.reliability_metric import (  # noqa F401 this is used in globals
@@ -50,6 +51,7 @@ class MetricManager:
         MetricsType.MAX.value: "MaxMetric",
         MetricsType.MIN.value: "MinMetric",
         MetricsType.AVG.value: "AvgMetric",
+        MetricsType.SUM.value: "SumMetric",
         MetricsType.VARIANCE.value: "VarianceMetric",
         MetricsType.COMBINED.value: "CombinedMetric",
         MetricsType.DUPLICATE_COUNT.value: "DuplicateCountMetric",
