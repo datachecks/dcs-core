@@ -33,6 +33,7 @@ Supported metric types are
 | Numeric Distribution | [Average](https://docs.datachecks.io//metrics/numeric_distribution/#average)           |
 | Numeric Distribution | [Minimum](https://docs.datachecks.io//metrics/numeric_distribution/#minimum)           |
 | Numeric Distribution | [Maximum](https://docs.datachecks.io//metrics/numeric_distribution/#maximum)           |
+| Numeric Distribution | [Sum](https://docs.datachecks.io//metrics/numeric_distribution/#sum)                   |
 | Numeric Distribution | [Variance](https://docs.datachecks.io//metrics/numeric_distribution/#variance)         |
 | Uniqueness           | [Distinct Count](https://docs.datachecks.io//metrics/uniqueness/#distinct-count)       |
 | Uniqueness           | [Duplicate Count](https://docs.datachecks.io//metrics/uniqueness/#duplicate-count)     |
