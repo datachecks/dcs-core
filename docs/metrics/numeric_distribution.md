@@ -80,6 +80,19 @@ metrics:
   resource: product_db.products.price
 ```
 
+## **Standard Deviation**
+
+Standard deviation metrics measure the amount of variation or dispersion of a set of values from the mean, indicating how spread out the data points are from the mean.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+metrics:
+- name: standard_deviation_of_price
+  metric_type: stddev
+  resource: product_db.products.price
+```
+
 ## **Skew**
 **Coming Soon..**
 

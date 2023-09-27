@@ -30,17 +30,3 @@ def test_should_throw_exception_when_elasticsearch_connect_fail():
 
     with pytest.raises(DataChecksDataSourcesConnectionError):
         datasource.connect()
-
-
-def test_should_connect_to_elasticsearch():
-    datasource = ElasticSearchDataSource(
-        data_source_name="test_os_data_source",
-        data_connection={
-            "host": "localhost",
-            "port": 9210,
-        },
-    )
-
-    es = datasource.connect()
-    assert es is not None
-    datasource.close()

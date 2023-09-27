@@ -160,6 +160,21 @@ class SQLDataSource(DataSource):
 
         return round(self.connection.execute(text(query)).fetchone()[0], 2)
 
+    def query_get_stddev(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the standard deviation value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT STDDEV_SAMP({}) FROM {}".format(field, qualified_table_name)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return round(self.connection.execute(text(query)).fetchone()[0], 2)
+
     def query_get_null_count(self, table: str, field: str, filters: str = None) -> int:
         """
         Get the null count
