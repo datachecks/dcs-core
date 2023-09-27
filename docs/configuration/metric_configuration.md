@@ -35,6 +35,7 @@ Supported metric types are
 | Numeric Distribution | [Maximum](https://docs.datachecks.io//metrics/numeric_distribution/#maximum)           |
 | Numeric Distribution | [Sum](https://docs.datachecks.io//metrics/numeric_distribution/#sum)                   |
 | Numeric Distribution | [Variance](https://docs.datachecks.io//metrics/numeric_distribution/#variance)         |
+| Numeric Distribution | [Standard Deviation](https://docs.datachecks.io//metrics/numeric_distribution/#standard-deviation) |
 | Uniqueness           | [Distinct Count](https://docs.datachecks.io//metrics/uniqueness/#distinct-count)       |
 | Uniqueness           | [Duplicate Count](https://docs.datachecks.io//metrics/uniqueness/#duplicate-count)     |
 | Completeness         | [Null Count](https://docs.datachecks.io//metrics/completeness/#null-count)             |

@@ -33,6 +33,7 @@ from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in
     MinMetric,
     NullCountMetric,
     NullPercentageMetric,
+    StddevMetric,
     SumMetric,
     VarianceMetric,
 )
@@ -52,6 +53,7 @@ class MetricManager:
         MetricsType.MIN.value: "MinMetric",
         MetricsType.AVG.value: "AvgMetric",
         MetricsType.SUM.value: "SumMetric",
+        MetricsType.STDDEV.value: "StddevMetric",
         MetricsType.VARIANCE.value: "VarianceMetric",
         MetricsType.COMBINED.value: "CombinedMetric",
         MetricsType.DUPLICATE_COUNT.value: "DuplicateCountMetric",

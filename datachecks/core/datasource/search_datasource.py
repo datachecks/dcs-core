@@ -169,6 +169,23 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)["aggregations"]
         return round(response["stats"]["variance_sampling"], 2)
 
+    def query_get_stddev(
+        self, index_name: str, field: str, filters: Dict = None
+    ) -> float:
+        """
+        Get the standard deviation value of a field
+        :param index_name:
+        :param field:
+        :param filters:
+        :return:
+        """
+        query = {"aggs": {"stats": {"extended_stats": {"field": field}}}}
+        if filters:
+            query["query"] = filters
+
+        response = self.client.search(index=index_name, body=query)["aggregations"]
+        return round(response["stats"]["std_deviation_sampling"], 2)
+
     def query_get_distinct_count(
         self, index_name: str, field: str, filters: Dict = None
     ) -> int:
