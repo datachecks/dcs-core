@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from datachecks.core.common.models.configuration import DataSourceType
+from datachecks.core.common.models.validation import Threshold, Validation
 from datachecks.core.configuration.configuration_parser import (
     load_configuration_from_yaml_str,
 )
@@ -164,4 +165,48 @@ def test_should_throw_exception_on_invalid_datasource_type():
         assert (
             str(e)
             == "Failed to parse configuration: 'invalid' is not a valid DataSourceType"
+        )
+
+
+def test_should_read_validation_config():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "postgres"
+        connection:
+          host: "localhost"
+          port: 5432
+    metrics:
+      - name: test_validity_metric
+        metric_type: combined
+        expression: mul(1, 2)
+        validation:
+          threshold: '> 10'
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.metrics["test_validity_metric"].validation == Validation(
+        threshold=Threshold(gt=10)
+    )
+
+
+def test_should_throw_exception_on_invalid_validation_config():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "postgres"
+        connection:
+          host: "localhost"
+          port: 5432
+    metrics:
+      - name: test_validity_metric
+        metric_type: combined
+        expression: mul(1, 2)
+        validation:
+          threshold: '>== 10'
+    """
+    try:
+        configuration = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert str(e).startswith(
+            "Failed to parse configuration: Invalid threshold configuration"
         )
