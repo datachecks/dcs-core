@@ -24,7 +24,7 @@ module.exports = {
     },
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, '../datachecks/core/dashboard/static/'),
+        path: path.resolve(__dirname, '../datachecks/dashboard/static/'),
     },
     optimization: {
         minimize: true,
