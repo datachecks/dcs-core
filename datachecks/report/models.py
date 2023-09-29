@@ -18,8 +18,27 @@ from typing import List, Optional
 
 
 @dataclass
+class MetricHealthStatus:
+    total_metrics: int
+    metric_validation_success: int
+    metric_validation_failed: int
+    health_score: int
+
+
+@dataclass
+class DashboardMetricOverview:
+    overall: MetricHealthStatus
+    reliability: MetricHealthStatus
+    numeric: MetricHealthStatus
+    uniqueness: MetricHealthStatus
+    completeness: MetricHealthStatus
+    custom: MetricHealthStatus
+
+
+@dataclass
 class DashboardInfo:
     name: str
+    dashboard_metric_overview: DashboardMetricOverview
 
 
 @dataclass
