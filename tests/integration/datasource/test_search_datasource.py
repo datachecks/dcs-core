@@ -148,6 +148,14 @@ class TestSQLDatasourceQueries:
         )
         assert max_value_age == 1500
 
+    def test_should_return_sum_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        sum_value_age = opensearch_datasource.query_get_sum(
+            INDEX_NAME, "age", {"match_all": {}}
+        )
+        assert sum_value_age == 1760
+
     def test_should_return_variance_with_filter(
         self, opensearch_datasource: OpenSearchDataSource
     ):
@@ -155,6 +163,14 @@ class TestSQLDatasourceQueries:
             INDEX_NAME, "age", {"match_all": {}}
         )
         assert variance == 350056.67
+
+    def test_should_return_stddev_with_filter(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        standard_deviation = opensearch_datasource.query_get_stddev(
+            INDEX_NAME, "age", {"match_all": {}}
+        )
+        assert standard_deviation == 591.66
 
     def test_should_return_distinct_count_with_filter(
         self, opensearch_datasource: OpenSearchDataSource

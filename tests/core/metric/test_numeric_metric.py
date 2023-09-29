@@ -26,6 +26,8 @@ from datachecks.core.metric.numeric_metric import (
     MinMetric,
     NullCountMetric,
     NullPercentageMetric,
+    StddevMetric,
+    SumMetric,
     VarianceMetric,
 )
 
@@ -223,6 +225,70 @@ class TestAvgColumnValueMetric:
         assert row_value.value == 1.3
 
 
+class TestSumColumnValueMetric:
+    def test_should_return_sum_column_value_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_sum.return_value = 1.3
+
+        row = SumMetric(
+            name="sum_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.SUM,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 1.3
+
+    def test_should_return_sum_column_value_postgres_with_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_sum.return_value = 1.3
+
+        row = SumMetric(
+            name="sum_metric_test_1",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.SUM,
+            field_name="age",
+            filters={"where_clause": "age >= 30 AND age <= 200"},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 1.3
+
+    def test_should_return_sum_column_value_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_sum.return_value = 1.3
+
+        row = SumMetric(
+            name="sum_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.SUM,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 1.3
+
+    def test_should_return_sum_column_value_opensearch_with_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_sum.return_value = 1.3
+
+        row = SumMetric(
+            name="sum_metric_test_1",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.SUM,
+            field_name="age",
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 1.3
+
+
 class TestVarianceColumnValueMetric:
     def test_should_return_variance_column_value_postgres_without_filter(self):
         mock_data_source = Mock(spec=SQLDataSource)
@@ -280,6 +346,70 @@ class TestVarianceColumnValueMetric:
             data_source=mock_data_source,
             index_name="numeric_metric_test",
             metric_type=MetricsType.VARIANCE,
+            field_name="age",
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 4380976080
+
+
+class TestStdDevColumnValueMetric:
+    def test_should_return_stddev_column_value_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_stddev.return_value = 4380976080
+
+        row = StddevMetric(
+            name="stddev_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.STDDEV,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 4380976080
+
+    def test_should_return_stddev_column_value_postgres_with_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_stddev.return_value = 4380976080
+
+        row = StddevMetric(
+            name="stddev_metric_test_1",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.STDDEV,
+            field_name="age",
+            filters={"where_clause": "age >= 30 AND age <= 200"},
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 4380976080
+
+    def test_should_return_stddev_column_value_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_stddev.return_value = 4380976080
+
+        row = StddevMetric(
+            name="stddev_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.STDDEV,
+            field_name="age",
+        )
+        row_value = row.get_metric_value()
+        assert row_value.value == 4380976080
+
+    def test_should_return_stddev_column_value_opensearch_with_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_stddev.return_value = 4380976080
+
+        row = StddevMetric(
+            name="stddev_metric_test_1",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.STDDEV,
             field_name="age",
             filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )

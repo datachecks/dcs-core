@@ -54,6 +54,19 @@ metrics:
     where: "rating > 4"
 ```
 
+## **Sum**
+
+Sum metrics measure the total of all values within a dataset, indicating the overall size of a particular dataset to help understand data quality.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+metrics:
+  - name: sum_of_price
+    metric_type: sum
+    resource: product_db.products.price
+```
+
 ## **Variance**
 
 Variance in data quality measures the degree of variability or dispersion in a dataset, indicating how spread out the data points are from the mean.
@@ -64,6 +77,19 @@ Variance in data quality measures the degree of variability or dispersion in a d
 metrics:
 - name: variance_of_price
   metric_type: variance
+  resource: product_db.products.price
+```
+
+## **Standard Deviation**
+
+Standard deviation metrics measure the amount of variation or dispersion of a set of values from the mean, indicating how spread out the data points are from the mean.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+metrics:
+- name: standard_deviation_of_price
+  metric_type: stddev
   resource: product_db.products.price
 ```
 

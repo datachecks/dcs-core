@@ -19,7 +19,12 @@ import uuid
 from dataclasses import asdict
 
 from datachecks.core.inspect import InspectOutput
-from datachecks.report.models import DashboardInfo, TemplateParams
+from datachecks.report.models import (
+    DashboardInfo,
+    DashboardMetricOverview,
+    MetricHealthStatus,
+    TemplateParams,
+)
 
 STATIC_PATH = os.path.join(os.path.dirname(__file__), "static")
 print(STATIC_PATH)
@@ -106,4 +111,47 @@ class DashboardInfoBuilder:
         self.inspect_data: InspectOutput = inspect_data
 
     def build(self):
-        return DashboardInfo("Report")
+        return DashboardInfo(
+            name="test", dashboard_metric_overview=self.__build_overview()
+        )
+
+    def __build_overview(self) -> DashboardMetricOverview:
+        data = self.inspect_data
+        return DashboardMetricOverview(
+            overall=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+            reliability=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+            numeric=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+            uniqueness=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+            completeness=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+            custom=MetricHealthStatus(
+                total_metrics=0,
+                metric_validation_success=0,
+                metric_validation_failed=0,
+                health_score=0,
+            ),
+        )

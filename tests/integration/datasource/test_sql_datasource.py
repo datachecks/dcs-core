@@ -199,6 +199,16 @@ class TestSQLDatasourceQueries:
         )
         assert result == 1500
 
+    def test_should_return_sum_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_sum(
+            table=self.TABLE_NAME,
+            field="age",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == 1535
+
     def test_should_return_variance_with_filter(
         self, postgres_datasource: PostgresDataSource
     ):
@@ -208,6 +218,16 @@ class TestSQLDatasourceQueries:
             filters="name in ('thor', 'black widow')",
         )
         assert result == 1073112.5
+
+    def test_should_return_stddev_with_filter(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_stddev(
+            table=self.TABLE_NAME,
+            field="age",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == round(Decimal(1035.91), 2)
 
     def test_should_return_duplicate_count_with_filter(
         self, postgres_datasource: PostgresDataSource
