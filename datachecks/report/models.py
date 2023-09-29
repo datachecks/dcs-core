@@ -11,3 +11,23 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+import dataclasses
+from dataclasses import dataclass
+from typing import List, Optional
+
+
+@dataclass
+class DashboardInfo:
+    name: str
+
+
+@dataclass
+class TemplateParams:
+    dashboard_id: str
+    dashboard_info: DashboardInfo
+    embed_font: bool = True
+    embed_lib: bool = True
+    embed_data: bool = True
+    font_file: Optional[str] = None
+    include_js_files: List[str] = dataclasses.field(default_factory=list)

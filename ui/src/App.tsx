@@ -49,20 +49,7 @@ const theme = createTheme({
 function App(props: { dashboard: DashboardInfo }) {
     return (
         <ThemeProvider theme={theme}>
-            <ApiContext.Provider value={{Api: new LocalApi(props.dashboard)}}>
-                <ApiContext.Consumer>
-                    {api =>
-
-                        <LoadableView func={() => api.Api.getDashboard( "")}>
-                            {
-                                params => <Grid container spacing={3} direction="row" alignItems="stretch">
-                                    <DashboardContent info={params}/>
-                                </Grid>
-                            }
-                        </LoadableView>
-                }
-            </ApiContext.Consumer>
-        </ApiContext.Provider>
+            datachecks
         </ThemeProvider>
     );
 }
