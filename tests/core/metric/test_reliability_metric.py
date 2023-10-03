@@ -18,6 +18,7 @@ import pytest
 
 from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType
+from datachecks.core.common.models.validation import Threshold, Validation
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.metric.reliability_metric import (
@@ -58,6 +59,23 @@ class TestDocumentCountMetric:
         )
         doc_value = doc.get_metric_value()
         assert doc_value.value == 51
+
+    def test_should_return_document_count_metric_with_validation(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_document_count.return_value = 51
+
+        doc = DocumentCountMetric(
+            name="document_count_metric_test_2",
+            data_source=mock_data_source,
+            index_name=INDEX_NAME,
+            metric_type=MetricsType.DOCUMENT_COUNT,
+            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
+            validation=Validation(threshold=Threshold(gt=100)),
+        )
+        doc_value = doc.get_metric_value()
+        assert doc_value.value == 51
+        assert doc_value.is_valid == False
 
 
 class TestRowCountMetric:
@@ -107,6 +125,22 @@ class TestRowCountMetric:
         )
         assert row_count_metric.get_metric_value() is None
 
+    def test_should_return_row_count_metric_with_validation(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_row_count.return_value = 10
+
+        row_count_metric = RowCountMetric(
+            name="row_count_metric_test",
+            data_source=mock_data_source,
+            metric_type=MetricsType.ROW_COUNT,
+            table_name="test_table",
+            validation=Validation(threshold=Threshold(gt=100)),
+        )
+        metric_value = row_count_metric.get_metric_value()
+        assert metric_value.value == 10.00
+        assert metric_value.is_valid == False
+
 
 class TestFreshnessValueMetric:
     def test_should_get_freshness_value_from_sql_datasource(self):
@@ -153,3 +187,20 @@ class TestFreshnessValueMetric:
             field_name="test_field",
         )
         assert freshness_metric.get_metric_value() is None
+
+    def test_should_get_freshness_value_from_sql_datasource_with_validation(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_time_diff.return_value = 3600
+
+        freshness_metric = FreshnessValueMetric(
+            name="freshness_value_metric_test",
+            data_source=mock_data_source,
+            metric_type=MetricsType.FRESHNESS,
+            table_name="test_table",
+            field_name="test_field",
+            validation=Validation(threshold=Threshold(gt=100)),
+        )
+        metric_value = freshness_metric.get_metric_value()
+        assert metric_value.value == 3600
+        assert metric_value.is_valid == True
