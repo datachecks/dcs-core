@@ -15,8 +15,6 @@
 from dataclasses import asdict
 from typing import Dict, List
 
-from loguru import logger
-
 from datachecks.core.common.models.configuration import MetricConfiguration
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
@@ -97,6 +95,9 @@ class MetricManager:
                 "filters": metric_config.filters
                 if metric_config.filters is not None
                 else None,
+                "validation": metric_config.validation
+                if metric_config.validation is not None
+                else None,
             }
             if isinstance(metric_config.resource, Index):
                 params["index_name"] = metric_config.resource.name
@@ -127,6 +128,9 @@ class MetricManager:
         for metric_name, metric_config in config.items():
             params = {
                 "filters": metric_config.filters if metric_config.filters else None,
+                "validation": metric_config.validation
+                if metric_config.validation is not None
+                else None,
             }
             metric: Metric = CombinedMetric(
                 name=metric_config.name,

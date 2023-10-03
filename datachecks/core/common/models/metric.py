@@ -62,6 +62,8 @@ class MetricValue:
     table_name: Optional[str] = None
     index_name: Optional[str] = None
     field_name: Optional[str] = None
+    is_valid: Optional[bool] = None
+    reason: Optional[str] = None
     tags: Dict[str, str] = None
 
 

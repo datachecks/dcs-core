@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Union
 
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
+from datachecks.core.common.models.validation import Validation
 
 
 class DataSourceType(str, Enum):
@@ -85,6 +86,7 @@ class MetricConfiguration:
     metric_type: MetricsType
     expression: Optional[str] = None
     resource: Optional[Union[Table, Index, Field]] = None
+    validation: Optional[Validation] = None
     filters: Optional[MetricsFilterConfiguration] = None
 
     def __post_init__(self):

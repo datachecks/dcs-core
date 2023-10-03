@@ -97,26 +97,4 @@ class CombinedMetric(Metric):
         Generate the metric value for this metric
         """
         expression_data = self._metric_expression_parser(self.expression, metric_values)
-        return self._perform_operation(expression_data)
-
-    def get_metric_value(
-        self, metric_values: List[MetricValue]
-    ) -> Union[MetricValue, None]:
-        try:
-            metric_value = self._generate_metric_value(metric_values)
-            tags = {
-                "metric_name": self.name,
-            }
-
-            value = MetricValue(
-                identity=self.get_metric_identity(),
-                metric_type=self.metric_type.value,
-                value=metric_value,
-                expression=self.expression,
-                timestamp=datetime.datetime.utcnow().isoformat(),
-                tags=tags,
-            )
-            return value
-        except Exception as e:
-            logger.error(f"Failed to generate metric {self.name}: {str(e)}")
-            return None
+        return round(self._perform_operation(expression_data), 2)

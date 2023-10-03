@@ -12,8 +12,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
 
-from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.integrations.databases.elasticsearch import ElasticSearchDataSource
-from datachecks.integrations.databases.opensearch import OpenSearchDataSource
+
+class ConditionType(str, Enum):
+    GTE = "gte"
+    LTE = "lte"
+    GT = "gt"
+    LT = "lt"
+    EQ = "eq"
+
+
+@dataclass
+class Threshold:
+    gte: Optional[float] = None
+    lte: Optional[float] = None
+    gt: Optional[float] = None
+    lt: Optional[float] = None
+    eq: Optional[float] = None
+
+
+@dataclass
+class Validation:
+    threshold: Threshold
