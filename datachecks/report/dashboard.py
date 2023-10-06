@@ -18,11 +18,14 @@ import os
 import uuid
 from dataclasses import asdict
 
+from datachecks.core.common.models.metric import DataSourceMetrics
 from datachecks.core.inspect import InspectOutput
 from datachecks.report.models import (
     DashboardInfo,
     DashboardMetricOverview,
+    GroupedMetricsType,
     MetricHealthStatus,
+    MetricRow,
     TemplateParams,
 )
 
@@ -34,9 +37,15 @@ def __load_js():
     return open(f"{STATIC_PATH}/index.js", encoding="utf-8").read()
 
 
-def __load_font():
+def __load_font(font: str):
     return base64.b64encode(
-        open(os.path.join(STATIC_PATH, "material-ui-icons.woff2"), "rb").read()
+        open(f"{STATIC_PATH}/assets/fonts/{font}", "rb").read()
+    ).decode()
+
+
+def __load_image(image: str):
+    return base64.b64encode(
+        open(f"{STATIC_PATH}/assets/images/{image}", "rb").read()
     ).decode()
 
 
@@ -68,28 +77,46 @@ def html_template(params: TemplateParams):
                     <style>
                     /* fallback */
                     @font-face {{
-                      font-family: 'Material Icons';
-                      font-style: normal;
+                      font-family: "Gilroy";
+                      font-weight: 600;
+                      src: url(data:font/ttf;base64,{__load_font("Gilroy-SemiBold.ttf")}) format("truetype");
+                    }}
+                    @font-face {{
+                      font-family: "Gilroy";
                       font-weight: 400;
-                      src: {f"url(data:font/ttf;base64,{__load_font()}) format('woff2');" if params.embed_font else
-                        f"url({params.font_file});"}
+                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Regular.ttf")}) format("truetype");
+                    }}
+                    @font-face {{
+                      font-family: "Gilroy";
+                      font-weight: 500;
+                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Medium.ttf")}) format("truetype");
+                    }}
+                    @font-face {{
+                      font-family: "Gilroy";
+                      font-weight: 700;
+                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Bold.ttf")}) format("truetype");
+                    }}
+                    .datachecks_logo {{
+                        background-image: url(data:image/svg+xml;base64,{__load_image("logo.svg")});
+                        background-repeat: no-repeat;
+                        background-size: contain;
+                    }}
+                    .github_logo {{
+                        background-image: url(data:image/svg+xml;base64,{__load_image("github.svg")});
+                        background-repeat: no-repeat;
+                        background-size: contain;
+                    }}
+                    .slack_logo {{
+                        background-image: url(data:image/svg+xml;base64,{__load_image("slack.svg")});
+                        background-repeat: no-repeat;
+                        background-size: contain;
+                    }}
+                    .docs_logo {{
+                        background-image: url(data:image/svg+xml;base64,{__load_image("docs.svg")});
+                        background-repeat: no-repeat;
+                        background-size: contain;
                     }}
 
-                    .material-icons {{
-                      font-family: 'Material Icons';
-                      font-weight: normal;
-                      font-style: normal;
-                      font-size: 24px;
-                      line-height: 1;
-                      letter-spacing: normal;
-                      text-transform: none;
-                      display: inline-block;
-                      white-space: nowrap;
-                      word-wrap: normal;
-                      direction: ltr;
-                      text-rendering: optimizeLegibility;
-                      -webkit-font-smoothing: antialiased;
-                    }}
                     </style>
                     {data_block}
             </head>
@@ -98,7 +125,7 @@ def html_template(params: TemplateParams):
             {lib_block}
             {js_files_block}
             <script>
-                window.buildDashboard("data_{params.dashboard_id}",
+                window.buildDashboard(data_{params.dashboard_id},
                     "root_{params.dashboard_id}"
                 );
             </script>
@@ -111,47 +138,80 @@ class DashboardInfoBuilder:
         self.inspect_data: InspectOutput = inspect_data
 
     def build(self):
-        return DashboardInfo(
-            name="test", dashboard_metric_overview=self.__build_overview()
+        [dashboard, metrics] = self.__build_params()
+        return DashboardInfo(name="test", metrics=metrics, dashboard=dashboard)
+
+    def __build_params(self) -> DashboardMetricOverview:
+        data = self.inspect_data
+
+        self.metrics = []
+        self.dashboard = DashboardMetricOverview(
+            **{
+                metric_type: MetricHealthStatus(
+                    total_metrics=0,
+                    metric_validation_success=0,
+                    metric_validation_failed=0,
+                    health_score=0,
+                )
+                for metric_type in DashboardMetricOverview.__dataclass_fields__.keys()
+            }
+        )
+        for data_source_name, ds_metrics in data.metrics.items():
+            row = None
+            if isinstance(ds_metrics, DataSourceMetrics):
+                for tabel_name, table_metrics in ds_metrics.table_metrics.items():
+                    for metric_identifier, metric in table_metrics.metrics.items():
+                        self._insert_value(metric)
+
+                for index_name, index_metrics in ds_metrics.index_metrics.items():
+                    for metric_identifier, metric in index_metrics.metrics.items():
+                        self._insert_value(metric)
+            else:
+                for metric_identifier, metric in ds_metrics.metrics.items():
+                    self._insert_value(metric)
+
+        self.calculate_health_score()
+        return [self.dashboard, self.metrics]
+
+    def _insert_value(self, metric):
+        for metric_type in GroupedMetricsType.__dataclass_fields__.keys():
+            if metric.metric_type in GroupedMetricsType[metric_type].value:
+                current = getattr(self.dashboard, metric_type)
+                overall = getattr(self.dashboard, "overall")
+                current.total_metrics += 1
+                overall.total_metrics += 1
+                if metric.is_valid is not None:
+                    if metric.is_valid:
+                        current.metric_validation_success += 1
+                        overall.metric_validation_success += 1
+                    else:
+                        current.metric_validation_failed += 1
+                        overall.metric_validation_failed += 1
+        self.metrics.append(
+            MetricRow(
+                metric_name=metric.tags.get("metric_name"),
+                data_source=metric.data_source,
+                metric_type=metric.metric_type,
+                metric_value=str(metric.value),
+                is_valid=metric.is_valid,
+                reason=metric.reason,
+            )
         )
 
-    def __build_overview(self) -> DashboardMetricOverview:
-        data = self.inspect_data
-        return DashboardMetricOverview(
-            overall=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-            reliability=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-            numeric=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-            uniqueness=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-            completeness=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-            custom=MetricHealthStatus(
-                total_metrics=0,
-                metric_validation_success=0,
-                metric_validation_failed=0,
-                health_score=0,
-            ),
-        )
+    def calculate_health_score(self):
+        for metric_type in DashboardMetricOverview.__dataclass_fields__.keys():
+            try:
+                metric = getattr(self.dashboard, metric_type)
+                metric.health_score = round(
+                    (
+                        metric.metric_validation_success
+                        / (
+                            metric.metric_validation_success
+                            + metric.metric_validation_failed
+                        )
+                    )
+                    * 100,
+                    2,
+                )
+            except ZeroDivisionError:
+                metric.health_score = 0

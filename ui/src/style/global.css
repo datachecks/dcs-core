@@ -1,0 +1,10 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Gilroy", sans-serif !important;
+}
+:root {
+  --primary: #0b0949;
+  --failed: #ed0400;
+  --success: #007b31;
+}

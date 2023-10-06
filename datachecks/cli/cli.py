@@ -144,6 +144,7 @@ def _build_metric_cli_table(*, inspect_output: InspectOutput):
 
 
 def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
+    logger.info(inspect_output)
     template_params = TemplateParams(
         dashboard_id="dcs_dashboard_" + str(uuid.uuid4()).replace("-", ""),
         dashboard_info=DashboardInfoBuilder(inspect_output).build(),
@@ -151,6 +152,8 @@ def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
 
     with open(report_path, "w", encoding="utf-8") as out_file:
         out_file.write(html_template(template_params))
+
+
 def _build_row(metric):
     _validity_style = (
         "" if metric.is_valid is None else "red" if not metric.is_valid else "green"
