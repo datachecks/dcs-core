@@ -41,7 +41,7 @@
     "style-loader": "^3.3.3",
     "svg-inline-loader": "^0.8.2",
     "ts-loader": "^9.2.5",
-    "webpack": "5.53.0"
+    "webpack": "5.76.0"
   },
   "resolutions": {},
   "devDependencies": {
