@@ -21,7 +21,7 @@ from typing import Union
 import click
 from loguru import logger
 from rich import print
-from rich.table import Table
+from rich.table import Table, Text
 
 from datachecks.__version__ import __version__
 from datachecks.core import Configuration, Inspect, load_configuration
@@ -106,43 +106,45 @@ def inspect(
 
 def _build_metric_cli_table(*, inspect_output: InspectOutput):
     table = Table(
-        title="List of Generated Metrics", show_header=True, header_style="bold blue"
+        title="List of Generated Metrics",
+        show_header=True,
+        header_style="bold blue",
     )
-    table.add_column("Metric Name", style="cyan", no_wrap=True)
+    table.add_column(
+        "Metric Name",
+        style="cyan",
+        no_wrap=True,
+    )
     table.add_column("Data Source", style="magenta")
     table.add_column("Metric Type", style="magenta")
     table.add_column("Value", justify="right", style="green")
+    table.add_column("Valid", justify="right")
+    table.add_column("Reason", justify="right")
+
     for data_source_name, ds_metrics in inspect_output.metrics.items():
+        row = None
         if isinstance(ds_metrics, DataSourceMetrics):
             for tabel_name, table_metrics in ds_metrics.table_metrics.items():
                 for metric_identifier, metric in table_metrics.metrics.items():
                     table.add_row(
-                        f"{metric.tags.get('metric_name')}",
-                        f"{data_source_name}",
-                        f"{metric.metric_type}",
-                        f"{metric.value}",
+                        *_build_row(metric),
                     )
             for index_name, index_metrics in ds_metrics.index_metrics.items():
                 for metric_identifier, metric in index_metrics.metrics.items():
                     table.add_row(
-                        f"{metric.tags.get('metric_name')}",
-                        f"{data_source_name}",
-                        f"{metric.metric_type}",
-                        f"{metric.value}",
+                        *_build_row(metric),
                     )
         else:
             for metric_identifier, metric in ds_metrics.metrics.items():
                 table.add_row(
-                    f"{metric.tags.get('metric_name')}",
-                    f"",
-                    f"{metric.metric_type}",
-                    f"{metric.value}",
+                    *_build_row(metric),
                 )
 
     return table
 
 
 def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
+    logger.info(inspect_output)
     template_params = TemplateParams(
         dashboard_id="dcs_dashboard_" + str(uuid.uuid4()).replace("-", ""),
         dashboard_info=DashboardInfoBuilder(inspect_output).build(),
@@ -150,3 +152,24 @@ def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
 
     with open(report_path, "w", encoding="utf-8") as out_file:
         out_file.write(html_template(template_params))
+
+
+def _build_row(metric):
+    _validity_style = (
+        "" if metric.is_valid is None else "red" if not metric.is_valid else "green"
+    )
+    return (
+        metric.tags.get("metric_name"),
+        metric.data_source,
+        metric.metric_type,
+        str(metric.value),
+        Text(
+            "-"
+            if metric.is_valid is None
+            else "Failed"
+            if not metric.is_valid
+            else "Passed",
+            style=_validity_style,
+        ),
+        "-" if metric.reason is None else metric.reason,
+    )

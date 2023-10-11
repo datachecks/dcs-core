@@ -15,12 +15,12 @@
 import datetime
 import json
 from abc import ABC
-from typing import Dict, Optional, Union
+from typing import Optional, Tuple, Union
 
 from loguru import logger
 
-from datachecks.core.common.errors import DataChecksMetricGenerationError
 from datachecks.core.common.models.metric import MetricsType, MetricValue
+from datachecks.core.common.models.validation import ConditionType
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
@@ -104,6 +104,9 @@ class Metric(ABC):
                     self.filter_query = json.loads(filters.where)
                 elif isinstance(data_source, SQLDataSource):
                     self.filter_query = filters.where
+        self.validation = None
+        if "validation" in kwargs and kwargs["validation"] is not None:
+            self.validation = kwargs["validation"]
 
     def get_metric_identity(self):
         MetricIdentity.generate_identity(
@@ -122,15 +125,28 @@ class Metric(ABC):
             tags = {
                 "metric_name": self.name,
             }
+            if self.metric_type.value == MetricsType.COMBINED.value:
+                value = MetricValue(
+                    identity=self.get_metric_identity(),
+                    metric_type=self.metric_type.value,
+                    value=metric_value,
+                    expression=self.expression,
+                    timestamp=datetime.datetime.utcnow().isoformat(),
+                    tags=tags,
+                )
+            else:
+                value = MetricValue(
+                    identity=self.get_metric_identity(),
+                    metric_type=self.metric_type.value,
+                    value=metric_value,
+                    timestamp=datetime.datetime.utcnow().isoformat(),
+                    data_source=self.data_source.data_source_name,
+                    expression=self.expression,
+                    tags=tags,
+                )
+            if self.validation is not None and self.validation.threshold is not None:
+                value.is_valid, value.reason = self.validate_metric(metric_value)
 
-            value = MetricValue(
-                identity=self.get_metric_identity(),
-                metric_type=self.metric_type.value,
-                value=metric_value,
-                timestamp=datetime.datetime.utcnow().isoformat(),
-                data_source=self.data_source.data_source_name,
-                tags=tags,
-            )
             if (
                 "index_name" in self.__dict__
                 and self.__dict__["index_name"] is not None
@@ -152,6 +168,41 @@ class Metric(ABC):
         except Exception as e:
             logger.error(f"Failed to generate metric {self.name}: {str(e)}")
             return None
+
+    def validate_metric(self, metric_value) -> Tuple[bool, Optional[str]]:
+        for operator, value in self.validation.threshold.__dict__.items():
+            if value is not None:
+                if ConditionType.GTE == operator:
+                    if metric_value < value:
+                        return (
+                            False,
+                            f"Less than threshold of {value}",
+                        )
+                elif ConditionType.LTE == operator:
+                    if metric_value > value:
+                        return (
+                            False,
+                            f"Greater than threshold of {value}",
+                        )
+                elif ConditionType.GT == operator:
+                    if metric_value <= value:
+                        return (
+                            False,
+                            f"Less than or equal to threshold of {value}",
+                        )
+                elif ConditionType.LT == operator:
+                    if metric_value >= value:
+                        return (
+                            False,
+                            f"Greater than or equal to threshold of {value}",
+                        )
+                elif ConditionType.EQ == operator:
+                    if metric_value != value:
+                        return (
+                            False,
+                            f"Not equal to {value}",
+                        )
+        return True, None
 
 
 class FieldMetrics(Metric, ABC):

@@ -126,3 +126,4 @@ processor/runnotebook.ipynb
 # Poetry
 #poetry.lock
 _internal_*
+datachecks_report.html

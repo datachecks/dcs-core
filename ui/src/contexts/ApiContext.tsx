@@ -1,19 +1,19 @@
 import React from "react";
 
-import {Api, DashboardInfo, WidgetInfo} from "../api/Api";
+import { Api, DashboardInfo } from "../api/Api";
 
 interface ApiContextState {
-    Api: Api;
+  Api: Api;
 }
 
 class NotImplementedApi implements Api {
-
-    getDashboard(dashboardId: string): Promise<DashboardInfo> {
-        return Promise.reject("not implemented");
-    }
-
+  getDashboard(dashboardId: string): Promise<DashboardInfo> {
+    return Promise.reject("not implemented");
+  }
 }
 
-const ApiContext = React.createContext<ApiContextState>({Api: new NotImplementedApi()});
+const ApiContext = React.createContext<ApiContextState>({
+  Api: new NotImplementedApi(),
+});
 
 export default ApiContext;

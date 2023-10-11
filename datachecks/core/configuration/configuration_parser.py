@@ -14,7 +14,9 @@
 
 from typing import Dict, List, Union
 
-from pyparsing import Forward, Group, Suppress, Word, alphas, delimitedList, nums
+from pyparsing import Combine, Group, Literal
+from pyparsing import Optional as OptionalParsing
+from pyparsing import Word, delimitedList, nums, oneOf
 
 from datachecks.core.common.errors import DataChecksConfigurationError
 from datachecks.core.common.models.configuration import (
@@ -27,7 +29,20 @@ from datachecks.core.common.models.configuration import (
 )
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
+from datachecks.core.common.models.validation import (
+    ConditionType,
+    Threshold,
+    Validation,
+)
 from datachecks.core.configuration.config_loader import parse_config
+
+CONDITION_TYPE_MAPPING = {
+    ">=": ConditionType.GTE,
+    "<=": ConditionType.LTE,
+    "=": ConditionType.EQ,
+    "<": ConditionType.LT,
+    ">": ConditionType.GT,
+}
 
 
 def parse_data_source_yaml_configurations(
@@ -72,6 +87,41 @@ def _parse_resource_index(resource_str: str) -> Index:
     if len(splits) != 2:
         raise ValueError(f"Invalid resource string {resource_str}")
     return Index(data_source=splits[0], name=splits[1])
+
+
+def _parse_threshold_str(threshold: str) -> Threshold:
+    try:
+        operator = oneOf(">= <= = < >").setParseAction(
+            lambda t: CONDITION_TYPE_MAPPING[t[0]]
+        )
+        number = Combine(
+            OptionalParsing(Literal("-"))
+            + Word(nums)
+            + OptionalParsing(Literal(".") + Word(nums))
+        ).setParseAction(lambda t: float(t[0]))
+
+        condition = operator + number
+        conditions = delimitedList(
+            Group(condition) | Group(condition + Literal("&") + condition),
+            delim="&",
+        )
+        result = conditions.parseString(threshold)
+        return Threshold(**{operator: value for operator, value in result})
+
+    except Exception as e:
+        raise DataChecksConfigurationError(
+            f"Invalid threshold configuration {threshold}: {str(e)}"
+        )
+
+
+def _parse_validation_configuration(validation_config: dict) -> Validation:
+    if "threshold" in validation_config:
+        threshold = _parse_threshold_str(threshold=validation_config["threshold"])
+        return Validation(threshold=threshold)
+    else:
+        raise DataChecksConfigurationError(
+            f"Invalid validation configuration {validation_config}"
+        )
 
 
 def _parse_resource_field(resource_str: str, belongs_to: str) -> Field:
@@ -121,7 +171,6 @@ def parse_metric_configurations(
                 ),
                 expression=expression_str,
             )
-            metric_configurations[metric_configuration.name] = metric_configuration
         else:
             resource_str = metric_yaml_configuration["resource"]
             data_source_name = resource_str.split(".")[0]
@@ -145,7 +194,14 @@ def parse_metric_configurations(
                 metric_configuration.filter = MetricsFilterConfiguration(
                     where=metric_yaml_configuration["filters"]["where"]
                 )
-            metric_configurations[metric_configuration.name] = metric_configuration
+        if (
+            "validation" in metric_yaml_configuration
+            and metric_yaml_configuration["validation"] is not None
+        ):
+            metric_configuration.validation = _parse_validation_configuration(
+                metric_yaml_configuration["validation"]
+            )
+        metric_configurations[metric_configuration.name] = metric_configuration
 
     return metric_configurations
 

@@ -15,6 +15,7 @@
 from unittest.mock import Mock
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
+from datachecks.core.common.models.validation import Threshold, Validation
 from datachecks.core.metric.combined_metric import CombinedMetric
 
 
@@ -104,3 +105,22 @@ class TestCombinedMetric:
             combined._metric_expression_parser("mul(2, 3, 5)", [metric_value])
         except Exception as e:
             assert str(e) == "Operation must have only two arguments"
+
+    def test_should_return_combined_value_with_validation(self, mocker):
+        mocker.patch(
+            "datachecks.core.metric.combined_metric.CombinedMetric._metric_expression_parser",
+            return_value=None,
+        )
+        mocker.patch(
+            "datachecks.core.metric.combined_metric.CombinedMetric._perform_operation",
+            return_value=51,
+        )
+        combined = CombinedMetric(
+            name="combined_metric_test",
+            metric_type=MetricsType.COMBINED,
+            expression="mul(2, 3)",
+            validation=Validation(threshold=Threshold(gt=100)),
+        )
+        combined_value = combined.get_metric_value(metric_values=[])
+        assert combined_value.value == 51
+        assert combined_value.is_valid == False

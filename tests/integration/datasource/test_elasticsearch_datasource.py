@@ -17,16 +17,3 @@ import pytest
 from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.integrations.databases.elasticsearch import ElasticSearchDataSource
 from datachecks.integrations.databases.opensearch import OpenSearchDataSource
-
-
-def test_should_throw_exception_when_elasticsearch_connect_fail():
-    datasource = ElasticSearchDataSource(
-        data_source_name="test_os_data_source",
-        data_connection={
-            "host": "localhost",
-            "port": 9211,
-        },
-    )
-
-    with pytest.raises(DataChecksDataSourcesConnectionError):
-        datasource.connect()

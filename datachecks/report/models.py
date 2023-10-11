@@ -14,6 +14,7 @@
 
 import dataclasses
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
 
 
@@ -36,9 +37,52 @@ class DashboardMetricOverview:
 
 
 @dataclass
+class MetricRow:
+    metric_name: str
+    data_source: str
+    metric_type: str
+    is_valid: bool
+    metric_value: float
+    reason: str
+
+    def get_dict(self):
+        return {
+            "metric_name": self.metric_name,
+            "data_source": "-" if self.data_source is None else self.data_source,
+            "metric_type": self.metric_type,
+            "is_valid": "-" if self.is_valid is None else str(self.is_valid),
+            "metric_value": self.metric_value,
+            "reason": "-" if self.reason is None else self.reason,
+        }
+
+
+@dataclass
 class DashboardInfo:
     name: str
-    dashboard_metric_overview: DashboardMetricOverview
+    metrics: List[MetricRow]
+    dashboard: DashboardMetricOverview
+
+
+@dataclass
+class GroupedMetricsType(str, Enum):
+    reliability: List[str] = dataclasses.field(
+        default_factory=["row_count", "document_count", "freshness"]
+    )
+    numeric: List[str] = dataclasses.field(
+        default_factory=["min", "max", "avg", "sum", "stddev", "variance"]
+    )
+    uniqueness: List[str] = dataclasses.field(
+        default_factory=["distinct_count", "duplicate_count"]
+    )
+    completeness: List[str] = dataclasses.field(
+        default_factory=[
+            "null_count",
+            "null_percentage",
+            "empty_string_count",
+            "empty_string_percentage",
+        ]
+    )
+    custom: List[str] = dataclasses.field(default_factory=["combined"])
 
 
 @dataclass
