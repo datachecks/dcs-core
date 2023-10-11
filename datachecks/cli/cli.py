@@ -14,6 +14,7 @@
 import os
 import sys
 import traceback
+import uuid
 import warnings
 from typing import Union
 
@@ -26,6 +27,8 @@ from datachecks.__version__ import __version__
 from datachecks.core import Configuration, Inspect, load_configuration
 from datachecks.core.common.models.metric import DataSourceMetrics
 from datachecks.core.inspect import InspectOutput
+from datachecks.report.dashboard import DashboardInfoBuilder, html_template
+from datachecks.report.models import TemplateParams
 
 logger.remove()
 logger.add(sys.stderr, level="WARNING")
@@ -53,9 +56,22 @@ def main():
     is_flag=True,
     help="Specify if the inspection should do auto-profile of all data sources",
 )
+@click.option(
+    "--html-report",
+    is_flag=True,
+    help="Specify if the inspection should generate HTML report",
+)
+@click.option(
+    "--report-path",
+    required=False,
+    default="datachecks_report.html",
+    help="Specify the file path for HTML report",
+)
 def inspect(
     config_path: Union[str, None],
     auto_profile: bool = False,
+    html_report: bool = False,
+    report_path: str = "datachecks_report.html",
 ):
     """
     Starts the datachecks inspection
@@ -75,8 +91,12 @@ def inspect(
 
         print("[bold green]Inspection completed successfully![/bold green] :tada:")
         print(f"Inspection took {inspector.execution_time_taken} seconds")
-
-        print(_build_metric_cli_table(output))
+        if html_report:
+            print(f"Generating HTML report at {report_path}")
+            _build_html_report(inspect_output=output, report_path=report_path)
+            print(f"HTML report generated at {report_path}")
+        else:
+            print(_build_metric_cli_table(inspect_output=output))
         sys.exit(0)
 
     except Exception as e:
@@ -84,7 +104,7 @@ def inspect(
         sys.exit(1)
 
 
-def _build_metric_cli_table(inspect_output: InspectOutput):
+def _build_metric_cli_table(*, inspect_output: InspectOutput):
     table = Table(
         title="List of Generated Metrics",
         show_header=True,
@@ -121,6 +141,17 @@ def _build_metric_cli_table(inspect_output: InspectOutput):
                 )
 
     return table
+
+
+def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
+    logger.info(inspect_output)
+    template_params = TemplateParams(
+        dashboard_id="dcs_dashboard_" + str(uuid.uuid4()).replace("-", ""),
+        dashboard_info=DashboardInfoBuilder(inspect_output).build(),
+    )
+
+    with open(report_path, "w", encoding="utf-8") as out_file:
+        out_file.write(html_template(template_params))
 
 
 def _build_row(metric):

@@ -1,0 +1,32 @@
+.table {
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.tableRow th,
+.tableRow td {
+  width: min-content !important;
+  min-width: unset !important;
+  color: var(--primary) !important;
+  font-size: 0.9em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.tableRow th {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.tableRow td {
+  color: var(--primary);
+}
+.tableRow td:first-child {
+  border-left: none;
+}
+.tableRow:last-child td {
+  padding-bottom: 30px;
+  padding-bottom: 2em;
+}

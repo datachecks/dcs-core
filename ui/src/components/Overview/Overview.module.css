@@ -1,0 +1,66 @@
+.main {
+  margin: 20px;
+}
+.title {
+  font-weight: bold;
+  font-size: 1.2em;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5em 0;
+}
+.arrow {
+  color: var(--failed);
+}
+.overviewWrapper {
+  display: flex;
+  flex-direction: row;
+
+  padding: 20px;
+  padding: 3em;
+  margin: 20px 0 0 0;
+  border-radius: 10px;
+  border: 2px solid black;
+}
+.overviewWrapper .content .description {
+  margin: 0 0 2em 0;
+  font-weight: 400;
+  width: 100%;
+  max-width: 450px;
+  letter-spacing: 0.05em;
+  line-height: 1.5em;
+  color: var(--primary);
+}
+.overviewWrapper .content .button {
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  border: 1px solid var(--failed);
+  color: var(--failed);
+}
+.scoreWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 0 0 2em;
+  gap: 3em;
+}
+.score {
+  display: flex;
+  text-align: center;
+  height: 120px;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.score .key {
+  font-weight: bold;
+  font-size: 1.2em;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+}
+.score .value {
+  font-weight: 700;
+  font-size: 3.5em;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+}
