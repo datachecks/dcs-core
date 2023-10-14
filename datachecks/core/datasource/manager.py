@@ -34,6 +34,7 @@ class DataSourceManager:
         "mysql": "MysqlDataSource",
         "bigquery": "BigQueryDataSource",
         "databricks": "DatabricksDataSource",
+        "redshift": "RedShiftDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):
