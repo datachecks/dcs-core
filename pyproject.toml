@@ -38,6 +38,7 @@ psycopg2 = { version="^2.9.6", optional=true }
 databricks-sql-connector = { version="^2.9.3", optional=true }
 elasticsearch = { version="^7.17.3", optional=true }
 pymysql = { version="^1.1.0", optional=true, extras=["rsa"] }
+sqlalchemy-redshift = { version="^0.8.14", optional=true }
 
 
 [tool.poetry.group.dev.dependencies]
@@ -63,7 +64,8 @@ opensearch = ["opensearch-py"]
 bigquery = ["sqlalchemy-bigquery"]
 databricks = ["databricks-sql-connector"]
 elasticsearch = ["elasticsearch"]
-all = ["psycopg2", "pymysql", "opensearch-py", "sqlalchemy-bigquery", "databricks-sql-connector", "elasticsearch"]
+redshift = ["sqlalchemy-redshift"]
+all = ["psycopg2", "pymysql", "opensearch-py", "sqlalchemy-bigquery", "databricks-sql-connector", "elasticsearch", "sqlalchemy-redshift"]
 
 [tool.poetry.scripts]
 datachecks = "datachecks.cli.cli:main"

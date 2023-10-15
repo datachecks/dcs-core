@@ -34,7 +34,6 @@ APM (Application Performance Monitoring) tools are used to monitor the performan
 But for Data products regular APM tools are not enough. We need a new kind of tools that can monitor the performance of Data applications.
 Data monitoring tools are used to monitor the data quality of databases and data pipelines. It identifies potential issues, including in the databases and data pipelines. It helps to identify the root cause of the data quality issues and helps to improve the data quality.
 
-
 ## What is `datachecks`?
 
 Datachecks is an open-source data monitoring tool that helps to monitor the data quality of databases and data pipelines.
@@ -43,14 +42,18 @@ It identifies potential issues, including in the databases and data pipelines. I
 Datachecks can generate several reliability, uniqueness, completeness metrics from several data sources
 
 ### Reports: Data Quality Visualisation
+
 You can generate with just one command. It generates a beautiful data quality report with all the metrics.
 This html report can be shared with the team.
+
 <p align="center">
     <img alt="why_data_observability" src="docs/assets/datachecks_dashboard.png" width="800">
 </p>
 
 ### CLI: Data Quality Visualisation in Bash
+
 Data quality report can be generated in the terminal. It is very useful for debugging. All it takes is one command.
+
 <p align="center">
     <img alt="why_data_observability" src="docs/assets/datachecks_cli_output.png" width="800">
 </p>
@@ -62,11 +65,13 @@ Install `datachecks` with the command that is specific to the database.
 ### Install Datachecks
 
 To install all datachecks dependencies, use the below command.
+
 ```shell
 pip install datachecks -U
 ```
 
 ### Create the config file
+
 With a simple config file, you can generate data quality reports for your data sources. Below is the sample config example.
 For more details, please visit the [config guide](https://docs.datachecks.io/configuration/metric_configuration/)
 
@@ -77,24 +82,25 @@ For more details, please visit the [config guide](https://docs.datachecks.io/con
 ### Run from CLI
 
 **Generate Report in Terminal**
+
 ```shell
 datachecks inspect -C config.yaml
 ```
 
 **Generate HTML Report**
+
 ```shell
 datachecks inspect -C config.yaml  --html-report
 ```
 
 Please visit the [Quick Start Guide](https://docs.datachecks.io/getting_started/)
 
-
 ## Supported Data Sources
 
 Datachecks supports sql and search data sources. Below are the list of supported data sources.
 
 | Data Source                                                             | Type                   | Supported  |
-|-------------------------------------------------------------------------|------------------------|------------|
+| ----------------------------------------------------------------------- | ---------------------- | ---------- |
 | [Postgres](https://docs.datachecks.io/integrations/postgres/)           | Transactional Database | :thumbsup: |
 | [MySql](https://docs.datachecks.io/integrations/mysql/)                 | Transactional Database | :thumbsup: |
 | MS SQL Server                                                           | Transactional Database | :soon:     |
@@ -103,12 +109,12 @@ Datachecks supports sql and search data sources. Below are the list of supported
 | [GCP BigQuery](https://docs.datachecks.io/integrations/bigquery/)       | Data Warehouse         | :thumbsup: |
 | [DataBricks](https://docs.datachecks.io/integrations/databricks/)       | Data Warehouse         | :thumbsup: |
 | Snowflake                                                               | Data Warehouse         | :soon:     |
-| AWS RedShift                                                            | Data Warehouse         | :soon:     |
+| [AWS RedShift](https://docs.datachecks.io/integrations/redshift/)       | Data Warehouse         | :thumbsup: |
 
 ## Metric Types
 
 | Metric                                                                                       | Description                                                                                                      |
-|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | **[Reliability Metrics](https://docs.datachecks.io/metrics/reliability/)**                   | Reliability metrics detect whether tables/indices/collections are updating with timely data                      |
 | **[Numeric Distribution Metrics](https://docs.datachecks.io/metrics/numeric_distribution/)** | Numeric Distribution metrics detect changes in the numeric distributions i.e. of values, variance, skew and more |
 | **[Uniqueness Metrics](https://docs.datachecks.io/metrics/uniqueness/)**                     | Uniqueness metrics detect when data constraints are breached like duplicates, number of distinct values etc      |
@@ -130,8 +136,9 @@ Datachecks supports sql and search data sources. Below are the list of supported
 ## Community & Support
 
 For additional information and help, you can use one of these channels:
-* [Slack](https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg) \(Live chat with the team, support, discussions, etc.\)
-* [GitHub issues](https://github.com/waterdipai/datachecks/issues) \(Bug reports, feature requests)
+
+- [Slack](https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg) \(Live chat with the team, support, discussions, etc.\)
+- [GitHub issues](https://github.com/waterdipai/datachecks/issues) \(Bug reports, feature requests)
 
 ## **Contributions**
 
