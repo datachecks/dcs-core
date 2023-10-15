@@ -9,7 +9,7 @@ export const navURLs = [
   {
     title: "Slack",
     logo: "slack_logo",
-    url: "https://www.linkedin.com/company/datachecks/",
+    url: "https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg",
   },
   {
     title: "Docs",
