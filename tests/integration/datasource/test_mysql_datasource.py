@@ -18,6 +18,7 @@ from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.integrations.databases.mysql import MysqlDataSource
 
 
+@pytest.mark.skip(reason="problem with mysql docker container")
 def test_should_throw_exception_when_mysql_connect_fail():
     datasource = MysqlDataSource(
         data_source_name="test_mysql_data_source",
@@ -34,6 +35,7 @@ def test_should_throw_exception_when_mysql_connect_fail():
         datasource.connect()
 
 
+@pytest.mark.skip(reason="problem with mysql docker container")
 def test_should_connect_mysql_datasource():
     datasource = MysqlDataSource(
         data_source_name="test_mysql_data_source",

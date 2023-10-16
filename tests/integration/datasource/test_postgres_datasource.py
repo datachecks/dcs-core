@@ -18,6 +18,7 @@ from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.integrations.databases.postgres import PostgresDataSource
 
 
+@pytest.mark.skip(reason="problem with postgres docker container")
 def test_should_throw_exception_when_postgres_connect_fail():
     datasource = PostgresDataSource(
         data_source_name="test_postgres_data_source",

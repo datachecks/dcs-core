@@ -18,6 +18,7 @@ from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
 from datachecks.integrations.databases.opensearch import OpenSearchDataSource
 
 
+@pytest.mark.skip(reason="problem with opensearch docker container")
 def test_should_throw_exception_when_opensearch_connect_fail():
     datasource = OpenSearchDataSource(
         data_source_name="test_os_data_source",

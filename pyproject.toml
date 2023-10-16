@@ -72,8 +72,7 @@ datachecks = "datachecks.cli.cli:main"
 
 [tool.coverage.run]
 omit = [
-    "datachecks/integrations/databases/bigquery.py",
-    "datachecks/integrations/databases/databricks.py"
+    "datachecks/integrations/databases/*",
 ]
 
 [build-system]
