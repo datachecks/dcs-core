@@ -117,7 +117,7 @@ While running the above command, you should see the following output:
 ![Getting Started](assets/datachecks_getting_started_cli.png)
 
 ### Generate Metrics Validation Report
-    
+
 You can generate a beautiful data quality report with all the metrics with just one command.
 This html report can be shared with the team.
 
