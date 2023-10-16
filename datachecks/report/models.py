@@ -42,7 +42,7 @@ class MetricRow:
     data_source: str
     metric_type: str
     is_valid: bool
-    metric_value: float
+    metric_value: str
     reason: str
 
     def get_dict(self):

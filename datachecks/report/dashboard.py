@@ -192,7 +192,7 @@ class DashboardInfoBuilder:
                 metric_name=metric.tags.get("metric_name"),
                 data_source=metric.data_source,
                 metric_type=metric.metric_type,
-                metric_value=metric.value,
+                metric_value=f"{metric.value:.2f}",
                 is_valid=metric.is_valid,
                 reason=metric.reason,
             ).get_dict()
