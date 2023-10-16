@@ -15,6 +15,8 @@ The resource name of freshness metric should be in the format `<datasource>.<tab
 
 In the below example the metric will look for the last updated timestamp of the table or index using `updated_at` field.
 
+The threshold will trigger a validation error when the metric is greater than 86400 seconds
+
 **Example**
 
 ```yaml title="dcs_config.yaml"
@@ -22,6 +24,8 @@ metrics:
   - name: freshness_of_products
     metric_type: freshness
     resource: product_db.products.updated_at
+    validation:
+      threshold: "> 86400"
 ```
 
 

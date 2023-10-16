@@ -17,6 +17,8 @@ metrics:
     resource: product_db.products.price
     filters:
       where: "country_code = 'IN'"
+    validation:
+      threshold: "< 190"
 ```
 
 
@@ -31,6 +33,8 @@ metrics:
   - name: min_price
     metric_type: min
     resource: product_db.products.price
+    validation:
+      threshold: "> 0"
 ```
 
 ## **Maximum**
@@ -44,6 +48,8 @@ metrics:
   - name: max_price
     metric_type: max
     resource: product_db.products.price
+    validation:
+      threshold: "< 1000"
 ```
 
 ```yaml title="dcs_config.yaml"
@@ -52,6 +58,8 @@ metrics:
   resource: product_db.products.price
   filters:
     where: "rating > 4"
+  validation:
+    threshold: "< 1000"
 ```
 
 ## **Sum**
@@ -65,6 +73,8 @@ metrics:
   - name: sum_of_price
     metric_type: sum
     resource: product_db.products.price
+    validation:
+      threshold: "> 100 & < 1000"
 ```
 
 ## **Variance**
