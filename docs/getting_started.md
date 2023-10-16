@@ -91,11 +91,15 @@ metrics:
   - name: count_of_products
     metric_type: row_count
     resource: product_db.products
+    validation:
+      threshold: "> 0 & < 1000"
   - name: max_product_price_in_india
     metric_type: max
     resource: product_db.products.price
     filters:
       where: "country_code = 'IN'"
+    validation:
+      threshold: "< 190"
 ```
 
 ## Run Datachecks
@@ -111,6 +115,16 @@ datachecks inspect --config-path ./dcs_config.yaml
 While running the above command, you should see the following output:
 
 ![Getting Started](assets/datachecks_getting_started_cli.png)
+
+### Generate Metrics Validation Report
+    
+You can generate a beautiful data quality report with all the metrics with just one command.
+This html report can be shared with the team.
+
+```bash
+datachecks inspect --config-path ./dcs_config.yaml --html-report
+```
+![Getting Started](assets/datachecks_dashboard.png)
 
 ### Run Datachecks in Python
 
