@@ -10,7 +10,7 @@ metrics:
     type: freshness
     resource: mysql_db.table_name.last_updated
     validation:
-      threshold: "> 86400" ##Freshness metric value is in seconds. Validation error if metric value is greater than 86400 seconds. 
+      threshold: "> 86400" ##Freshness metric value is in seconds. Validation error if metric value is greater than 86400 seconds.
 ```
 
 ## Configuration Details
@@ -27,6 +27,7 @@ metrics:
 ## Metric Types
 
 Supported metric types are
+
 
 | Metric Group         | Metric Type                                                                                        |
 |:---------------------|:---------------------------------------------------------------------------------------------------|
