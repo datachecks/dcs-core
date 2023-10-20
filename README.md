@@ -15,12 +15,12 @@
 <div align="center">
 ⭐️ If you like it, star the repo <a href="https://github.com/waterdipai/waterdip/stargazers"></a> ⭐
 
-**|**
-<a href="https://docs.datachecks.io/">**Docs**</a>
-**|**
-<a href="https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg">**Slack**</a>
-**|**
-
+<h3>|
+<a href="https://docs.datachecks.io/">Documentations</a>
+|
+<a href="https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg">Slack Community</a>
+|
+</h3>
 </div>
 
 ## Why Data Monitoring?
