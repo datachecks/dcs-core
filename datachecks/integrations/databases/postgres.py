@@ -39,11 +39,17 @@ class PostgresDataSource(SQLDataSource):
                 database=self.data_connection.get("database"),
             )
             schema = self.data_connection.get("schema")
-            engine = create_engine(
-                url,
-                connect_args={"options": f"-csearch_path={schema}"},
-                isolation_level="AUTOCOMMIT",
-            )
+            if schema is None:
+                engine = create_engine(
+                    url,
+                    isolation_level="AUTOCOMMIT",
+                )
+            else:
+                engine = create_engine(
+                    url,
+                    connect_args={"options": f"-csearch_path={schema}"},
+                    isolation_level="AUTOCOMMIT",
+                )
             self.connection = engine.connect()
             return self.connection
         except Exception as e:
