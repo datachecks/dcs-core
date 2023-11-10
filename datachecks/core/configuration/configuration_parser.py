@@ -159,6 +159,16 @@ def parse_metric_configurations(
 ) -> Dict[str, MetricConfiguration]:
     metric_configurations: Dict[str, MetricConfiguration] = {}
 
+    metric_names = [
+        metric_yaml_configuration["name"]
+        for metric_yaml_configuration in metric_yaml_configurations
+    ]
+
+    if len(metric_names) != len(set(metric_names)):
+        raise DataChecksConfigurationError(
+            f"Duplicate metric names found in configuration: {metric_names}"
+        )
+
     for metric_yaml_configuration in metric_yaml_configurations:
         metric_type = MetricsType(metric_yaml_configuration["metric_type"].lower())
 
