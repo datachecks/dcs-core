@@ -160,15 +160,13 @@ def parse_metric_configurations(
     metric_configurations: Dict[str, MetricConfiguration] = {}
 
     for metric_yaml_configuration in metric_yaml_configurations:
-        metric_type = MetricsType(metric_yaml_configuration["metric_type"].lower())
+        metric_type = MetricsType(metric_yaml_configuration["type"].lower())
 
         if metric_type == MetricsType.COMBINED:
             expression_str = metric_yaml_configuration["expression"]
             metric_configuration = MetricConfiguration(
                 name=metric_yaml_configuration["name"],
-                metric_type=MetricsType(
-                    metric_yaml_configuration["metric_type"].lower()
-                ),
+                metric_type=MetricsType(metric_yaml_configuration["type"].lower()),
                 expression=expression_str,
             )
         else:
@@ -180,9 +178,7 @@ def parse_metric_configurations(
 
             metric_configuration = MetricConfiguration(
                 name=metric_yaml_configuration["name"],
-                metric_type=MetricsType(
-                    metric_yaml_configuration["metric_type"].lower()
-                ),
+                metric_type=MetricsType(metric_yaml_configuration["type"].lower()),
                 resource=_metric_resource_parser(
                     resource_str=resource_str,
                     data_source_type=data_source_configuration.type,
