@@ -12,7 +12,9 @@ Below we are installing the package with the **postgres extra**, which is requir
 ```bash
 pip install 'datachecks[postgres]' -U
 ```
+
 ## Quick Setup of Database & Test Data
+
 > Ignore if you already have a PostgreSql setup
 
 ??? "Create a SQL file"
@@ -40,7 +42,6 @@ pip install 'datachecks[postgres]' -U
     ```
 
 ??? "Postgres Docker Compose file"
-
 
     Create a `docker-compose.yml` for postgres:
 
@@ -89,12 +90,12 @@ data_sources:
       database: dcs_demo
 metrics:
   - name: count_of_products
-    metric_type: row_count
+    type: row_count
     resource: product_db.products
     validation:
       threshold: "> 0 & < 1000"
   - name: max_product_price_in_india
-    metric_type: max
+    type: max
     resource: product_db.products.price
     filters:
       where: "country_code = 'IN'"
@@ -124,6 +125,7 @@ This html report can be shared with the team.
 ```bash
 datachecks inspect --config-path ./dcs_config.yaml --html-report
 ```
+
 ![Getting Started](assets/datachecks_dashboard.png)
 
 ### Run Datachecks in Python
