@@ -96,6 +96,33 @@ class MetricConfiguration:
             )
 
 
+class MetricStorageType(str, Enum):
+    """
+    Metric storage type
+    """
+
+    LOCAL_FILE = "local_file"
+
+
+@dataclass
+class LocalFileStorageParameters:
+    """
+    Local file metric storage parameters
+    """
+
+    path: str
+
+
+@dataclass
+class MetricStorageConfiguration:
+    """
+    Metric storage configuration
+    """
+
+    type: MetricStorageType
+    params: Union[LocalFileStorageParameters]
+
+
 @dataclass
 class Configuration:
     """
@@ -104,3 +131,4 @@ class Configuration:
 
     data_sources: Dict[str, DataSourceConfiguration]
     metrics: Dict[str, MetricConfiguration]
+    storage: Optional[MetricStorageConfiguration] = None

@@ -12,9 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+ERROR_RUNTIME = "runtime_error"
 ERROR_CONFIGURATION = "configuration_error"
 ERROR_DATA_SOURCES_CONNECTION = "data_sources_connection_error"
 ERROR_METRIC_GENERATION = "metric_generation_error"
+
+
+class DataChecksRuntimeError(Exception):
+    """Raised when there is an error in the configuration file."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.error_code = ERROR_RUNTIME
 
 
 class DataChecksConfigurationError(Exception):

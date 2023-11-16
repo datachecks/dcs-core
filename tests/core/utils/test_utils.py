@@ -12,22 +12,33 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
+
 import pytest
 
-from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.integrations.databases.opensearch import OpenSearchDataSource
+from datachecks.core.utils.utils import ensure_directory_exists
+
+TEST_DIR = "/tmp/datachecks/test_dir"
 
 
-def test_should_throw_exception_when_opensearch_connect_fail():
-    datasource = OpenSearchDataSource(
-        data_source_name="test_os_data_source",
-        data_connection={
-            "username": "admin",
-            "password": "admin",
-            "host": "localhost",
-            "port": 2000,
-        },
-    )
+@pytest.fixture(scope="module", autouse=True)
+def directory_fixture():
+    try:
+        os.rmdir(TEST_DIR)
+    except FileNotFoundError:
+        pass
+    yield
+    try:
+        os.rmdir(TEST_DIR)
+    except FileNotFoundError:
+        pass
 
-    with pytest.raises(DataChecksDataSourcesConnectionError):
-        datasource.connect()
+
+def test_check_directory_exists():
+    os.makedirs(TEST_DIR)
+    assert ensure_directory_exists(TEST_DIR) is True
+
+
+def test_check_and_create_dir():
+    status = ensure_directory_exists(TEST_DIR, create_if_not_exists=True)
+    assert status is True

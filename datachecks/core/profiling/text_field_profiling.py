@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
@@ -48,7 +48,7 @@ class TextSQLFieldProfiler:
             field_name=self._field_name,
             data_type=self._data_type,
         )
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc)
         for key, value in data.items():
             metric_value = MetricValue(
                 value=value,

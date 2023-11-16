@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Union
 
 from datachecks.core.common.models.metric import (
@@ -96,7 +96,7 @@ class DataSourceProfiling:
                 data_source=self._datasource.data_source_name,
                 metric_type=MetricsType.ROW_COUNT,
                 table_name=table,
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(timezone.utc),
             )
 
     def _generate_numeric_field_profile(
