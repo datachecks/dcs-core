@@ -102,3 +102,13 @@ export enum MetricTableHeader {
   is_valid = "Is Valid",
   reason = "Reason",
 }
+export const TabsProps = {
+  sx: {
+    "& .Mui-selected": {
+      color: "var(--primary)!important",
+    },
+    "& .MuiTabs-indicator": {
+      backgroundColor: "var(--failed)!important",
+    },
+  },
+};

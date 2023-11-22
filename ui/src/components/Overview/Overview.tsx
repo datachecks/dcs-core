@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Score from "./Score";
-import { Button } from "@material-ui/core";
-import { ArrowForward } from "@material-ui/icons";
+import { Button } from "@mui/material";
+import { ArrowForward } from "@mui/icons-material";
 import { MetricHealthStatus } from "../../api/Api";
 import { overAllScore } from "../../types/component.type";
 import styles from "./Overview.module.css";
