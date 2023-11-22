@@ -1,11 +1,11 @@
 import React from "react";
+import styles from "../../src/pages/Metrics/Metrics.module.css";
 import {
   CancelRounded,
   FilterListRounded,
   HighlightOffOutlined,
   SearchRounded,
-} from "@material-ui/icons";
-import styles from "../../src/pages/Metrics/Metrics.module.css";
+} from "@mui/icons-material";
 export const MetricTable: {
   Header: MetricHeader;
   Props: any;

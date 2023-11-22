@@ -1,15 +1,9 @@
 import React from "react";
-import {
-  Table,
-  Button,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@material-ui/core";
 import styles from "./Preview.module.css";
-import { ArrowForward } from "@material-ui/icons";
 import { DashboardMetricOverview } from "../../api/Api";
 import { docRedirects, PreviewTableHeader } from "../../types/component.type";
+import { Button, Table, TableCell, TableHead, TableRow } from "@mui/material";
+import { ArrowForward } from "@mui/icons-material";
 
 function Preview({ dashboard }: { dashboard: DashboardMetricOverview }) {
   const renderTableHeaders = () => (
