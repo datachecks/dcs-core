@@ -210,3 +210,30 @@ def test_should_throw_exception_on_invalid_validation_config():
         assert str(e).startswith(
             "Failed to parse configuration: Invalid threshold configuration"
         )
+
+
+def test_should_throw_exception_on_multiple_datasources_of_same_name():
+    yaml_string = """
+    data_sources:
+      - name: test_datasource
+        type: opensearch
+        connection:
+          host: 127.0.0.1
+          port: 9205
+          username: opensearch
+          password: opensearch
+      - name: test_datasource
+        type: postgres
+        connection:
+          host: 127.0.0.1
+          port: 5432
+          username: postgres
+          password: postgres
+          database: test_db
+    """
+    try:
+        configurations = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert str(e).startswith(
+            "Failed to parse configuration: Duplicate data source names found"
+        )
