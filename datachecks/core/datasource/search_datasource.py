@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from dateutil import parser
@@ -219,7 +219,7 @@ class SearchIndexDataSource(DataSource):
             last_updated = response["hits"]["hits"][0]["_source"][field]
 
             last_updated = parser.parse(timestr=last_updated).timestamp()
-            now = datetime.utcnow().timestamp()
+            now = datetime.now(timezone.utc).timestamp()
             return int(now - last_updated)
 
         return 0

@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from datetime import datetime, timezone
 from unittest.mock import Mock
 
 from datachecks.core import Inspect
@@ -73,7 +73,7 @@ class TestInspect:
             return_value=MetricValue(
                 identity="test_identity",
                 metric_type=MetricsType.ROW_COUNT,
-                timestamp="2020-01-01T00:00:00.000000",
+                timestamp=datetime.now(timezone.utc),
                 data_source=self.DATA_SOURCE_NAME,
                 value=1,
             ),

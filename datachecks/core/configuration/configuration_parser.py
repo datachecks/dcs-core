@@ -24,8 +24,11 @@ from datachecks.core.common.models.configuration import (
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
     DataSourceType,
+    LocalFileStorageParameters,
     MetricConfiguration,
     MetricsFilterConfiguration,
+    MetricStorageConfiguration,
+    MetricStorageType,
 )
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
@@ -46,7 +49,7 @@ CONDITION_TYPE_MAPPING = {
 
 
 def parse_data_source_yaml_configurations(
-    data_source_yaml_configurations: List[dict],
+    data_source_yaml_configurations: List[Dict],
 ) -> Dict[str, DataSourceConfiguration]:
     data_source_configurations: Dict[str, DataSourceConfiguration] = {}
     for data_source_yaml_configuration in data_source_yaml_configurations:
@@ -114,7 +117,7 @@ def _parse_threshold_str(threshold: str) -> Threshold:
         )
 
 
-def _parse_validation_configuration(validation_config: dict) -> Validation:
+def _parse_validation_configuration(validation_config: Dict) -> Validation:
     if "threshold" in validation_config:
         threshold = _parse_threshold_str(threshold=validation_config["threshold"])
         return Validation(threshold=threshold)
@@ -153,9 +156,31 @@ def _metric_resource_parser(
             return _parse_resource_field(resource_str, "table")
 
 
+def parse_storage_configurations(
+    storage_yaml_configurations: Dict,
+) -> Union[MetricStorageConfiguration, None]:
+    if storage_yaml_configurations["type"] == "local_file":
+        if "params" not in storage_yaml_configurations:
+            raise DataChecksConfigurationError(
+                "storage params should be provided for local file storage configuration"
+            )
+        if "path" not in storage_yaml_configurations["params"]:
+            raise DataChecksConfigurationError(
+                "path should be provided for local file storage configuration"
+            )
+        return MetricStorageConfiguration(
+            type=MetricStorageType.LOCAL_FILE,
+            params=LocalFileStorageParameters(
+                path=storage_yaml_configurations["params"]["path"]
+            ),
+        )
+    else:
+        return None
+
+
 def parse_metric_configurations(
     data_source_configurations: Dict[str, DataSourceConfiguration],
-    metric_yaml_configurations: List[dict],
+    metric_yaml_configurations: List[Dict],
 ) -> Dict[str, MetricConfiguration]:
     metric_configurations: Dict[str, MetricConfiguration] = {}
 
@@ -231,9 +256,12 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
             data_source_configurations=data_source_configurations,
             metric_yaml_configurations=config_dict["metrics"],
         )
-        return Configuration(
+        configuration = Configuration(
             data_sources=data_source_configurations, metrics=metric_configurations
         )
+        if "storage" in config_dict:
+            configuration.storage = parse_storage_configurations(config_dict["storage"])
+        return configuration
     except Exception as ex:
         raise DataChecksConfigurationError(
             message=f"Failed to parse configuration: {str(ex)}"

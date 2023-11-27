@@ -36,7 +36,7 @@ class MetricIdentity:
         index_name: str = None,
         table_name: str = None,
         field_name: str = None,
-    ):
+    ) -> str:
         """
         Generate a unique identifier for a metric
         """
@@ -108,8 +108,8 @@ class Metric(ABC):
         if "validation" in kwargs and kwargs["validation"] is not None:
             self.validation = kwargs["validation"]
 
-    def get_metric_identity(self):
-        MetricIdentity.generate_identity(
+    def get_metric_identity(self) -> str:
+        return MetricIdentity.generate_identity(
             metric_type=self.metric_type,
             metric_name=self.name,
             data_source=self.data_source,
@@ -131,7 +131,7 @@ class Metric(ABC):
                     metric_type=self.metric_type.value,
                     value=metric_value,
                     expression=self.expression,
-                    timestamp=datetime.datetime.utcnow().isoformat(),
+                    timestamp=datetime.datetime.utcnow(),
                     tags=tags,
                 )
             else:
@@ -139,7 +139,7 @@ class Metric(ABC):
                     identity=self.get_metric_identity(),
                     metric_type=self.metric_type.value,
                     value=metric_value,
-                    timestamp=datetime.datetime.utcnow().isoformat(),
+                    timestamp=datetime.datetime.utcnow(),
                     data_source=self.data_source.data_source_name,
                     expression=self.expression,
                     tags=tags,

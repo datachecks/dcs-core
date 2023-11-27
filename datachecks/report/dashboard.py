@@ -30,7 +30,6 @@ from datachecks.report.models import (
 )
 
 STATIC_PATH = os.path.join(os.path.dirname(__file__), "static")
-print(STATIC_PATH)
 
 
 def __load_js():

@@ -12,22 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
+from datetime import datetime, timezone
 
-from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.integrations.databases.opensearch import OpenSearchDataSource
+from datachecks.core.common.models.metric import MetricsType, MetricValue
 
 
-def test_should_throw_exception_when_opensearch_connect_fail():
-    datasource = OpenSearchDataSource(
-        data_source_name="test_os_data_source",
-        data_connection={
-            "username": "admin",
-            "password": "admin",
-            "host": "localhost",
-            "port": 2000,
-        },
-    )
-
-    with pytest.raises(DataChecksDataSourcesConnectionError):
-        datasource.connect()
+class TestMetricValue:
+    def test_datetime_serializer(self):
+        current_time = datetime.now(timezone.utc)
+        metric_value = MetricValue(
+            identity="identity",
+            value=1,
+            metric_type=MetricsType.ROW_COUNT,
+            timestamp=current_time,
+        )
+        json_encoded = metric_value.json
+        json_decoded = MetricValue.from_json(json_encoded)
+        assert json_decoded.timestamp == current_time

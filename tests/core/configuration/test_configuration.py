@@ -11,7 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from datachecks.core.common.models.configuration import DataSourceType
+from datachecks.core.common.models.configuration import (
+    DataSourceType,
+    LocalFileStorageParameters,
+    MetricStorageConfiguration,
+    MetricStorageType,
+)
 from datachecks.core.common.models.validation import Threshold, Validation
 from datachecks.core.configuration.configuration_parser import (
     load_configuration_from_yaml_str,
@@ -209,4 +214,84 @@ def test_should_throw_exception_on_invalid_validation_config():
     except Exception as e:
         assert str(e).startswith(
             "Failed to parse configuration: Invalid threshold configuration"
+        )
+
+
+def test_should_load_local_storage_config():
+    yaml_string = """
+    data_sources:
+      - name: "test"
+        type: "postgres"
+        connection:
+          host: "localhost"
+          port: 5432
+    metrics:
+      - name: test_validity_metric
+        metric_type: combined
+        expression: mul(1, 2)
+        validation:
+          threshold: '> 10'
+
+    storage:
+      type: local_file
+      params:
+        path: /tmp
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    storage: MetricStorageConfiguration = configuration.storage
+    assert storage.type == MetricStorageType.LOCAL_FILE
+    assert type(storage.params) == LocalFileStorageParameters
+    assert storage.params.path == "/tmp"
+
+
+def test_should_return_none_for_invalid_storage_type():
+    yaml_string = """
+        data_sources:
+          - name: "test"
+            type: "postgres"
+            connection:
+              host: "localhost"
+              port: 5432
+        metrics:
+          - name: test_validity_metric
+            metric_type: combined
+            expression: mul(1, 2)
+            validation:
+              threshold: '> 10'
+
+        storage:
+          type: invalid
+          params:
+            path: /tmp
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.storage is None
+
+
+def test_should_throw_exception_on_invalid_storage_config():
+    yaml_string = """
+        data_sources:
+          - name: "test"
+            type: "postgres"
+            connection:
+              host: "localhost"
+              port: 5432
+        metrics:
+          - name: test_validity_metric
+            metric_type: combined
+            expression: mul(1, 2)
+            validation:
+              threshold: '> 10'
+
+        storage:
+          type: local_file
+          params:
+            path1: /tmp
+        """
+
+    try:
+        configuration = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert str(e).startswith(
+            "Failed to parse configuration: path should be provided for local file storage configuration"
         )

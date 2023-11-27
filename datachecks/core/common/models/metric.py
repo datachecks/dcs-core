@@ -11,10 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+
+import pytz
+from dateutil import parser
+
+from datachecks.core.utils.utils import EnhancedJSONEncoder
 
 
 class MetricsType(str, Enum):
@@ -56,7 +62,7 @@ class MetricValue:
     identity: str
     value: Union[int, float]
     metric_type: MetricsType
-    timestamp: str
+    timestamp: datetime
     data_source: Optional[str] = None
     expression: Optional[str] = None
     table_name: Optional[str] = None
@@ -65,6 +71,29 @@ class MetricValue:
     is_valid: Optional[bool] = None
     reason: Optional[str] = None
     tags: Dict[str, str] = None
+
+    @property
+    def json(self):
+        return json.dumps(asdict(self), cls=EnhancedJSONEncoder)
+
+    @classmethod
+    def from_json(cls, json_string: str):
+        json_obj = json.loads(json_string)
+        parsed_date = parser.parse(json_obj.get("timestamp")).astimezone(tz=pytz.UTC)
+        return cls(
+            identity=json_obj.get("identity"),
+            value=json_obj.get("value"),
+            metric_type=MetricsType(json_obj.get("metric_type")),
+            timestamp=parsed_date,
+            data_source=json_obj.get("data_source", None),
+            expression=json_obj.get("expression", None),
+            table_name=json_obj.get("table_name", None),
+            index_name=json_obj.get("index_name", None),
+            field_name=json_obj.get("field_name", None),
+            is_valid=json_obj.get("is_valid", None),
+            reason=json_obj.get("reason", None),
+            tags=json_obj.get("tags", None),
+        )
 
 
 @dataclass
@@ -80,6 +109,11 @@ class TableMetrics:
     """
     metrics: Dict[str, MetricValue]
 
+    """
+    Historical values of the metrics is a dictionary of metric identifier and list of metric values
+    """
+    historical_metrics: Optional[Dict[str, List[MetricValue]]] = None
+
 
 @dataclass
 class IndexMetrics:
@@ -93,6 +127,11 @@ class IndexMetrics:
     metrics is a dictionary of metric identifier and metric value
     """
     metrics: Dict[str, MetricValue]
+
+    """
+    Historical values of the metrics is a dictionary of metric identifier and list of metric values
+    """
+    historical_metrics: Optional[Dict[str, List[MetricValue]]] = None
 
 
 @dataclass

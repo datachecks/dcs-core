@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from datetime import datetime, timezone
 from unittest.mock import Mock
 
 from datachecks.core.common.models.metric import MetricsType, MetricValue
@@ -31,7 +31,7 @@ class TestFieldProfiling:
                     value=1,
                     identity="test_identity",
                     metric_type=MetricsType("min"),
-                    timestamp="2020-01-01T00:00:00.000000",
+                    timestamp=datetime.now(timezone.utc),
                     data_source="test_data_source",
                 ),
             ),
@@ -57,7 +57,7 @@ class TestFieldProfiling:
                     value=1,
                     identity="test_identity",
                     metric_type=MetricsType("min"),
-                    timestamp="2020-01-01T00:00:00.000000",
+                    timestamp=datetime.now(timezone.utc),
                     data_source="test_data_source",
                     table_name="test_table",
                 ),

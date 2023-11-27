@@ -51,11 +51,12 @@ def main():
     default=None,
     help="Specify the file path for configuration",
 )
-@click.option(
-    "--auto-profile",
-    is_flag=True,
-    help="Specify if the inspection should do auto-profile of all data sources",
-)
+# Disabled for now
+# @click.option(
+#     "--auto-profile",
+#     is_flag=True,
+#     help="Specify if the inspection should do auto-profile of all data sources",
+# )
 @click.option(
     "--html-report",
     is_flag=True,
@@ -69,7 +70,7 @@ def main():
 )
 def inspect(
     config_path: Union[str, None],
-    auto_profile: bool = False,
+    # auto_profile: bool = False, # Disabled for now
     html_report: bool = False,
     report_path: str = "datachecks_report.html",
 ):
@@ -84,7 +85,8 @@ def inspect(
             )
         configuration: Configuration = load_configuration(config_path)
 
-        inspector = Inspect(configuration=configuration, auto_profile=auto_profile)
+        # inspector = Inspect(configuration=configuration, auto_profile=auto_profile) # Disabled for now
+        inspector = Inspect(configuration=configuration)
 
         print("Starting [bold blue]datachecks[/bold blue] inspection...", ":zap:")
         output: InspectOutput = inspector.run()
@@ -144,7 +146,6 @@ def _build_metric_cli_table(*, inspect_output: InspectOutput):
 
 
 def _build_html_report(*, inspect_output: InspectOutput, report_path: str):
-    logger.info(inspect_output)
     template_params = TemplateParams(
         dashboard_id="dcs_dashboard_" + str(uuid.uuid4()).replace("-", ""),
         dashboard_info=DashboardInfoBuilder(inspect_output).build(),
