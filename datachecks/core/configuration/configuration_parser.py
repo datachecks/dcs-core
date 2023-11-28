@@ -51,6 +51,13 @@ CONDITION_TYPE_MAPPING = {
 def parse_data_source_yaml_configurations(
     data_source_yaml_configurations: List[Dict],
 ) -> Dict[str, DataSourceConfiguration]:
+    data_sources_names = []
+    for data_source_yaml_configuration in data_source_yaml_configurations:
+        if data_source_yaml_configuration["name"] in data_sources_names:
+            raise DataChecksConfigurationError(
+                f"Duplicate datasource names found: {data_source_yaml_configuration['name']}"
+            )
+        data_sources_names.append(data_source_yaml_configuration["name"])
     data_source_configurations: Dict[str, DataSourceConfiguration] = {}
     for data_source_yaml_configuration in data_source_yaml_configurations:
         name_ = data_source_yaml_configuration["name"]

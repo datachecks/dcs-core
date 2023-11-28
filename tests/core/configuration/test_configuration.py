@@ -295,3 +295,34 @@ def test_should_throw_exception_on_invalid_storage_config():
         assert str(e).startswith(
             "Failed to parse configuration: path should be provided for local file storage configuration"
         )
+
+
+def test_should_throw_exception_on_duplicate_datasource_names():
+    yaml_string = """
+        data_sources:
+          - name: "test"
+            type: "postgres"
+            connection:
+              host: "localhost"
+              port: 5421
+              username: postgres
+              password: postgres
+              database: dcs_db
+              schema: public
+          - name: "test"
+            type: "mysql"
+            connection:
+              host: "localhost"
+              port: 3306
+              username: dbuser
+              password: dbpass
+              database: dcs_db
+              schema: public
+        """
+
+    try:
+        configuration = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert str(e).startswith(
+            "Failed to parse configuration: Duplicate datasource names found"
+        )
