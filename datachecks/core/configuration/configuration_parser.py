@@ -51,17 +51,6 @@ CONDITION_TYPE_MAPPING = {
 def parse_data_source_yaml_configurations(
     data_source_yaml_configurations: List[Dict],
 ) -> Dict[str, DataSourceConfiguration]:
-    data_sources_names = []
-    duplicate_names = []
-    for data_source_yaml_configuration in data_source_yaml_configurations:
-        if data_source_yaml_configuration["name"] not in data_sources_names:
-            data_sources_names.append(data_source_yaml_configuration["name"])
-        else:
-            duplicate_names.append(data_source_yaml_configuration["name"])
-    if len(duplicate_names) != 0:
-        raise DataChecksConfigurationError(
-            f"Duplicate datasource names found : {duplicate_names}"
-        )
     data_source_configurations: Dict[str, DataSourceConfiguration] = {}
     for data_source_yaml_configuration in data_source_yaml_configurations:
         name_ = data_source_yaml_configuration["name"]
@@ -193,8 +182,14 @@ def parse_metric_configurations(
     data_source_configurations: Dict[str, DataSourceConfiguration],
     metric_yaml_configurations: List[Dict],
 ) -> Dict[str, MetricConfiguration]:
+    metrics_names = []
+    for metric_yaml_configuration in metric_yaml_configurations:
+        if metric_yaml_configuration["name"] in metrics_names:
+            raise DataChecksConfigurationError(
+                f"Duplicate metric names found: {metric_yaml_configuration['name']}"
+            )
+        metrics_names.append(metric_yaml_configuration["name"])
     metric_configurations: Dict[str, MetricConfiguration] = {}
-
     for metric_yaml_configuration in metric_yaml_configurations:
         metric_type = MetricsType(metric_yaml_configuration["metric_type"].lower())
 
