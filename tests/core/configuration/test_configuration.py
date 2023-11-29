@@ -296,7 +296,7 @@ def test_should_throw_exception_on_invalid_storage_config():
             "Failed to parse configuration: path should be provided for local file storage configuration"
         )
 
-
+        
 def test_should_throw_exception_on_duplicate_metric_names():
     yaml_string = """
         data_sources:
