@@ -326,3 +326,39 @@ def test_should_throw_exception_on_duplicate_datasource_names():
         assert str(e).startswith(
             "Failed to parse configuration: Duplicate datasource names found"
         )
+
+
+def test_should_throw_exception_on_duplicate_metric_names():
+    yaml_string = """
+        data_sources:
+          - name: "test"
+            type: "postgres"
+            connection:
+              host: "localhost"
+              port: 5421
+              username: postgres
+              password: postgres
+              database: dcs_db
+              schema: public
+        metrics:
+          - name: postgres_avg_price
+            metric_type: avg
+            resource: iris.dcs_iris.sepal_length
+            validation:
+              threshold: "> 0 & < 1000"
+
+          - name: postgres_min_price
+            metric_type: min
+            resource: iris.dcs_iris.sepal_length
+
+          - name: postgres_min_price
+            metric_type: max
+            resource: iris.dcs_iris.sepal_length
+        """
+
+    try:
+        configuration = load_configuration_from_yaml_str(yaml_string)
+    except Exception as e:
+        assert str(e).startswith(
+            "Failed to parse configuration: Duplicate metric names found"
+        )
