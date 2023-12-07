@@ -99,11 +99,12 @@ class Metric(ABC):
         self.filter_query = None
         if "filters" in kwargs and kwargs["filters"] is not None:
             filters = kwargs["filters"]
-            if hasattr(filters, "where"):
+            if "where" in filters and filters["where"] is not None:
                 if isinstance(data_source, SearchIndexDataSource):
-                    self.filter_query = json.loads(filters.where)
+                    self.filter_query = json.loads(filters["where"])
                 elif isinstance(data_source, SQLDataSource):
-                    self.filter_query = filters.where
+                    self.filter_query = filters["where"]
+
         self.validation = None
         if "validation" in kwargs and kwargs["validation"] is not None:
             self.validation = kwargs["validation"]
