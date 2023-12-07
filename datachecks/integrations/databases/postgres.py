@@ -38,7 +38,7 @@ class PostgresDataSource(SQLDataSource):
                 port=self.data_connection.get("port"),
                 database=self.data_connection.get("database"),
             )
-            schema = self.data_connection.get("schema")
+            schema = self.data_connection.get("schema") or "public"
             engine = create_engine(
                 url,
                 connect_args={"options": f"-csearch_path={schema}"},
