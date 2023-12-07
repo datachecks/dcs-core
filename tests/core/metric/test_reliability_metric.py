@@ -55,7 +55,7 @@ class TestDocumentCountMetric:
             data_source=mock_data_source,
             index_name=INDEX_NAME,
             metric_type=MetricsType.DOCUMENT_COUNT,
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
         )
         doc_value = doc.get_metric_value()
         assert doc_value.value == 51
@@ -70,7 +70,7 @@ class TestDocumentCountMetric:
             data_source=mock_data_source,
             index_name=INDEX_NAME,
             metric_type=MetricsType.DOCUMENT_COUNT,
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
             validation=Validation(threshold=Threshold(gt=100)),
         )
         doc_value = doc.get_metric_value()
@@ -89,7 +89,7 @@ class TestRowCountMetric:
             data_source=mock_data_source,
             metric_type=MetricsType.ROW_COUNT,
             table_name="test_table",
-            filters={"where_clause": "age >= 30 AND age <= 40"},
+            filters={"where": "age >= 30 AND age <= 40"},
         )
         metric_value = row_count_metric.get_metric_value()
         assert metric_value.value == 10
@@ -121,7 +121,6 @@ class TestRowCountMetric:
             data_source=mock_data_source,
             metric_type=MetricsType.ROW_COUNT,
             table_name="test_table",
-            filters={"where_clause": "age >= 30 AND age <= 40"},
         )
         assert row_count_metric.get_metric_value() is None
 

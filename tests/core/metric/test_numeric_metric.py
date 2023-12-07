@@ -60,7 +60,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 13
@@ -91,7 +91,7 @@ class TestMinColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 100, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 100, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 13
@@ -108,7 +108,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=100)),
         )
         gt_row_value = gt_row.get_metric_value()
@@ -121,7 +121,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
             validation=Validation(threshold=Threshold(lt=100)),
         )
         lt_row_value = lt_row.get_metric_value()
@@ -134,7 +134,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
             validation=Validation(threshold=Threshold(gte=100)),
         )
         gte_row_value = gte_row.get_metric_value()
@@ -147,7 +147,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
             validation=Validation(threshold=Threshold(lte=100)),
         )
         lte_row_value = lte_row.get_metric_value()
@@ -160,7 +160,7 @@ class TestMinColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MIN,
             field_name="age",
-            filters={"where_clause": "age >= 100 AND age <= 200"},
+            filters={"where": "age >= 100 AND age <= 200"},
             validation=Validation(threshold=Threshold(eq=100)),
         )
         eq_row_value = eq_row.get_metric_value()
@@ -195,7 +195,7 @@ class TestMaxColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MAX,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 51
@@ -226,7 +226,7 @@ class TestMaxColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.MAX,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 51
@@ -242,7 +242,7 @@ class TestMaxColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.MAX,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -277,7 +277,7 @@ class TestAvgColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.AVG,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 1.3
@@ -308,7 +308,7 @@ class TestAvgColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.AVG,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 1.3
@@ -324,7 +324,7 @@ class TestAvgColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.AVG,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -359,7 +359,7 @@ class TestSumColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.SUM,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 1.3
@@ -390,7 +390,7 @@ class TestSumColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.SUM,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 1.3
@@ -423,7 +423,7 @@ class TestVarianceColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.VARIANCE,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 4800
@@ -454,7 +454,7 @@ class TestVarianceColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.VARIANCE,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 4800
@@ -470,7 +470,7 @@ class TestVarianceColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.VARIANCE,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -505,7 +505,7 @@ class TestStdDevColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.STDDEV,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 4380976080
@@ -536,7 +536,7 @@ class TestStdDevColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.STDDEV,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 4380976080
@@ -569,7 +569,7 @@ class TestDuplicateCountColumnValueMetric:
             table_name="uniqueness_metric_test",
             metric_type=MetricsType.DUPLICATE_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -600,7 +600,7 @@ class TestDuplicateCountColumnValueMetric:
             index_name="uniqueness_metric_test",
             metric_type=MetricsType.DUPLICATE_COUNT,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -616,7 +616,7 @@ class TestDuplicateCountColumnValueMetric:
             table_name="uniqueness_metric_test",
             metric_type=MetricsType.DUPLICATE_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -651,7 +651,7 @@ class TestNullCountColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.NULL_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -682,7 +682,7 @@ class TestNullCountColumnValueMetric:
             index_name="completeness_metric_test",
             metric_type=MetricsType.NULL_COUNT,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -698,7 +698,7 @@ class TestNullCountColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.NULL_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -733,7 +733,7 @@ class TestNullPercentageColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.NULL_PERCENTAGE,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -764,7 +764,7 @@ class TestNullPercentageColumnValueMetric:
             index_name="completeness_metric_test",
             metric_type=MetricsType.NULL_PERCENTAGE,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -780,7 +780,7 @@ class TestNullPercentageColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.NULL_PERCENTAGE,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -815,7 +815,7 @@ class TestDistinctCountColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.DISTINCT_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 50
@@ -846,7 +846,7 @@ class TestDistinctCountColumnValueMetric:
             index_name="numeric_metric_test",
             metric_type=MetricsType.DISTINCT_COUNT,
             field_name="age",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 30
@@ -862,7 +862,7 @@ class TestDistinctCountColumnValueMetric:
             table_name="numeric_metric_test",
             metric_type=MetricsType.DISTINCT_COUNT,
             field_name="age",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -897,7 +897,7 @@ class TestEmptyStringCountColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_COUNT,
             field_name="description",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -928,7 +928,7 @@ class TestEmptyStringCountColumnValueMetric:
             index_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_COUNT,
             field_name="description",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0
@@ -944,7 +944,7 @@ class TestEmptyStringCountColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_COUNT,
             field_name="description",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()
@@ -979,7 +979,7 @@ class TestEmptyStringPercentageColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_PERCENTAGE,
             field_name="description",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0.0
@@ -1010,7 +1010,7 @@ class TestEmptyStringPercentageColumnValueMetric:
             index_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_PERCENTAGE,
             field_name="description",
-            filters={"search_query": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 200}}}'},
         )
         row_value = row.get_metric_value()
         assert row_value.value == 0.0
@@ -1026,7 +1026,7 @@ class TestEmptyStringPercentageColumnValueMetric:
             table_name="completeness_metric_test",
             metric_type=MetricsType.EMPTY_STRING_PERCENTAGE,
             field_name="description",
-            filters={"where_clause": "age >= 30 AND age <= 200"},
+            filters={"where": "age >= 30 AND age <= 200"},
             validation=Validation(threshold=Threshold(gt=10)),
         )
         row_value = row.get_metric_value()

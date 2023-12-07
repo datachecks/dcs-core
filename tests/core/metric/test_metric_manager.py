@@ -67,15 +67,13 @@ class TestMetricManager:
 
         metric_name, index_name = "test_document_count_metric", "test_index"
 
-        filters = {"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'}
-
         metric_config = MetricConfiguration(
             name=metric_name,
             metric_type=MetricsType.DOCUMENT_COUNT,
             resource=Index(name=index_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
         )
 
-        metric_config.filters = MetricsFilterConfiguration(**filters)
         metric_manager = MetricManager(
             metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
@@ -151,15 +149,13 @@ class TestMetricManager:
 
         metric_name, table_name = "test_row_count_metric", "test_table"
 
-        filters = {"where": "age > 30"}
-
         metric_config = MetricConfiguration(
             name=metric_name,
             metric_type=MetricsType.ROW_COUNT,
             resource=Table(name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+            filters={"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
         )
 
-        metric_config.filters = MetricsFilterConfiguration(**filters)
         metric_manager = MetricManager(
             metric_config={metric_name: metric_config},
             data_source_manager=datasource_manager,
