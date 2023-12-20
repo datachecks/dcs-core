@@ -76,6 +76,7 @@ nav:
       - Completeness Metrics: metrics/completeness.md
       - Special Metrics:
           - Combined Metrics: metrics/combined.md
+          - Custom SQL Metrics: metrics/custom_sql.md
   - Support:
       - Contact: support/contact.md
       - Telemetry: support/usage_analytics.md

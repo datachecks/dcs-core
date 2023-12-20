@@ -36,6 +36,15 @@ metrics:
     resource: product_db.products
     filters:
       where: "is_valid is True and country_code = 'US'"
+
+  - name: custom_sql_example
+    metric_type: custom_sql
+    resource: product_db.products
+    query: |
+      SELECT count(*) FROM product_db.products left join
+      product_db.products on search_datastore.product_data_us.id = product_db.products.id
+      where product_db.products.is_valid is True and product_db.products.country_code = 'US'
+
   - name: count_us_parts_not_valid
     metric_type: row_count
     resource: search_staging_db.products

@@ -299,3 +299,9 @@ class TestSQLDatasourceQueries:
     def test_should_return_row_count(self, postgres_datasource: PostgresDataSource):
         row_count = postgres_datasource.query_get_row_count(self.TABLE_NAME)
         assert row_count == 6
+
+    def test_should_run_custom_sql(self, postgres_datasource: PostgresDataSource):
+        row_count = postgres_datasource.query_get_custom_sql(
+            query=f"select count(*), avg(age) from {self.TABLE_NAME}"
+        )
+        assert row_count == 6

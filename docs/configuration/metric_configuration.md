@@ -29,21 +29,22 @@ metrics:
 Supported metric types are
 
 
-| Metric Group         | Metric Type                                                                                        |
-|:---------------------|:---------------------------------------------------------------------------------------------------|
-| Reliability          | [Freshness](https://docs.datachecks.io//metrics/reliability/#freshness)                            |
-| Reliability          | [Row Count](https://docs.datachecks.io//metrics/reliability/#row-count)                            |
-| Reliability          | [Document Count](https://docs.datachecks.io//metrics/reliability/#document-count)                  |
-| Numeric Distribution | [Average](https://docs.datachecks.io//metrics/numeric_distribution/#average)                       |
-| Numeric Distribution | [Minimum](https://docs.datachecks.io//metrics/numeric_distribution/#minimum)                       |
-| Numeric Distribution | [Maximum](https://docs.datachecks.io//metrics/numeric_distribution/#maximum)                       |
-| Numeric Distribution | [Sum](https://docs.datachecks.io//metrics/numeric_distribution/#sum)                               |
-| Numeric Distribution | [Variance](https://docs.datachecks.io//metrics/numeric_distribution/#variance)                     |
-| Numeric Distribution | [Standard Deviation](https://docs.datachecks.io//metrics/numeric_distribution/#standard-deviation) |
-| Uniqueness           | [Distinct Count](https://docs.datachecks.io//metrics/uniqueness/#distinct-count)                   |
-| Uniqueness           | [Duplicate Count](https://docs.datachecks.io//metrics/uniqueness/#duplicate-count)                 |
-| Completeness         | [Null Count](https://docs.datachecks.io//metrics/completeness/#null-count)                         |
-| Completeness         | [Null Percentage](https://docs.datachecks.io//metrics/completeness/#null-percentage)               |
-| Completeness         | [Empty Count](https://docs.datachecks.io//metrics/completeness/#empty-count)                       |
-| Completeness         | [Empty Percentage](https://docs.datachecks.io//metrics/completeness/#empty-percentage)             |
-| Special              | [Combined](https://docs.datachecks.io//metrics/combined/)                                          |
+| Metric Group         | Metric Type                                                                                       |
+|:---------------------|:--------------------------------------------------------------------------------------------------|
+| Reliability          | [Freshness](https://docs.datachecks.io/metrics/reliability/#freshness)                            |
+| Reliability          | [Row Count](https://docs.datachecks.io/metrics/reliability/#row-count)                            |
+| Reliability          | [Document Count](https://docs.datachecks.io/metrics/reliability/#document-count)                  |
+| Numeric Distribution | [Average](https://docs.datachecks.io//metrics/numeric_distribution/#average)                      |
+| Numeric Distribution | [Minimum](https://docs.datachecks.io/metrics/numeric_distribution/#minimum)                       |
+| Numeric Distribution | [Maximum](https://docs.datachecks.io/metrics/numeric_distribution/#maximum)                       |
+| Numeric Distribution | [Sum](https://docs.datachecks.io/metrics/numeric_distribution/#sum)                               |
+| Numeric Distribution | [Variance](https://docs.datachecks.io/metrics/numeric_distribution/#variance)                     |
+| Numeric Distribution | [Standard Deviation](https://docs.datachecks.io/metrics/numeric_distribution/#standard-deviation) |
+| Uniqueness           | [Distinct Count](https://docs.datachecks.io/metrics/uniqueness/#distinct-count)                   |
+| Uniqueness           | [Duplicate Count](https://docs.datachecks.io/metrics/uniqueness/#duplicate-count)                 |
+| Completeness         | [Null Count](https://docs.datachecks.io/metrics/completeness/#null-count)                         |
+| Completeness         | [Null Percentage](https://docs.datachecks.io/metrics/completeness/#null-percentage)               |
+| Completeness         | [Empty Count](https://docs.datachecks.io/metrics/completeness/#empty-count)                       |
+| Completeness         | [Empty Percentage](https://docs.datachecks.io/metrics/completeness/#empty-percentage)             |
+| Special              | [Combined](https://docs.datachecks.io/metrics/combined/)                                          |
+| Special              | [Custom SQL](https://docs.datachecks.io/metrics/custom_sql/)                                      |
