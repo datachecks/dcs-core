@@ -150,6 +150,7 @@ class DashboardInfoBuilder:
                     total_metrics=0,
                     metric_validation_success=0,
                     metric_validation_failed=0,
+                    metric_validation_unchecked=0,
                     health_score=0,
                 )
                 for metric_type in DashboardMetricOverview.__dataclass_fields__.keys()
@@ -186,6 +187,9 @@ class DashboardInfoBuilder:
                     else:
                         current.metric_validation_failed += 1
                         overall.metric_validation_failed += 1
+                else:
+                    current.metric_validation_unchecked += 1
+                    overall.metric_validation_unchecked += 1
         self.metrics.append(
             MetricRow(
                 metric_name=metric.tags.get("metric_name"),

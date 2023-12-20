@@ -23,6 +23,7 @@ class MetricHealthStatus:
     total_metrics: int
     metric_validation_success: int
     metric_validation_failed: int
+    metric_validation_unchecked: int
     health_score: int
 
 
