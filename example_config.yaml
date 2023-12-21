@@ -36,11 +36,11 @@ metrics:
     resource: product_db.products
     filters:
       where: "is_valid is True and country_code = 'US'"
-  - name: count_us_parts_valid
+  - name: count_us_parts_not_valid
     metric_type: row_count
     resource: search_staging_db.products
     filters:
-      where: "is_valid is True and country_code = 'US'"
+      where: "is_valid is False and country_code = 'US'"
   - name: combined_metric_example_percentage
     metric_type: combined
     expression: mul(div(count_us_parts, count_us_parts_valid), 100)
