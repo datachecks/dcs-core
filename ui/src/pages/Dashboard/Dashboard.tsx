@@ -1,21 +1,19 @@
-import React from "react";
-import Overview from "../../components/Overview";
+import Overall from "../../components/Overall";
 import Preview from "../../components/Preview";
 import { DashboardMetricOverview } from "../../api/Api";
+import React from "react";
 
-function Dashboard({
-  dashboard,
-  setTab,
-}: {
+interface IDashboardProps {
   dashboard: DashboardMetricOverview;
-  setTab: (value: string) => void;
-}) {
-  return (
-    <>
-      <Overview overall={dashboard.overall} setTab={setTab} />
-      <Preview dashboard={dashboard} />
-    </>
-  );
 }
+
+const Dashboard: React.FC<IDashboardProps> = ({ dashboard }) => {
+  return (
+    <React.Fragment>
+      <Preview dashboard={dashboard} />
+      <Overall overall={dashboard.overall} />
+    </React.Fragment>
+  );
+};
 
 export default Dashboard;

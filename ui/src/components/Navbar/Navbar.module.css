@@ -1,39 +1,51 @@
 .logo {
-  height: 30px;
+  height: 50px;
   width: 100%;
 }
-.connects .logo {
-  height: 20px;
-}
 .connects {
-  gap: 1.5rem;
+  gap: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .connect {
-  width: 100%;
   display: flex;
-  color: white;
+  color: black;
   cursor: pointer;
-  margin: 0.5rem 0;
-  font-weight: 500;
-  max-width: 300px;
+
+  background-color: #f4f4f5;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  border-radius: 10px;
   font-size: 0.9rem;
   letter-spacing: 0.7px;
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  text-transform: uppercase;
 }
 .connect .logo {
-  width: 25px;
-  height: 25px;
-  margin-right: 0.6rem;
+  width: 20px;
+  height: 20px;
 }
+
+@media (prefers-color-scheme: dark) {
+  .connect .logo {
+    filter: invert(100%);
+  }
+}
+
+@media screen and (min-width: 800px) {
+  .navbar {
+    position: absolute;
+    top: 0;
+  }
+}
+
 .navbar {
   display: flex;
-  padding: 20px;
-  background: #0e0b40;
+  width: calc(100% - 4rem);
+  margin-top: 1rem;
+  padding: 0 2rem;
+  background-color: transparent;
   justify-content: space-between;
 }
