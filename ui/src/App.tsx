@@ -7,25 +7,27 @@ import Metrics from "./pages/Metrics/Metrics";
 
 import { DashboardInfo } from "./api/Api";
 
-function App(props: { dashboard: DashboardInfo }) {
-  const [value, setValue] = React.useState("dashboard");
-  return (
-    <div>
-      <Navbar />
-      <Tabs value={value} setValue={setValue} />
-      {
-        {
-          metrics: <Metrics metrics={props.dashboard.metrics} />,
-          dashboard: (
-            <Dashboard
-              setTab={setValue}
-              dashboard={props.dashboard.dashboard}
-            />
-          ),
-        }[value]
-      }
-    </div>
-  );
+interface IAppProps {
+  data: DashboardInfo;
 }
+
+const App: React.FC<IAppProps> = ({ data }) => {
+  const [value, setValue] = React.useState("dashboard");
+
+  return (
+    <React.Fragment>
+      <Navbar />
+      <main style={{ maxWidth: "74rem", margin: "auto" }}>
+        <Tabs value={value} setValue={setValue} />
+        {
+          {
+            metrics: <Metrics metrics={data.metrics} />,
+            dashboard: <Dashboard dashboard={data.dashboard} />,
+          }[value]
+        }
+      </main>
+    </React.Fragment>
+  );
+};
 
 export default App;

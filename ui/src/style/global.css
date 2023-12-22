@@ -1,10 +1,13 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: "Gilroy", sans-serif !important;
+  font-family: "DMSans", sans-serif !important;
 }
 :root {
-  --primary: #0b0949;
-  --failed: #ed0400;
-  --success: #007b31;
+  --primary: #191919;
+
+  --success: #72ddf7;
+  --failed: #f7aef8;
+  --error: #f79898;
+  --unchecked: #b388eb;
 }

@@ -2,7 +2,7 @@ import { MetricHealthStatus } from "../api/Api";
 
 export const navURLs = [
   {
-    title: "Github",
+    title: "GitHub",
     logo: "github_logo",
     url: "https://github.com/waterdipai/datachecks",
   },
@@ -17,6 +17,7 @@ export const navURLs = [
     url: "https://docs.datachecks.io/",
   },
 ];
+
 export interface IScoreProps {
   title: string;
   key?: keyof MetricHealthStatus;
@@ -24,11 +25,13 @@ export interface IScoreProps {
   color?: ScoreState | undefined;
   percent?: boolean;
 }
+
 export enum ScoreState {
   success = "--success",
   failed = "--failed",
-  default = "--primary",
+  unchecked = "--unchecked",
 }
+
 export const overAllScore: IScoreProps[] = [
   {
     title: "TOTAL METRICS",
@@ -38,6 +41,11 @@ export const overAllScore: IScoreProps[] = [
     title: "PASSED METRICS",
     key: "metric_validation_success",
     color: ScoreState.success,
+  },
+  {
+    title: "UNCHECKED METRICS",
+    key: "metric_validation_unchecked",
+    color: ScoreState.unchecked,
   },
   {
     title: "FAILED METRICS",
@@ -51,31 +59,38 @@ export const overAllScore: IScoreProps[] = [
   },
 ];
 export interface docRedirect {
+  key: string;
   title: string;
   url: string;
 }
 export const docRedirects: docRedirect[] = [
   {
+    key: "reliability",
     title: "RELIABILITY METRICS",
     url: "https://docs.datachecks.io/metrics/reliability/",
   },
   {
+    key: "numeric",
     title: "NUMERIC METRICS",
     url: "https://docs.datachecks.io/metrics/numeric_distribution/",
   },
   {
+    key: "uniqueness",
     title: "UNIQUENESS METRICS",
-    url: "https://docs.dataquality.ai/docs/metrics/uniqueness-metrics/",
+    url: "https://docs.datachecks.io/metrics/uniqueness/",
   },
   {
+    key: "completeness",
     title: "COMPLETENESS METRICS",
     url: "https://docs.datachecks.io/metrics/completeness/",
   },
   {
+    key: "custom",
     title: "CUSTOM METRICS",
     url: "https://docs.datachecks.io/metrics/combined/",
   },
 ];
+
 export enum MetricType {
   reliability = "Reliability",
   numeric = "Numeric",
@@ -83,17 +98,21 @@ export enum MetricType {
   completeness = "Completeness",
   custom = "Custom",
 }
+
 export interface ITabsProps {
   value: string;
   setValue: (value: string) => void;
 }
+
 export enum PreviewTableHeader {
   metric_type = "Metric Type",
   total_metrics = "Total Metrics",
   metric_validation_success = "Passed Metrics",
   metric_validation_failed = "Failed Metrics",
+  metric_validation_unchecked = "Unchecked Metrics",
   health_score = "Health Score",
 }
+
 export enum MetricTableHeader {
   metric_name = "Metric Name",
   data_source = "Data Source",
@@ -102,6 +121,7 @@ export enum MetricTableHeader {
   is_valid = "Is Valid",
   reason = "Reason",
 }
+
 export const TabsProps = {
   sx: {
     "& .Mui-selected": {
