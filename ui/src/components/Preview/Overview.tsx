@@ -5,7 +5,8 @@ import { IconButton, Tab, Tabs } from "@mui/material";
 import PieChart from "../Piechart";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { BootstrapTooltip } from "../BootstrapTooltip";
-import { docRedirects } from "../../types/component.type";
+import { VerticalTabsProps, docRedirects } from "../../types/component.type";
+import { themeColors } from "../../utils/staticData";
 
 interface IOverviewProps {
   dashboard: DashboardMetricOverview;
@@ -61,19 +62,13 @@ const Overview: React.FC<IOverviewProps> = ({ dashboard, width }) => {
       <div className={styles.snapscoreMain}>
         <div className={styles.verticalTabs}>
           <Tabs
+            {...VerticalTabsProps}
             orientation="vertical"
             variant="scrollable"
             indicatorColor="primary"
             value={value}
             textColor="inherit"
             onChange={handleChange}
-            TabIndicatorProps={{
-              style: {
-                background: "#72ddf760",
-                borderRadius: "10px",
-                width: "100%",
-              },
-            }}
           >
             {Object.entries(dashboard)
               .filter(([dataKey]) => dataKey !== "overall")
@@ -97,25 +92,24 @@ const Overview: React.FC<IOverviewProps> = ({ dashboard, width }) => {
                   id: "Unchecked",
                   label: "Unchecked Metrics",
                   value: metric.metric_validation_unchecked,
-                  color: "#8093F1",
+                  color: themeColors.unchecked,
                 },
                 {
                   id: "Success",
                   label: "Validation Success",
                   value: metric.metric_validation_success,
-                  color: "#72DDF7",
+                  color: themeColors.success,
                 },
                 {
                   id: "Failed",
                   label: "Validation Failure",
                   value: metric.metric_validation_failed,
-                  color: "#F7AEF8",
+                  color: themeColors.failed,
                 },
               ];
 
               return (
                 <TabPanel value={value} index={index}>
-                  {/* <h2>{metric_type}</h2> */}
                   <div className={styles.metricGraph}>
                     <div
                       style={{
@@ -134,7 +128,13 @@ const Overview: React.FC<IOverviewProps> = ({ dashboard, width }) => {
                           )
                         }
                       >
-                        <BootstrapTooltip title={"Docs"}>
+                        <BootstrapTooltip
+                          title={
+                            docRedirects.find(
+                              (item) => item.key === metric_type
+                            )?.info
+                          }
+                        >
                           <InfoOutlinedIcon
                             fontSize={"small"}
                             style={{
@@ -147,7 +147,6 @@ const Overview: React.FC<IOverviewProps> = ({ dashboard, width }) => {
                     <PieChart
                       data={data}
                       metricName={metric_type}
-                      // percentage
                       key={width}
                     />
                   </div>

@@ -10,14 +10,14 @@ const Navbar: React.FC = () => {
       <div className={styles.connects}>
         {navURLs.map((navURL, index) => (
           <BootstrapTooltip title={navURL.title}>
-            <div
+            <button
+              aria-label={navURL.title}
               key={index}
               className={styles.connect}
               onClick={() => window.open(navURL.url)}
             >
               <div className={`${navURL.logo} ${styles.logo}`} />
-              {/* {navURL.title} */}
-            </div>
+            </button>
           </BootstrapTooltip>
         ))}
       </div>

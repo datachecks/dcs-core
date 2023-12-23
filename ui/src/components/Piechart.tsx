@@ -43,7 +43,6 @@ const PieChart: React.FC<IPieChartPreview> = ({
         modifiers: [["darker", 0.2]],
       }}
       arcLabel={(item) => `${item.value} ${percentage ? "%" : ""}`}
-      //   arcLabel={(item) => `${item.value}%`}
       arcLinkLabelsSkipAngle={10}
       arcLinkLabelsTextColor="#000"
       arcLinkLabelsThickness={2}

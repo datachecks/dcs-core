@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Metrics from "./pages/Metrics/Metrics";
 
+import "./style/global.css";
+
 import { DashboardInfo } from "./api/Api";
 
 interface IAppProps {
@@ -17,7 +19,7 @@ const App: React.FC<IAppProps> = ({ data }) => {
   return (
     <React.Fragment>
       <Navbar />
-      <main style={{ maxWidth: "74rem", margin: "auto" }}>
+      <main>
         <Tabs value={value} setValue={setValue} />
         {
           {

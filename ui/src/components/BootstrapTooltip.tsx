@@ -11,5 +11,6 @@ export const BootstrapTooltip = styled(
   },
   [`& .${tooltipClasses.tooltip}`]: {
     backgroundColor: theme.palette.common.black,
+    maxWidth: 150,
   },
 }));

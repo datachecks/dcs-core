@@ -1,6 +1,7 @@
 import styles from "./Preview.module.css";
 import { DashboardMetricOverview } from "../../api/Api";
 import PieChart from "../Piechart";
+import { themeColors } from "../../utils/staticData";
 
 interface ISnapshotProps {
   dashboard: DashboardMetricOverview;
@@ -13,19 +14,19 @@ const Snapshot: React.FC<ISnapshotProps> = ({ dashboard, width }) => {
       id: "Unchecked",
       label: "Unchecked Metrics",
       value: dashboard.overall.metric_validation_unchecked,
-      color: "#8093F1",
+      color: themeColors.unchecked,
     },
     {
       id: "Success",
       label: "Validation Success",
       value: dashboard.overall.metric_validation_success,
-      color: "#72DDF7",
+      color: themeColors.success,
     },
     {
       id: "Failed",
       label: "Validation Failure",
       value: dashboard.overall.metric_validation_failed,
-      color: "#F7AEF8",
+      color: themeColors.failed,
     },
   ];
 
@@ -34,13 +35,13 @@ const Snapshot: React.FC<ISnapshotProps> = ({ dashboard, width }) => {
       id: "Healthy",
       label: "Healthy",
       value: dashboard.overall.health_score,
-      color: "#72DDF7",
+      color: themeColors.success,
     },
     {
       id: "Unhealthy",
       label: "Unhealthy",
       value: 100 - dashboard.overall.health_score,
-      color: "#F7AEF8",
+      color: themeColors.failed,
     },
   ];
 

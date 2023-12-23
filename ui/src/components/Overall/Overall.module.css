@@ -26,9 +26,6 @@
 .score {
   font-size: 2rem;
   color: #343434;
-  /* background-color: rgba(0, 0, 0); */
-  /* border-radius: 8px; */
-  /* padding: 0.2rem; */
   font-weight: 400;
 }
 
@@ -56,10 +53,6 @@
   justify-content: space-between;
 }
 
-.card:nth-child(0) {
-  margin-left: 0px;
-}
-
 .cardSection {
   display: flex;
   flex-direction: row;
@@ -68,10 +61,6 @@
 }
 
 @media screen and (max-width: 800px) {
-  /* .description {
-    display: none;
-  } */
-
   .cardSection {
     flex-direction: column;
   }

@@ -9,5 +9,10 @@
   --success: #72ddf7;
   --failed: #f7aef8;
   --error: #f79898;
-  --unchecked: #b388eb;
+  --unchecked: #8093f1;
+}
+
+main {
+  max-width: 74rem;
+  margin: auto;
 }

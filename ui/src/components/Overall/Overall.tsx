@@ -7,6 +7,7 @@ import styles from "./Overall.module.css";
 import SpeedIcon from "@mui/icons-material/Speed";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import DesktopAccessDisabledIcon from "@mui/icons-material/DesktopAccessDisabled";
+import { themeColors } from "../../utils/staticData";
 
 interface IOverallProps {
   overall: MetricHealthStatus;
@@ -16,7 +17,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
   const data = [
     {
       header: "Total Metrics",
-      color: "var(--success)",
+      color: themeColors.success,
       description:
         "A visual representation of test execution metrics, providing a comprehensive view of your database performance.",
       value: overall.total_metrics,
@@ -24,7 +25,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
     },
     {
       header: "Validation Failures",
-      color: "var(--failed)",
+      color: themeColors.failed,
       description:
         "A breakdown of test failures, empowering you to address issues and enhance database robustness.",
       value: overall.metric_validation_failed,
@@ -32,7 +33,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
     },
     {
       header: "Unchecked Metrics",
-      color: "var(--unchecked)",
+      color: themeColors.unchecked,
       description:
         "Unmonitored tests to ensure comprehensive coverage, all in one glance. Stay ahead of potential blind spots.",
       value: 12,
@@ -49,7 +50,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
               <div className={styles.header}>
                 <div
                   style={{
-                    backgroundColor: item.color,
+                    backgroundColor: item.color + "80",
                     padding: "0.4rem",
                     borderRadius: "20%",
                   }}

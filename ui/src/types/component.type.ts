@@ -1,4 +1,5 @@
 import { MetricHealthStatus } from "../api/Api";
+import { themeColors } from "../utils/staticData";
 
 export const navURLs = [
   {
@@ -62,32 +63,38 @@ export interface docRedirect {
   key: string;
   title: string;
   url: string;
+  info: string;
 }
 export const docRedirects: docRedirect[] = [
   {
     key: "reliability",
     title: "RELIABILITY METRICS",
     url: "https://docs.datachecks.io/metrics/reliability/",
+    info: "Reliability metrics detect whether tables / indices / collections are updating with timely data",
   },
   {
     key: "numeric",
     title: "NUMERIC METRICS",
     url: "https://docs.datachecks.io/metrics/numeric_distribution/",
+    info: "Numeric Distribution metrics detect changes in the numeric distributions i.e. of values, variance, skew and more",
   },
   {
     key: "uniqueness",
     title: "UNIQUENESS METRICS",
     url: "https://docs.datachecks.io/metrics/uniqueness/",
+    info: "Uniqueness metrics detect when data constraints are breached like duplicates, number of distinct values etc",
   },
   {
     key: "completeness",
     title: "COMPLETENESS METRICS",
     url: "https://docs.datachecks.io/metrics/completeness/",
+    info: "Completeness metrics detect when there are missing values in datasets i.e. Null, empty value",
   },
   {
     key: "custom",
     title: "CUSTOM METRICS",
     url: "https://docs.datachecks.io/metrics/combined/",
+    info: "Custom metrics detect whether data is formatted correctly and represents a valid value",
   },
 ];
 
@@ -124,11 +131,26 @@ export enum MetricTableHeader {
 
 export const TabsProps = {
   sx: {
-    "& .Mui-selected": {
-      color: "var(--primary)!important",
+    borderColor: "divider",
+  },
+  TabIndicatorProps: {
+    style: {
+      background: themeColors.success + "60",
+      borderRadius: "10px",
+      height: "100%",
     },
-    "& .MuiTabs-indicator": {
-      backgroundColor: "var(--failed)!important",
+  },
+};
+
+export const VerticalTabsProps = {
+  sx: {
+    borderColor: "divider",
+  },
+  TabIndicatorProps: {
+    style: {
+      background: themeColors.success + "60",
+      borderRadius: "10px",
+      width: "100%",
     },
   },
 };

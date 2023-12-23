@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./Tabs.module.css";
 import { Tab, Tabs as MTabs } from "@mui/material";
 import { ITabsProps, TabsProps } from "../../types/component.type";
@@ -10,19 +9,8 @@ function Tabs({ value, setValue }: ITabsProps) {
         {...TabsProps}
         value={value}
         variant="scrollable"
-        // indicatorColor="primary"
-        TabIndicatorProps={{
-          style: {
-            background: "#72ddf760",
-            borderRadius: "10px",
-            height: "100%",
-          },
-        }}
-        textColor="inherit"
         aria-label="Vertical tabs example"
-        sx={{
-          borderColor: "divider",
-        }}
+        textColor="inherit"
         onChange={(e: any, v: any) => setValue(v)}
       >
         <Tab

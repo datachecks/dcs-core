@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "../../src/pages/Metrics/Metrics.module.css";
 import {
   CancelRounded,
@@ -92,3 +91,10 @@ export interface MetricHeader {
     enableSorting?: boolean;
   };
 }
+
+export const themeColors = {
+  success: "#72DDF7",
+  failed: "#F7AEF8",
+  unchecked: "#8093F1",
+  error: "#f79898",
+};

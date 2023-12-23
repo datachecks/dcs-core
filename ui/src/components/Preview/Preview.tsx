@@ -9,10 +9,8 @@ interface IPreviewProps {
 }
 
 const Preview: React.FC<IPreviewProps> = ({ dashboard }) => {
-  // Adding a event listener to the window to get the width of the window, to make the piechart responsive
   let [width, setWidth] = React.useState(window.innerWidth || 1001);
   window.addEventListener("resize", () => setWidth(window.innerWidth));
-  // console.log(dashboard);
 
   return (
     <section className={styles.section}>
