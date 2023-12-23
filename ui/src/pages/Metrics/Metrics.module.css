@@ -12,13 +12,13 @@
   width: min-content !important;
   min-width: unset !important;
   color: var(--primary) !important;
-  font-size: 0.9em;
+  font-size: 0.8em;
   font-weight: 600;
   letter-spacing: 0.06em;
 }
 .tableRow th {
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 .tableRow td {
   color: var(--primary);

@@ -1,8 +1,9 @@
 import { MetricHealthStatus } from "../api/Api";
+import { themeColors } from "../utils/staticData";
 
 export const navURLs = [
   {
-    title: "Github",
+    title: "GitHub",
     logo: "github_logo",
     url: "https://github.com/waterdipai/datachecks",
   },
@@ -17,6 +18,7 @@ export const navURLs = [
     url: "https://docs.datachecks.io/",
   },
 ];
+
 export interface IScoreProps {
   title: string;
   key?: keyof MetricHealthStatus;
@@ -24,11 +26,13 @@ export interface IScoreProps {
   color?: ScoreState | undefined;
   percent?: boolean;
 }
+
 export enum ScoreState {
   success = "--success",
   failed = "--failed",
-  default = "--primary",
+  unchecked = "--unchecked",
 }
+
 export const overAllScore: IScoreProps[] = [
   {
     title: "TOTAL METRICS",
@@ -38,6 +42,11 @@ export const overAllScore: IScoreProps[] = [
     title: "PASSED METRICS",
     key: "metric_validation_success",
     color: ScoreState.success,
+  },
+  {
+    title: "UNCHECKED METRICS",
+    key: "metric_validation_unchecked",
+    color: ScoreState.unchecked,
   },
   {
     title: "FAILED METRICS",
@@ -51,31 +60,44 @@ export const overAllScore: IScoreProps[] = [
   },
 ];
 export interface docRedirect {
+  key: string;
   title: string;
   url: string;
+  info: string;
 }
 export const docRedirects: docRedirect[] = [
   {
+    key: "reliability",
     title: "RELIABILITY METRICS",
     url: "https://docs.datachecks.io/metrics/reliability/",
+    info: "Reliability metrics detect whether tables / indices / collections are updating with timely data",
   },
   {
+    key: "numeric",
     title: "NUMERIC METRICS",
     url: "https://docs.datachecks.io/metrics/numeric_distribution/",
+    info: "Numeric Distribution metrics detect changes in the numeric distributions i.e. of values, variance, skew and more",
   },
   {
+    key: "uniqueness",
     title: "UNIQUENESS METRICS",
-    url: "https://docs.dataquality.ai/docs/metrics/uniqueness-metrics/",
+    url: "https://docs.datachecks.io/metrics/uniqueness/",
+    info: "Uniqueness metrics detect when data constraints are breached like duplicates, number of distinct values etc",
   },
   {
+    key: "completeness",
     title: "COMPLETENESS METRICS",
     url: "https://docs.datachecks.io/metrics/completeness/",
+    info: "Completeness metrics detect when there are missing values in datasets i.e. Null, empty value",
   },
   {
+    key: "custom",
     title: "CUSTOM METRICS",
     url: "https://docs.datachecks.io/metrics/combined/",
+    info: "Custom metrics detect whether data is formatted correctly and represents a valid value",
   },
 ];
+
 export enum MetricType {
   reliability = "Reliability",
   numeric = "Numeric",
@@ -83,17 +105,21 @@ export enum MetricType {
   completeness = "Completeness",
   custom = "Custom",
 }
+
 export interface ITabsProps {
   value: string;
   setValue: (value: string) => void;
 }
+
 export enum PreviewTableHeader {
   metric_type = "Metric Type",
   total_metrics = "Total Metrics",
   metric_validation_success = "Passed Metrics",
   metric_validation_failed = "Failed Metrics",
+  metric_validation_unchecked = "Unchecked Metrics",
   health_score = "Health Score",
 }
+
 export enum MetricTableHeader {
   metric_name = "Metric Name",
   data_source = "Data Source",
@@ -102,13 +128,29 @@ export enum MetricTableHeader {
   is_valid = "Is Valid",
   reason = "Reason",
 }
+
 export const TabsProps = {
   sx: {
-    "& .Mui-selected": {
-      color: "var(--primary)!important",
+    borderColor: "divider",
+  },
+  TabIndicatorProps: {
+    style: {
+      background: themeColors.success + "60",
+      borderRadius: "10px",
+      height: "100%",
     },
-    "& .MuiTabs-indicator": {
-      backgroundColor: "var(--failed)!important",
+  },
+};
+
+export const VerticalTabsProps = {
+  sx: {
+    borderColor: "divider",
+  },
+  TabIndicatorProps: {
+    style: {
+      background: themeColors.success + "60",
+      borderRadius: "10px",
+      width: "100%",
     },
   },
 };

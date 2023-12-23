@@ -5,27 +5,31 @@ import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Metrics from "./pages/Metrics/Metrics";
 
+import "./style/global.css";
+
 import { DashboardInfo } from "./api/Api";
 
-function App(props: { dashboard: DashboardInfo }) {
-  const [value, setValue] = React.useState("dashboard");
-  return (
-    <div>
-      <Navbar />
-      <Tabs value={value} setValue={setValue} />
-      {
-        {
-          metrics: <Metrics metrics={props.dashboard.metrics} />,
-          dashboard: (
-            <Dashboard
-              setTab={setValue}
-              dashboard={props.dashboard.dashboard}
-            />
-          ),
-        }[value]
-      }
-    </div>
-  );
+interface IAppProps {
+  data: DashboardInfo;
 }
+
+const App: React.FC<IAppProps> = ({ data }) => {
+  const [value, setValue] = React.useState("dashboard");
+
+  return (
+    <React.Fragment>
+      <Navbar />
+      <main>
+        <Tabs value={value} setValue={setValue} />
+        {
+          {
+            metrics: <Metrics metrics={data.metrics} />,
+            dashboard: <Dashboard dashboard={data.dashboard} />,
+          }[value]
+        }
+      </main>
+    </React.Fragment>
+  );
+};
 
 export default App;

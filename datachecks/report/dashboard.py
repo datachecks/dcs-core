@@ -76,24 +76,24 @@ def html_template(params: TemplateParams):
                     <style>
                     /* fallback */
                     @font-face {{
-                      font-family: "Gilroy";
+                      font-family: "DMSans";
                       font-weight: 600;
-                      src: url(data:font/ttf;base64,{__load_font("Gilroy-SemiBold.ttf")}) format("truetype");
+                      src: url(data:font/ttf;base64,{__load_font("DMSans-SemiBold.ttf")}) format("truetype");
                     }}
                     @font-face {{
-                      font-family: "Gilroy";
+                      font-family: "DMSans";
                       font-weight: 400;
-                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Regular.ttf")}) format("truetype");
+                      src: url(data:font/ttf;base64,{__load_font("DMSans-Regular.ttf")}) format("truetype");
                     }}
                     @font-face {{
-                      font-family: "Gilroy";
+                      font-family: "DMSans";
                       font-weight: 500;
-                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Medium.ttf")}) format("truetype");
+                      src: url(data:font/ttf;base64,{__load_font("DMSans-Medium.ttf")}) format("truetype");
                     }}
                     @font-face {{
-                      font-family: "Gilroy";
+                      font-family: "DMSans";
                       font-weight: 700;
-                      src: url(data:font/ttf;base64,{__load_font("Gilroy-Bold.ttf")}) format("truetype");
+                      src: url(data:font/ttf;base64,{__load_font("DMSans-Bold.ttf")}) format("truetype");
                     }}
                     .datachecks_logo {{
                         background-image: url(data:image/svg+xml;base64,{__load_image("logo.svg")});
@@ -129,7 +129,8 @@ def html_template(params: TemplateParams):
                 );
             </script>
         </body>
-        """
+    </html>
+    """
 
 
 class DashboardInfoBuilder:

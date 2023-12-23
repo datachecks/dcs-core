@@ -1,86 +1,114 @@
-.main {
-  margin: 20px;
-}
-.title {
-  font-weight: bold;
-  font-size: 1.2em;
-  letter-spacing: 0.08em;
-  margin: 0 0 1em 0;
-}
-.table {
-  margin: 0 1em 0 0em;
-  width: 100% !important;
-  border: 2px solid var(--primary);
-  border-radius: 10px !important;
-  border-collapse: unset !important;
-}
-.table .tableRow {
+.section {
+  margin: 0.25rem auto;
+  display: flex;
   width: 100%;
-}
-.tableRow th,
-.tableRow td {
-  width: 15%;
-  color: var(--primary) !important;
-  font-size: 0.9em;
-  letter-spacing: 0.06em;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.tableRow th {
-  font-weight: 600;
-  border: 2px solid var(--primary);
-  border-right: none;
-  border-top: none;
-  text-transform: uppercase;
+@media screen and (max-width: 1024px) {
+  .section {
+    flex-direction: column;
+  }
 }
-.tableRow td {
-  border: none;
-  border-left: 2px solid var(--primary);
-  color: var(--primary);
-  padding: 10px 3em;
-}
-.tableRow th:first-child {
-  border-left: none;
-}
-.tableRow td:first-child {
-  width: 30%;
-  border-left: none;
+
+.metricTab {
+  font-size: 4rem;
   text-transform: capitalize;
 }
-.tableRow:nth-child(2) td {
-  padding-top: 2em;
+
+.metricsSideBar {
+  min-width: 100px;
+  max-width: 150px;
 }
-.tableRow:last-child td {
-  padding-bottom: 30px;
-  padding-bottom: 2em;
-}
-.previewWrapper {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 25px;
-}
-.documentations {
-  gap: 15px;
+
+.snapscoreGraph {
+  height: 200px;
+  margin-top: -3rem;
+  width: 100%;
   display: flex;
-  padding: 25px 30px;
-  border-radius: 10px;
+  overflow-x: hidden;
+}
+
+.metricGraph {
+  height: 250px;
+  width: 100%;
+  display: flex;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.metricButton {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 1rem;
+  display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  border: 2px solid var(--primary);
-  color: var(--primary);
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
-.documentations div {
-  margin-bottom: 10px;
+
+.header {
+  font-size: 1.5rem;
+  font-weight: 600;
 }
-.documentations .button {
-  height: 25px;
-  padding: 15px 22px;
-  color: var(--primary);
-  border: 1px solid var(--primary);
+
+.subHeader {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
-.documentations .button .MuiButton-label {
-  word-spacing: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+.description {
+  color: gray;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.metricsGraph {
+  width: 350px;
+}
+
+.snapscoreMain {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.verticalTabs {
+  display: flex;
+}
+
+.horizontalTabs {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .horizontalTabs {
+    display: flex;
+  }
+}
+
+.card {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 1rem;
+  gap: 0.5rem;
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.cardInfo {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* margin-bottom: 1rem; */
+  gap: 0.5rem;
 }
