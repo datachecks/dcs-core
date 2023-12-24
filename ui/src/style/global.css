@@ -15,4 +15,6 @@
 main {
   max-width: 74rem;
   margin: auto;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
 }

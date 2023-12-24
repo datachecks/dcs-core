@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import App from "./App";
 import { DashboardInfo } from "./api/Api";
 import { createRoot } from "react-dom/client";

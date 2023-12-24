@@ -1,2 +1,2 @@
-import Dashboard from "./Metrics";
-export default Dashboard;
+import { Metrics } from "./Metrics";
+export default Metrics;

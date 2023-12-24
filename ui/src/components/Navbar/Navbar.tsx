@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./Navbar.module.css";
-import { navURLs } from "../../types/component.type";
-import { BootstrapTooltip } from "../BootstrapTooltip";
+import { navURLs } from "../../utils/staticData";
+import { BootstrapTooltip } from "../UI/BootstrapTooltip";
 
-const Navbar: React.FC = () => {
+export const Navbar: React.FC = () => {
   return (
     <nav className={styles.navbar}>
       <div className={`datachecks_logo ${styles.logo}`} />
@@ -24,5 +24,3 @@ const Navbar: React.FC = () => {
     </nav>
   );
 };
-
-export default Navbar;

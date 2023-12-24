@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./Preview.module.css";
 import { DashboardMetricOverview } from "../../api/Api";
-import Snapshot from "./Snapshot";
 import Overview from "./Overview";
+import Snapshot from "./Snapshot";
 
 interface IPreviewProps {
   dashboard: DashboardMetricOverview;

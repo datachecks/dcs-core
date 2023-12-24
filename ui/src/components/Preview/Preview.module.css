@@ -11,79 +11,7 @@
     flex-direction: column;
   }
 }
-
-.metricTab {
-  font-size: 4rem;
-  text-transform: capitalize;
-}
-
-.metricsSideBar {
-  min-width: 100px;
-  max-width: 150px;
-}
-
-.snapscoreGraph {
-  height: 200px;
-  margin-top: -3rem;
-  width: 100%;
-  display: flex;
-  overflow-x: hidden;
-}
-
-.metricGraph {
-  height: 250px;
-  width: 100%;
-  display: flex;
-  overflow-x: hidden;
-  position: relative;
-}
-
-.metricButton {
-  background-color: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  margin: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.header {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.subHeader {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.description {
-  color: gray;
-  font-size: 0.7rem;
-  font-weight: 500;
-}
-
-.metricsGraph {
-  width: 350px;
-}
-
-.snapscoreMain {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-}
-
-.verticalTabs {
-  display: flex;
-}
-
+/* 
 .horizontalTabs {
   display: none;
 }
@@ -92,23 +20,4 @@
   .horizontalTabs {
     display: flex;
   }
-}
-
-.card {
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 1rem;
-  gap: 0.5rem;
-  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-}
-
-.cardInfo {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  /* margin-bottom: 1rem; */
-  gap: 0.5rem;
-}
+} */

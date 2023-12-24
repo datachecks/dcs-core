@@ -57,7 +57,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
                 >
                   {item.icon}
                 </div>
-                <h1 style={{ color: "#161616" }}>{item.header}</h1>
+                <h1>{item.header}</h1>
               </div>
             </div>
             <h1 className={styles.score}>{item.value}</h1>
