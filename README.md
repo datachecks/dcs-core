@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Logo" src="docs/assets/datachecks_banner_logo.svg" width="1512">
+    <img alt="Logo" src="https://raw.githubusercontent.com/waterdipai/datachecks/main/docs/assets/datachecks_banner_logo.svg" width="1512">
 </p>
 <p align="center"><b>Open Source Data Quality Monitoring.</b></p>
 

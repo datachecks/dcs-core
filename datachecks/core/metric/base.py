@@ -97,6 +97,10 @@ class Metric(ABC):
         self.data_source = data_source
         self.expression = expression
         self.filter_query = None
+
+        if "query" in kwargs and kwargs["query"] is not None:
+            self.custom_sql_query = kwargs["query"]
+
         if "filters" in kwargs and kwargs["filters"] is not None:
             filters = kwargs["filters"]
             if "where" in filters and filters["where"] is not None:
@@ -117,7 +121,7 @@ class Metric(ABC):
             expression=self.expression,
         )
 
-    def _generate_metric_value(self, **kwargs) -> float:
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         pass
 
     def get_metric_value(self, **kwargs) -> Union[MetricValue, None]:

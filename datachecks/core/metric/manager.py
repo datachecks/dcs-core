@@ -21,6 +21,9 @@ from datachecks.core.common.models.metric import MetricsType
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.metric.base import Metric
 from datachecks.core.metric.combined_metric import CombinedMetric
+from datachecks.core.metric.custom_metric import (  # noqa F401 this is used in globals
+    CustomSqlMetric,
+)
 from datachecks.core.metric.numeric_metric import (  # noqa F401 this is used in globals
     AvgMetric,
     DistinctCountMetric,
@@ -60,6 +63,7 @@ class MetricManager:
         MetricsType.NULL_PERCENTAGE.value: "NullPercentageMetric",
         MetricsType.EMPTY_STRING_COUNT.value: "EmptyStringCountMetric",
         MetricsType.EMPTY_STRING_PERCENTAGE.value: "EmptyStringPercentageMetric",
+        MetricsType.CUSTOM_SQL.value: "CustomSqlMetric",
     }
 
     def __init__(
@@ -97,6 +101,9 @@ class MetricManager:
                 else None,
                 "validation": metric_config.validation
                 if metric_config.validation is not None
+                else None,
+                "query": metric_config.query
+                if metric_config.query is not None
                 else None,
             }
             if isinstance(metric_config.resource, Index):

@@ -67,23 +67,23 @@ class DashboardInfo:
 @dataclass
 class GroupedMetricsType(str, Enum):
     reliability: List[str] = dataclasses.field(
-        default_factory=["row_count", "document_count", "freshness"]
+        default_factory=lambda: ["row_count", "document_count", "freshness"]
     )
     numeric: List[str] = dataclasses.field(
-        default_factory=["min", "max", "avg", "sum", "stddev", "variance"]
+        default_factory=lambda: ["min", "max", "avg", "sum", "stddev", "variance"]
     )
     uniqueness: List[str] = dataclasses.field(
-        default_factory=["distinct_count", "duplicate_count"]
+        default_factory=lambda: ["distinct_count", "duplicate_count"]
     )
     completeness: List[str] = dataclasses.field(
-        default_factory=[
+        default_factory=lambda: [
             "null_count",
             "null_percentage",
             "empty_string_count",
             "empty_string_percentage",
         ]
     )
-    custom: List[str] = dataclasses.field(default_factory=["combined"])
+    custom: List[str] = dataclasses.field(default_factory=lambda: ["combined"])
 
 
 @dataclass

@@ -50,6 +50,7 @@ class MetricsType(str, Enum):
     MIN_LENGTH = "min_length"
     AVG_LENGTH = "avg_length"
     COMBINED = "combined"
+    CUSTOM_SQL = "custom_sql"
 
 
 @dataclass
@@ -71,6 +72,7 @@ class MetricValue:
     is_valid: Optional[bool] = None
     reason: Optional[str] = None
     tags: Dict[str, str] = None
+    # historical_values: Optional[List["MetricValue"]] = None
 
     @property
     def json(self):

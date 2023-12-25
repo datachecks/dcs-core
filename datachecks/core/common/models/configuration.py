@@ -85,6 +85,7 @@ class MetricConfiguration:
     name: str
     metric_type: MetricsType
     expression: Optional[str] = None
+    query: Optional[str] = None
     resource: Optional[Union[Table, Index, Field]] = None
     validation: Optional[Validation] = None
     filters: Optional[MetricsFilterConfiguration] = None

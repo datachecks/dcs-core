@@ -71,6 +71,7 @@ class TestMetricManager:
             name=metric_name,
             metric_type=MetricsType.DOCUMENT_COUNT,
             resource=Index(name=index_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+            # TODO: Fix this, this needs to be a filter configuration not dict
             filters={"where": '{"range": {"age": {"gte": 30, "lte": 40}}}'},
         )
 
@@ -660,8 +661,33 @@ class TestMetricManager:
         assert gt_metric.validation.threshold.gt == 100
         assert eq_metric.validation.threshold.eq == 100
 
-        assert gte_metric.validate_metric(101)[0] == True
-        assert lte_metric.validate_metric(99)[0] == True
-        assert lt_metric.validate_metric(99)[0] == True
-        assert gt_metric.validate_metric(101)[0] == True
-        assert eq_metric.validate_metric(100)[0] == True
+        assert gte_metric.validate_metric(101)[0] is True
+        assert lte_metric.validate_metric(99)[0] is True
+        assert lt_metric.validate_metric(99)[0] is True
+        assert gt_metric.validate_metric(101)[0] is True
+        assert eq_metric.validate_metric(100)[0] is True
+
+    def test_should_create_custom_sql_metric(self):
+        mock_datasource = Mock(DataSource)
+        mock_datasource.data_source_name.return_value = POSTGRES_DATA_SOURCE_NAME
+
+        datasource_manager = Mock(DataSourceManager)
+        datasource_manager.get_data_source.return_value = mock_datasource
+
+        metric_name, table_name = "test_row_count_metric", "test_table"
+
+        metric_config = MetricConfiguration(
+            name=metric_name,
+            metric_type=MetricsType.CUSTOM_SQL,
+            resource=Table(name=table_name, data_source=POSTGRES_DATA_SOURCE_NAME),
+        )
+        metric_manager = MetricManager(
+            metric_config={metric_name: metric_config},
+            data_source_manager=datasource_manager,
+        )
+
+        metric = list(metric_manager.metrics.values())[0]
+
+        assert metric.name == "test_row_count_metric"
+        assert metric.metric_type == MetricsType.CUSTOM_SQL
+        assert metric.table_name == "test_table"

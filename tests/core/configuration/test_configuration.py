@@ -362,3 +362,28 @@ def test_should_throw_exception_on_duplicate_metric_names():
         assert str(e).startswith(
             "Failed to parse configuration: Duplicate metric names found"
         )
+
+
+def test_should_read_custom_sql_configuration():
+    yaml_string = """
+        data_sources:
+          - name: test
+            type: postgres
+            connection:
+              host: "localhost"
+              port: 5421
+        metrics:
+          - name: postgres_avg_price
+            metric_type: custom_sql
+            resource: test.dcs_iris
+            query: |
+                SELECT AVG(sepal_length)
+                FROM iris.dcs_iris
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert configuration.metrics["postgres_avg_price"].metric_type == "custom_sql"
+    assert configuration.metrics["postgres_avg_price"].name == "postgres_avg_price"
+    assert (
+        configuration.metrics["postgres_avg_price"].query
+        == "SELECT AVG(sepal_length)\nFROM iris.dcs_iris\n"
+    )

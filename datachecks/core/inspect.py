@@ -270,11 +270,6 @@ class Inspect:
         Repository will be selected based on the configuration.
         """
         self.metric_repository.save_all_metrics(metric_values)
-        mm = self.metric_repository.get_all_metrics()
-        for k, v in mm.items():
-            print(k, v[0][0].json)
-            print(k, v[1][0].json)
-            print("====")
 
     def run(self) -> InspectOutput:
         """

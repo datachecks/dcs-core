@@ -83,6 +83,17 @@ class SQLDataSource(DataSource):
 
         return self.connection.execute(text(query)).fetchone()[0]
 
+    def query_get_custom_sql(self, query: str) -> Union[int, float, None]:
+        """
+        Get the first row of the custom sql query
+        :param query: custom sql query
+        """
+        row = self.connection.execute(text(query)).fetchone()
+        if row is not None:
+            return row[0]
+        else:
+            return None
+
     def query_get_max(self, table: str, field: str, filters: str = None) -> int:
         """
         Get the max value
