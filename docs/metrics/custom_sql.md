@@ -11,6 +11,6 @@ metrics:
   - name: custom_sql_example
     type: custom_sql
     resource: mysql_db.student
-    custom_sql:
-      query: "SELECT COUNT(*) FROM student WHERE city = 'bangalore' AND age >= 30"
+    query: |
+      SELECT COUNT(*) FROM student WHERE city = 'bangalore' AND age >= 30
 ```
