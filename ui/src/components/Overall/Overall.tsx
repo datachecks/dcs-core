@@ -36,7 +36,7 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
       color: themeColors.unchecked,
       description:
         "Unmonitored tests to ensure comprehensive coverage, all in one glance. Stay ahead of potential blind spots.",
-      value: 12,
+      value: overall.metric_validation_unchecked,
       icon: <DesktopAccessDisabledIcon />,
     },
   ];
