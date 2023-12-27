@@ -6,10 +6,10 @@
 :root {
   --primary: #191919;
 
-  --success: #72ddf7;
+  --success: #99e194;
   --failed: #f7aef8;
-  --error: #f79898;
-  --unchecked: #8093f1;
+  --error: #f6a3a3;
+  --unchecked: #ffd56b;
 }
 
 main {

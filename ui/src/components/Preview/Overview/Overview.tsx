@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../UI/Card";
+import styles from "./Overview.module.css";
 
 interface IOverviewProps {
   dashboard: DashboardMetricOverview;
@@ -31,7 +32,7 @@ export const Overview: React.FC<IOverviewProps> = ({ dashboard, width }) => {
           your data.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className={styles.contentWidth}>
         <MetricVerticalTabs
           data={dashboard}
           value={value}

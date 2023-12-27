@@ -8,6 +8,7 @@ import SpeedIcon from "@mui/icons-material/Speed";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import DesktopAccessDisabledIcon from "@mui/icons-material/DesktopAccessDisabled";
 import { themeColors } from "../../utils/staticData";
+import { Card, CardContent, CardDescription, CardHeader } from "../UI/Card";
 
 interface IOverallProps {
   overall: MetricHealthStatus;
@@ -44,28 +45,27 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
   return (
     <section className={styles.section}>
       {data.map((item) => (
-        <div className={styles.card} key={item.header}>
-          <div className={styles.cardSection}>
-            <div className={styles.cardInfo}>
-              <div className={styles.header}>
+        <Card key={item.header}>
+          <CardContent>
+            <CardHeader>
+              <CardContent>
                 <div
                   style={{
                     backgroundColor: item.color + "80",
-                    padding: "0.4rem",
-                    borderRadius: "20%",
                   }}
+                  className={styles.header}
                 >
                   {item.icon}
+                  {item.header}
                 </div>
-                <h1>{item.header}</h1>
-              </div>
-            </div>
+              </CardContent>
+            </CardHeader>
             <h1 className={styles.score}>{item.value}</h1>
-          </div>
-          <div className={styles.description}>
-            <p>{item.description}</p>
-          </div>
-        </div>
+          </CardContent>
+          <CardContent>
+            <CardDescription>{item.description}</CardDescription>
+          </CardContent>
+        </Card>
       ))}
     </section>
   );

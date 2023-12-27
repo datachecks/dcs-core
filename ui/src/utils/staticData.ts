@@ -1,10 +1,9 @@
 import { docRedirect } from "../types/component.type";
 
 export const themeColors = {
-  success: "#72DDF7",
-  failed: "#F7AEF8",
-  unchecked: "#8093F1",
-  error: "#f79898",
+  success: "#99e194",
+  failed: "#f6a3a3",
+  unchecked: "#ffd56b",
 };
 
 export const navURLs = [

@@ -32,9 +32,9 @@ export const PieChart: React.FC<IPieChartPreview> = ({
         }}
         data={data}
         margin={
-          !ArcLabel
-            ? { top: 0, right: 80, bottom: 0, left: 80 }
-            : { top: 50, right: 10, bottom: 10, left: 10 }
+          ArcLabel
+            ? { top: 50, right: 10, bottom: 10, left: 10 }
+            : { top: 0, right: 100, bottom: 0, left: 80 }
         }
         innerRadius={0.5}
         padAngle={0.7}
