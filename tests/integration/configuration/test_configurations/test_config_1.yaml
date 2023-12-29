@@ -1,0 +1,17 @@
+# Data sources to query
+data_sources:
+  - name: search_datastore        # Data source name
+    type: opensearch              # Data source type is OpenSearch
+    connection:
+      host: 127.0.0.1
+      port: 9205
+      username: !ENV ${OS_USER}   # Username to use for authentication ENV variables
+      password: !ENV ${OS_PASS}   # Password to use for authentication ENV variables
+
+# Metrics to generate
+metrics:
+  - name: count_us_parts
+    metric_type: document_count
+    resource: search_datastore.product_data_us
+    filters:
+      where: '{"match_all" : {}}'
