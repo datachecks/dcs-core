@@ -1,8 +1,10 @@
 import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+
 import { DashboardMetricOverview } from "../../../../api/Api";
 import { VerticalTabsProps } from "../../../../types/component.type";
+
 import styles from "./VerticalTabs.module.css";
-import Tab from "@mui/material/Tab";
 
 interface IMetricVerticalTabsProps {
   data: DashboardMetricOverview;
@@ -24,15 +26,7 @@ export const MetricVerticalTabs: React.FC<IMetricVerticalTabsProps> = ({
 
   return (
     <div className={styles.verticalTabs}>
-      <Tabs
-        {...VerticalTabsProps}
-        orientation="vertical"
-        variant="scrollable"
-        indicatorColor="primary"
-        value={value}
-        textColor="inherit"
-        onChange={handleChange}
-      >
+      <Tabs {...VerticalTabsProps} value={value} onChange={handleChange}>
         {Object.entries(data)
           .filter(([dataKey]) => dataKey !== "overall")
           .map(([metric_type, metric], index) => (

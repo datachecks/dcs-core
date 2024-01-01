@@ -1,13 +1,14 @@
 import React from "react";
 
-import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
+import Metrics from "./pages/Metrics";
 
-import "./style/global.css";
+import Navbar from "./components/Navbar";
+import Tabs from "./components/UI/Tabs";
 
 import { DashboardInfo } from "./api/Api";
-import Tabs from "./components/UI/Tabs";
-import Metrics from "./pages/Metrics";
+
+import "./style/global.css";
 
 interface IAppProps {
   data: DashboardInfo;

@@ -1,3 +1,4 @@
+import { TabsOwnProps } from "@mui/material";
 import { MetricHealthStatus } from "../api/Api";
 import { themeColors } from "../utils/staticData";
 
@@ -23,10 +24,12 @@ export interface MetricHeader {
   };
 }
 
-export const TabsProps = {
+export const TabsProps: TabsOwnProps = {
   sx: {
     borderColor: "divider",
   },
+  variant: "scrollable",
+  textColor: "inherit",
   TabIndicatorProps: {
     style: {
       background: themeColors.success + "60",
@@ -36,10 +39,14 @@ export const TabsProps = {
   },
 };
 
-export const VerticalTabsProps = {
+export const VerticalTabsProps: TabsOwnProps = {
   sx: {
     borderColor: "divider",
   },
+  orientation: "vertical",
+  variant: "scrollable",
+  indicatorColor: "primary",
+  textColor: "inherit",
   TabIndicatorProps: {
     style: {
       background: themeColors.success + "60",
