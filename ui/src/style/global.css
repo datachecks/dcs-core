@@ -6,9 +6,11 @@
 :root {
   --primary: #191919;
 
+  --accent: #a3e5f6;
+  --error: #f6a3a3;
+
   --success: #99e194;
   --failed: #f7aef8;
-  --error: #f6a3a3;
   --unchecked: #d8d8d8;
 }
 

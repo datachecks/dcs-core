@@ -2,7 +2,7 @@ import IconButton from "@mui/material/IconButton";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import styles from "./MetricInfoIcon.module.css";
 import { docRedirects } from "../../../../utils/staticData";
-import { BootstrapTooltip } from "../../../UI/BootstrapTooltip";
+import { BootstrapTooltip } from "../../../Tooltip/BootstrapTooltip";
 
 interface IMetricInfoIconProps {
   metric_type: string;

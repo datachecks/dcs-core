@@ -1,5 +1,5 @@
 import { DashboardMetricOverview } from "../../../api/Api";
-import PieChart from "../../UI/Piechart";
+import PieChart from "../../Piechart";
 import { themeColors } from "../../../utils/staticData";
 import {
   Card,
@@ -9,7 +9,7 @@ import {
   CardSection,
   CardSubtitle,
   CardTitle,
-} from "../../UI/Card";
+} from "../../Card";
 
 interface ISnapshotProps {
   dashboard: DashboardMetricOverview;

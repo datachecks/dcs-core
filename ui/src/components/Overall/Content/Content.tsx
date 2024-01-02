@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardHeader } from "../../UI/Card";
+import { Card, CardContent, CardDescription, CardHeader } from "../../Card";
 import styles from "./Content.module.css";
 
 interface IOverallContentProps {

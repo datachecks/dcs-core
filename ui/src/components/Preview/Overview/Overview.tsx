@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../UI/Card";
+} from "../../Card";
 import styles from "./Overview.module.css";
 
 interface IOverviewProps {

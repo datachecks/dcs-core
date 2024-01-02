@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Metrics from "./pages/Metrics";
 
 import Navbar from "./components/Navbar";
-import Tabs from "./components/UI/Tabs";
+import Tabs from "./components/Tabs";
 
 import { DashboardInfo } from "./api/Api";
 

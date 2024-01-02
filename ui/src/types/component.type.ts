@@ -32,7 +32,7 @@ export const TabsProps: TabsOwnProps = {
   textColor: "inherit",
   TabIndicatorProps: {
     style: {
-      background: themeColors.success + "60",
+      background: themeColors.accent + "60",
       borderRadius: "10px",
       height: "100%",
     },
@@ -49,7 +49,7 @@ export const VerticalTabsProps: TabsOwnProps = {
   textColor: "inherit",
   TabIndicatorProps: {
     style: {
-      background: themeColors.success + "60",
+      background: themeColors.accent + "60",
       borderRadius: "10px",
       width: "100%",
     },

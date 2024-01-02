@@ -1,7 +1,7 @@
 import { DashboardMetricOverview } from "../../../../api/Api";
 import { themeColors } from "../../../../utils/staticData";
 
-import PieChart from "../../../UI/Piechart";
+import PieChart from "../../../Piechart";
 import MetricInfoIcon from "../MetricInfoIcon";
 
 import styles from "./MetricContent.module.css";

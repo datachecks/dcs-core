@@ -1,6 +1,7 @@
 import { docRedirect } from "../types/component.type";
 
 export const themeColors = {
+  accent: "#a3e5f6",
   success: "#99e194",
   failed: "#f6a3a3",
   unchecked: "#d8d8d8",

@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Navbar.module.css";
 import { navURLs } from "../../utils/staticData";
-import { BootstrapTooltip } from "../UI/BootstrapTooltip";
+import { BootstrapTooltip } from "../Tooltip/BootstrapTooltip";
 
 export const Navbar: React.FC = () => {
   return (
