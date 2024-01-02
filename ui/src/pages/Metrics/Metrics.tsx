@@ -1,9 +1,13 @@
 import React, { useMemo } from "react";
 import { MetricRow } from "../../api/Api";
-import { MetricTable } from "../../utils/staticData";
 import { MaterialReactTable } from "material-react-table";
+import { MetricTable } from "../../utils/metricTable";
 
-function Metrics({ metrics }: { metrics: MetricRow[] }) {
+interface IMetricsProps {
+  metrics: MetricRow[];
+}
+
+export const Metrics: React.FC<IMetricsProps> = ({ metrics }) => {
   return (
     <MaterialReactTable
       data={metrics}
@@ -18,5 +22,4 @@ function Metrics({ metrics }: { metrics: MetricRow[] }) {
       {...MetricTable.Props}
     />
   );
-}
-export default Metrics;
+};

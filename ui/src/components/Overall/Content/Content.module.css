@@ -1,0 +1,14 @@
+.header {
+  padding: 0.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.score {
+  font-size: 2rem;
+  color: #343434;
+  font-weight: 400;
+}

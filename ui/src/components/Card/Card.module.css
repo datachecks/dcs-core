@@ -1,0 +1,56 @@
+.card {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 1rem;
+  gap: 0.5rem;
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.cardHeader {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.cardSubtitle {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.cardSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardDescription {
+  color: gray;
+  font-size: 0.7rem;
+  font-weight: 500;
+}

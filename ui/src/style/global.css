@@ -1,10 +1,22 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: "Gilroy", sans-serif !important;
+  font-family: "DMSans", sans-serif !important;
 }
 :root {
-  --primary: #0b0949;
-  --failed: #ed0400;
-  --success: #007b31;
+  --primary: #191919;
+
+  --accent: #a3e5f6;
+  --error: #f6a3a3;
+
+  --success: #99e194;
+  --failed: #f7aef8;
+  --unchecked: #d8d8d8;
+}
+
+main {
+  max-width: 74rem;
+  margin: auto;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
 }

@@ -1,0 +1,15 @@
+.smallGraph {
+  height: 200px;
+  margin-top: -3rem;
+  width: 100%;
+  display: flex;
+  overflow-x: hidden;
+}
+
+.defaultGraph {
+  height: 250px;
+  width: 100%;
+  display: flex;
+  overflow-x: hidden;
+  position: relative;
+}

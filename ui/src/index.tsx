@@ -1,14 +1,14 @@
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import App from "./App";
 import { DashboardInfo } from "./api/Api";
 import { createRoot } from "react-dom/client";
 import "./style/global.css";
 
-export function buildDashboard(dashboard: DashboardInfo, tagId: string) {
+export function buildDashboard(data: DashboardInfo, tagId: string) {
   const root = createRoot(document.getElementById(tagId) as HTMLElement);
   root.render(
     <StrictMode>
-      <App dashboard={dashboard} />
+      <App data={data} />
     </StrictMode>
   );
 }

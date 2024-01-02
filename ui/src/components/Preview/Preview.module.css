@@ -1,86 +1,13 @@
-.main {
-  margin: 20px;
-}
-.title {
-  font-weight: bold;
-  font-size: 1.2em;
-  letter-spacing: 0.08em;
-  margin: 0 0 1em 0;
-}
-.table {
-  margin: 0 1em 0 0em;
-  width: 100% !important;
-  border: 2px solid var(--primary);
-  border-radius: 10px !important;
-  border-collapse: unset !important;
-}
-.table .tableRow {
+.section {
+  margin: 0.25rem auto;
+  display: flex;
   width: 100%;
-}
-.tableRow th,
-.tableRow td {
-  width: 15%;
-  color: var(--primary) !important;
-  font-size: 0.9em;
-  letter-spacing: 0.06em;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.tableRow th {
-  font-weight: 600;
-  border: 2px solid var(--primary);
-  border-right: none;
-  border-top: none;
-  text-transform: uppercase;
-}
-.tableRow td {
-  border: none;
-  border-left: 2px solid var(--primary);
-  color: var(--primary);
-  padding: 10px 3em;
-}
-.tableRow th:first-child {
-  border-left: none;
-}
-.tableRow td:first-child {
-  width: 30%;
-  border-left: none;
-  text-transform: capitalize;
-}
-.tableRow:nth-child(2) td {
-  padding-top: 2em;
-}
-.tableRow:last-child td {
-  padding-bottom: 30px;
-  padding-bottom: 2em;
-}
-.previewWrapper {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 25px;
-}
-.documentations {
-  gap: 15px;
-  display: flex;
-  padding: 25px 30px;
-  border-radius: 10px;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  border: 2px solid var(--primary);
-  color: var(--primary);
-}
-.documentations div {
-  margin-bottom: 10px;
-}
-.documentations .button {
-  height: 25px;
-  padding: 15px 22px;
-  color: var(--primary);
-  border: 1px solid var(--primary);
-}
-.documentations .button .MuiButton-label {
-  word-spacing: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+@media screen and (max-width: 1024px) {
+  .section {
+    flex-direction: column;
+  }
 }
