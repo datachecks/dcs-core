@@ -1,20 +1,19 @@
-import "../../style/global.css";
+import OverallContent from "./Content";
 
-import { MetricHealthStatus } from "../../api/Api";
-import styles from "./Overall.module.css";
-
-// Icon imports
 import SpeedIcon from "@mui/icons-material/Speed";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import DesktopAccessDisabledIcon from "@mui/icons-material/DesktopAccessDisabled";
+
 import { themeColors } from "../../utils/staticData";
-import { Card, CardContent, CardDescription, CardHeader } from "../UI/Card";
+
+import { MetricHealthStatus } from "../../api/Api";
+import styles from "./Overall.module.css";
 
 interface IOverallProps {
   overall: MetricHealthStatus;
 }
 
-const Overall: React.FC<IOverallProps> = ({ overall }) => {
+export const Overall: React.FC<IOverallProps> = ({ overall }) => {
   const data = [
     {
       header: "Total Metrics",
@@ -45,30 +44,8 @@ const Overall: React.FC<IOverallProps> = ({ overall }) => {
   return (
     <section className={styles.section}>
       {data.map((item) => (
-        <Card key={item.header}>
-          <CardContent>
-            <CardHeader>
-              <CardContent>
-                <div
-                  style={{
-                    backgroundColor: item.color + "80",
-                  }}
-                  className={styles.header}
-                >
-                  {item.icon}
-                  {item.header}
-                </div>
-              </CardContent>
-            </CardHeader>
-            <h1 className={styles.score}>{item.value}</h1>
-          </CardContent>
-          <CardContent>
-            <CardDescription>{item.description}</CardDescription>
-          </CardContent>
-        </Card>
+        <OverallContent item={item} key={item.header} />
       ))}
     </section>
   );
 };
-
-export default Overall;

@@ -1,2 +1,2 @@
-import Overall from "./Overall";
+import { Overall } from "./Overall";
 export default Overall;
