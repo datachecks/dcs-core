@@ -11,7 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import glob
 from abc import ABC
+from pathlib import Path
 from typing import Dict, List, TypeVar, Union
 
 from pyparsing import Combine, Group, Literal
@@ -292,13 +294,8 @@ class MetricsConfigParser(ConfigParser):
         return metric_configurations
 
 
-def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
-    """
-    Load configuration from a yaml string
-    """
+def _parse_configuration_from_dict(config_dict: Dict) -> Configuration:
     try:
-        config_dict: Dict = parse_config(data=yaml_string)
-
         data_source_configurations = DataSourceConfigParser().parse(
             config_list=config_dict["data_sources"]
         )
@@ -310,7 +307,7 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
             data_sources=data_source_configurations, metrics=metric_configurations
         )
 
-        if "storage" in config_dict:
+        if "storage" in config_dict and config_dict["storage"] is not None:
             configuration.storage = StorageConfigParser().parse(
                 config=config_dict["storage"]
             )
@@ -321,13 +318,58 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
         )
 
 
-def load_configuration(file_path: str) -> Configuration:
+def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
+    """
+    Load configuration from a yaml string
+    """
+    try:
+        config_dict: Dict = parse_config(data=yaml_string)
+    except Exception as ex:
+        raise DataChecksConfigurationError(
+            message=f"Failed to parse configuration: {str(ex)}"
+        )
+    return _parse_configuration_from_dict(config_dict=config_dict)
+
+
+def load_configuration(configuration_path: str) -> Configuration:
     """
     Load configuration from a yaml file
-    :param file_path:
+    :param configuration_path:
     :return:
     """
-    with open(file_path) as config_yaml_file:
-        yaml_string = config_yaml_file.read()
 
-        return load_configuration_from_yaml_str(yaml_string)
+    path = Path(configuration_path)
+    if not path.exists():
+        raise DataChecksConfigurationError(
+            message=f"Configuration file {configuration_path} does not exist"
+        )
+    if path.is_file():
+        with open(configuration_path) as config_yaml_file:
+            yaml_string = config_yaml_file.read()
+            return load_configuration_from_yaml_str(yaml_string)
+    else:
+        config_files = glob.glob(f"{configuration_path}/*.yaml")
+        if len(config_files) == 0:
+            raise DataChecksConfigurationError(
+                message=f"No configuration files found in {configuration_path}"
+            )
+        else:
+            config_dict_list: List[Dict] = []
+            for config_file in config_files:
+                with open(config_file) as config_yaml_file:
+                    yaml_string = config_yaml_file.read()
+                    config_dict: Dict = parse_config(data=yaml_string)
+                    config_dict_list.append(config_dict)
+
+            final_config_dict = {
+                "data_sources": [],
+                "metrics": [],
+                "storage": None,
+            }
+            for config_dict in config_dict_list:
+                final_config_dict["data_sources"].extend(config_dict["data_sources"])
+                final_config_dict["metrics"].extend(config_dict["metrics"])
+                if "storage" in config_dict:
+                    final_config_dict["storage"] = config_dict["storage"]
+
+            return _parse_configuration_from_dict(final_config_dict)
