@@ -27,6 +27,10 @@ export interface MetricHeader {
 export const TabsProps: TabsOwnProps = {
   sx: {
     borderColor: "divider",
+    "& .MuiTouchRipple-root": {
+      color: "rgba(163, 229, 246, 0.376)",
+      borderRadius: "10px",
+    },
   },
   variant: "scrollable",
   textColor: "inherit",
@@ -42,6 +46,10 @@ export const TabsProps: TabsOwnProps = {
 export const VerticalTabsProps: TabsOwnProps = {
   sx: {
     borderColor: "divider",
+    "& .MuiTouchRipple-root": {
+      color: "rgba(163, 229, 246, 0.376)",
+      borderRadius: "10px",
+    },
   },
   orientation: "vertical",
   variant: "scrollable",

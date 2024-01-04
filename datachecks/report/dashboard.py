@@ -141,7 +141,7 @@ class DashboardInfoBuilder:
         [dashboard, metrics] = self.__build_params()
         return DashboardInfo(name="test", metrics=metrics, dashboard=dashboard)
 
-    def __build_params(self) -> DashboardMetricOverview:
+    def __build_params(self):
         data = self.inspect_data
 
         self.metrics = []
@@ -170,12 +170,11 @@ class DashboardInfoBuilder:
             else:
                 for metric_identifier, metric in ds_metrics.metrics.items():
                     self._insert_value(metric)
-
         self.calculate_health_score()
         return [self.dashboard, self.metrics]
 
     def _insert_value(self, metric):
-        for metric_type in GroupedMetricsType.__dataclass_fields__.keys():
+        for metric_type in GroupedMetricsType.__members__.keys():
             if metric.metric_type in GroupedMetricsType[metric_type].value:
                 current = getattr(self.dashboard, metric_type)
                 overall = getattr(self.dashboard, "overall")
