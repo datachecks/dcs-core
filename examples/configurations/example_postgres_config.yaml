@@ -1,6 +1,6 @@
 # Data sources to query
 data_sources:
-  - name: iris_pgsql
+  - name: iris
     type: postgres
     connection:
       host: 127.0.0.1
@@ -128,7 +128,6 @@ metrics:
     resource: iris.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
-
 storage:
   type: local_file|s3|elastic|postgres|clickhouse
   params:
