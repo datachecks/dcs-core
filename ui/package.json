@@ -37,7 +37,9 @@
     "ts-loader": "^9.5.1",
     "webpack": "^5.89.0"
   },
-  "resolutions": {},
+  "resolutions": {
+    "d3-color": "^3.1.0"
+  },
   "devDependencies": {
     "source-map-explorer": "^2.5.0",
     "terser-webpack-plugin": "^5.3.1",

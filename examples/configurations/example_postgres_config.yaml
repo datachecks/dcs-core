@@ -1,6 +1,6 @@
 # Data sources to query
 data_sources:
-  - name: iris_pgsql
+  - name: iris
     type: postgres
     connection:
       host: 127.0.0.1
