@@ -1,4 +1,4 @@
-# Data sources to query
+# Data sources to queryiris_pgsql
 data_sources:
   - name: iris
     type: postgres
@@ -13,54 +13,54 @@ metrics:
   # Numeric Metrics
   - name: sepal_length_avg_price
     metric_type: avg
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     validation:
       threshold: "> 0 & < 1000"
 
   - name: postgres_min_price
     metric_type: min
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   - name: postgres_max_price
     metric_type: max
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   - name: postgres_variance_price
     metric_type: variance
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   # Uniqueness Metrics
   - name: postgres_distinct_count_price
     metric_type: distinct_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   - name: postgres_duplicate_count_price
     metric_type: duplicate_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   # Completeness Metrics
   - name: postgres_null_count_price
     metric_type: null_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   - name: postgres_null_percentage_price
     metric_type: null_percentage
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
 
   - name: postgres_empty_string_count_price
     metric_type: empty_string_count
-    resource: iris.dcs_iris.species
+    resource: iris_pgsql.dcs_iris.species
 
   # Reliability Metrics
   - name: postgres_row_count
     metric_type: row_count
-    resource: iris.dcs_iris
+    resource: iris_pgsql.dcs_iris
     validation:
       threshold: "> 100"
 
   - name: postgres_freshness
     metric_type: freshness
-    resource: iris.dcs_iris.timestamp
+    resource: iris_pgsql.dcs_iris.timestamp
     validation:
       threshold: ">-5000"
 
@@ -101,34 +101,33 @@ metrics:
 
   - name: postgres_avg_price_filtered
     metric_type: avg
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
 
   - name: postgres_min_price_filtered
     metric_type: min
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
 
   - name: postgres_max_price_with_filter
     metric_type: max
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
 
   - name: postgres_min_price_with_filter
     metric_type: min
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
 
   - name: postgres_distinct_count_price_with_filter
     metric_type: distinct_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_pgsql.dcs_iris.sepal_length
     filters:
       where: "species = 'versicolor'"
-
 storage:
   type: local_file|s3|elastic|postgres|clickhouse
   params:

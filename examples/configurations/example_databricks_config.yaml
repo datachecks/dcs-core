@@ -1,6 +1,6 @@
 # Data sources to query
 data_sources:
-  - name: iris
+  - name: iris_databricks
     type: databricks
     connection:
       host: !ENV ${DATABRICKS_HOST}
@@ -13,50 +13,50 @@ metrics:
   # Numeric Metrics - Databricks
   - name: databricks_avg_price
     metric_type: avg
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_min_price
     metric_type: min
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_max_price
     metric_type: max
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_variance_price
     metric_type: variance
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   # Uniqueness Metrics - Databricks
   - name: databricks_distinct_count_price
     metric_type: distinct_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_duplicate_count_price
     metric_type: duplicate_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   # Completeness Metrics - Databricks
   - name: databricks_null_count_price
     metric_type: null_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_null_percentage_price
     metric_type: null_percentage
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
 
   - name: databricks_empty_string_count_price
     metric_type: empty_string_count
-    resource: iris.dcs_iris.species
+    resource: iris_databricks.dcs_iris.species
 
   # Reliability Metrics - Databricks
   - name: databricks_row_count
     metric_type: row_count
-    resource: iris.dcs_iris
+    resource: iris_databricks.dcs_iris
 
   - name: databricks_freshness
     metric_type: freshness
-    resource: iris.dcs_iris.timestamp
+    resource: iris_databricks.dcs_iris.timestamp
 
   # Combined Metrics - Databricks
   - name: databricks_combined_div
@@ -94,42 +94,42 @@ metrics:
   # With Filters
   - name: databricks_avg_price_with_filter
     metric_type: avg
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_avg_price_with_filter
     metric_type: avg
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_max_price_with_filter
     metric_type: max
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_min_price_with_filter
     metric_type: min
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_variance_price_with_filter
     metric_type: variance
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_distinct_count_price_with_filter
     metric_type: distinct_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
 
   - name: databricks_duplicate_count_price_with_filter
     metric_type: duplicate_count
-    resource: iris.dcs_iris.sepal_length
+    resource: iris_databricks.dcs_iris.sepal_length
     filters:
       where: '{ "match": { "species": "versicolor" } }'
