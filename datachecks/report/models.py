@@ -64,7 +64,7 @@ class DashboardInfo:
     dashboard: DashboardMetricOverview
 
 
-class GroupedMetricsType(List[str], Enum):
+class GroupedMetricsType(Enum):
     reliability = ["row_count", "document_count", "freshness"]
     numeric = ["min", "max", "avg", "sum", "stddev", "variance"]
     uniqueness = ["distinct_count", "duplicate_count"]

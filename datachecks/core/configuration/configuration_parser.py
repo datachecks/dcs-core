@@ -367,8 +367,12 @@ def load_configuration(configuration_path: str) -> Configuration:
                 "storage": None,
             }
             for config_dict in config_dict_list:
-                final_config_dict["data_sources"].extend(config_dict["data_sources"])
-                final_config_dict["metrics"].extend(config_dict["metrics"])
+                if "data_sources" in config_dict:
+                    final_config_dict["data_sources"].extend(
+                        config_dict["data_sources"]
+                    )
+                if "metrics" in config_dict:
+                    final_config_dict["metrics"].extend(config_dict["metrics"])
                 if "storage" in config_dict:
                     final_config_dict["storage"] = config_dict["storage"]
 
