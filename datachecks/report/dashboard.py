@@ -104,16 +104,20 @@ def html_template(params: TemplateParams):
                         background-image: url(data:image/svg+xml;base64,{__load_image("github.svg")});
                         background-repeat: no-repeat;
                         background-size: contain;
+                        filter: invert(1);
                     }}
                     .slack_logo {{
                         background-image: url(data:image/svg+xml;base64,{__load_image("slack.svg")});
                         background-repeat: no-repeat;
                         background-size: contain;
+                        filter: invert(1);
+
                     }}
                     .docs_logo {{
                         background-image: url(data:image/svg+xml;base64,{__load_image("docs.svg")});
                         background-repeat: no-repeat;
                         background-size: contain;
+                        filter: invert(1);
                     }}
 
                     </style>
