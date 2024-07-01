@@ -35,6 +35,7 @@ class DataSourceManager:
         "bigquery": "BigQueryDataSource",
         "databricks": "DatabricksDataSource",
         "redshift": "RedShiftDataSource",
+        "snowflake": "SnowFlakeDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):
