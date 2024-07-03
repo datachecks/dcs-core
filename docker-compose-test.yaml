@@ -40,30 +40,6 @@ services:
     networks:
       - test-postgres
     restart: unless-stopped
-  test-dc-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: test-dc-elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    volumes:
-      - test-elasticsearch-data:/usr/share/elasticsearch/data
-    ports:
-      - "9210:9200"
-      - "9310:9300"
-  test-dc-mysql:
-    container_name: test-dc-mysql
-    image: mysql:8.0
-    environment:
-      MYSQL_DATABASE: dcs_db
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbpass
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - test-dc-mysql:/var/lib/mysql
-    ports:
-      - "3304:3306"
-    restart: unless-stopped
 
 networks:
   test-opensearch-net:

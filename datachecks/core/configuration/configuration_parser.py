@@ -77,8 +77,10 @@ class DataSourceConfigParser(ConfigParser):
             token=config["connection"].get("token"),
             catalog=config["connection"].get("catalog"),
             http_path=config["connection"].get("http_path"),
+            account=config["connection"].get("account"),
+            warehouse=config["connection"].get("warehouse"),
+            role=config["connection"].get("role"),
         )
-
         return connection_config
 
     @staticmethod

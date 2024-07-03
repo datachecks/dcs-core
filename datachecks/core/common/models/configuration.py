@@ -31,7 +31,6 @@ class DataSourceType(str, Enum):
     REDSHIFT = "redshift"
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
-    MONGODB = "mongodb"
 
 
 @dataclass
@@ -54,6 +53,10 @@ class DataSourceConnectionConfiguration:
     token: Optional[str] = None  # Databricks specific configuration
     catalog: Optional[str] = None  # Databricks specific configuration
     http_path: Optional[str] = None  # Databricks specific configuration
+
+    account: Optional[str] = None  # Snowflake specific configuration
+    warehouse: Optional[str] = None  # Snowflake specific configuration
+    role: Optional[str] = None  # Snowflake specific configuration
 
 
 @dataclass
