@@ -58,6 +58,8 @@ class DataSourceConnectionConfiguration:
     warehouse: Optional[str] = None  # Snowflake specific configuration
     role: Optional[str] = None  # Snowflake specific configuration
 
+    driver: Optional[str] = None  # SQL Server specific configuration
+
 
 @dataclass
 class DataSourceConfiguration:

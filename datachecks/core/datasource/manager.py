@@ -36,6 +36,7 @@ class DataSourceManager:
         "databricks": "DatabricksDataSource",
         "redshift": "RedShiftDataSource",
         "snowflake": "SnowFlakeDataSource",
+        "mssql": "MssqlDataSource",
     }
 
     def __init__(self, config: Dict[str, DataSourceConfiguration]):

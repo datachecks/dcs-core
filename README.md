@@ -100,15 +100,15 @@ Please visit the [Quick Start Guide](https://docs.datachecks.io/getting_started/
 Datachecks supports sql and search data sources. Below are the list of supported data sources.
 
 | Data Source                                                             | Type                   | Supported  |
-| ----------------------------------------------------------------------- | ---------------------- | ---------- |
+|-------------------------------------------------------------------------|------------------------|------------|
 | [Postgres](https://docs.datachecks.io/integrations/postgres/)           | Transactional Database | :thumbsup: |
 | [MySql](https://docs.datachecks.io/integrations/mysql/)                 | Transactional Database | :thumbsup: |
-| MS SQL Server                                                           | Transactional Database | :soon:     |
+| MS SQL Server                                                           | Transactional Database | :thumbsup: |
 | [OpenSearch](https://docs.datachecks.io/integrations/opensearch/)       | Search Engine          | :thumbsup: |
 | [Elasticsearch](https://docs.datachecks.io/integrations/elasticsearch/) | Search Engine          | :thumbsup: |
 | [GCP BigQuery](https://docs.datachecks.io/integrations/bigquery/)       | Data Warehouse         | :thumbsup: |
 | [DataBricks](https://docs.datachecks.io/integrations/databricks/)       | Data Warehouse         | :thumbsup: |
-| Snowflake                                                               | Data Warehouse         | :soon:     |
+| Snowflake                                                               | Data Warehouse         | :thumbsup: |
 | [AWS RedShift](https://docs.datachecks.io/integrations/redshift/)       | Data Warehouse         | :thumbsup: |
 
 ## Metric Types
