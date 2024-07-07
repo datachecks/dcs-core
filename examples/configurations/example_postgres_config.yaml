@@ -9,126 +9,70 @@ data_sources:
       password: !ENV ${PGSQL_PASS}
       database: dcs_db
       schema: public
-metrics:
+
+validations for iris_pgsql.dcs_iris:
   # Numeric Metrics
-  - name: sepal_length_avg_price
-    metric_type: avg
-    resource: iris_pgsql.dcs_iris.sepal_length
-    validation:
+  - sepal length min size:
+      on: min(sepal_length)
+      threshold: "= 0"
+  - sepal length max size:
+      on: max(sepal_length)
+      threshold: "= 150"
+  - sepal length avg size:
+      on: avg(sepal_length)
       threshold: "> 0 & < 1000"
-
-  - name: postgres_min_price
-    metric_type: min
-    resource: iris_pgsql.dcs_iris.sepal_length
-
-  - name: postgres_max_price
-    metric_type: max
-    resource: iris_pgsql.dcs_iris.sepal_length
-
-  - name: postgres_variance_price
-    metric_type: variance
-    resource: iris_pgsql.dcs_iris.sepal_length
+  - sepal length sum size:
+      on: sum(sepal_length)
+      threshold: "> 0 & < 1000"
+  - sepal length variance size:
+      on: variance(sepal_length)
+      threshold: "< 1"
+  - sepal length stddev size:
+      on: stddev(sepal_length)
+      threshold: "< 0.5"
 
   # Uniqueness Metrics
-  - name: postgres_distinct_count_price
-    metric_type: distinct_count
-    resource: iris_pgsql.dcs_iris.sepal_length
-
-  - name: postgres_duplicate_count_price
-    metric_type: duplicate_count
-    resource: iris_pgsql.dcs_iris.sepal_length
+  - species duplicate count:
+      on: count_duplicate(species)
+      threshold: "< 100"
+  - species distinct count:
+      on: count_distinct(species)
+      threshold: "> 0"
 
   # Completeness Metrics
-  - name: postgres_null_count_price
-    metric_type: null_count
-    resource: iris_pgsql.dcs_iris.sepal_length
+  - sepal length null count:
+      on: count_null(sepal_length)
+      threshold: "= 0"
+  - sepal length null percentage:
+      on: percent_null(sepal_length)
+      threshold: "= 0"
+  - species empty string count:
+      on: count_empty_string(species)
+      threshold: "= 0"
+  - species empty string percentage:
+      on: percent_empty_string(species)
+      threshold: "= 0"
 
-  - name: postgres_null_percentage_price
-    metric_type: null_percentage
-    resource: iris_pgsql.dcs_iris.sepal_length
-
-  - name: postgres_empty_string_count_price
-    metric_type: empty_string_count
-    resource: iris_pgsql.dcs_iris.species
+  # Custom Metrics
+  - sepal length custom sql example:
+      on: custom_sql
+      query: "SELECT avg(sepal_length) * 2 FROM dcs_iris"
+      threshold: "> 0 & < 10"
 
   # Reliability Metrics
-  - name: postgres_row_count
-    metric_type: row_count
-    resource: iris_pgsql.dcs_iris
-    validation:
-      threshold: "> 100"
-
-  - name: postgres_freshness
-    metric_type: freshness
-    resource: iris_pgsql.dcs_iris.timestamp
-    validation:
-      threshold: ">-5000"
-
-  # Combined Metrics
-  - name: postgres_combined_div
-    metric_type: combined
-    expression: div(postgres_distinct_count_price, postgres_max_price)
-
-  - name: postgres_combined_mul
-    metric_type: combined
-    expression: mul(postgres_distinct_count_price, postgres_max_price)
-
-  - name: postgres_combined_sum
-    metric_type: combined
-    expression: sum(postgres_distinct_count_price, postgres_max_price)
-
-  - name: postgres_combined_sub
-    metric_type: combined
-    expression: sub(postgres_distinct_count_price, postgres_max_price)
-
-  - name: postgres_combined_div_mul
-    metric_type: combined
-    expression: div(mul(postgres_distinct_count_price, postgres_max_price), postgres_min_price)
-
-  - name: postgres_combined_div_mul_sum
-    metric_type: combined
-    expression: sum(div(mul(postgres_distinct_count_price, postgres_max_price), postgres_min_price), postgres_row_count)
-
-  - name: postgres_combined_div_mul_sum_sub
-    metric_type: combined
-    expression: sub(sum(div(mul(postgres_distinct_count_price, postgres_max_price), postgres_min_price), postgres_row_count), postgres_duplicate_count_price)
-
-  - name: postgres_combined_div_mul_sum_sub_div
-    metric_type: combined
-    expression: div(sub(sum(div(mul(postgres_distinct_count_price, postgres_max_price), postgres_min_price), postgres_row_count), postgres_duplicate_count_price), postgres_distinct_count_price)
+  - dcs_iris rows count:
+      on: count_rows
+      threshold: "> 0"
+  - dcs_iris last update count:
+      on: freshness(timestamp)
+      threshold: "> 0"
 
   # Filtered Metrics
-
-  - name: postgres_avg_price_filtered
-    metric_type: avg
-    resource: iris_pgsql.dcs_iris.sepal_length
-    filters:
-      where: "species = 'versicolor'"
-
-  - name: postgres_min_price_filtered
-    metric_type: min
-    resource: iris_pgsql.dcs_iris.sepal_length
-    filters:
-      where: "species = 'versicolor'"
-
-  - name: postgres_max_price_with_filter
-    metric_type: max
-    resource: iris_pgsql.dcs_iris.sepal_length
-    filters:
-      where: "species = 'versicolor'"
-
-  - name: postgres_min_price_with_filter
-    metric_type: min
-    resource: iris_pgsql.dcs_iris.sepal_length
-    filters:
-      where: "species = 'versicolor'"
-
-  - name: postgres_distinct_count_price_with_filter
-    metric_type: distinct_count
-    resource: iris_pgsql.dcs_iris.sepal_length
-    filters:
-      where: "species = 'versicolor'"
-storage:
-  type: local_file|s3|elastic|postgres|clickhouse
-  params:
-    path: /Users/subhankar/Work/datageek00/dcs_metrics
+  - dcs_iris rows count with filter:
+      on: count_rows
+      threshold: "< 50"
+      where: "species = 'virginica'"
+  - dcs_iris min with filter:
+      on: min(sepal_length)
+      threshold: "= 4"
+      where: "species = 'virginica'"

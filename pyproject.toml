@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Development Status :: 2 - Beta",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Topic :: Database :: Database Engines/Servers",
     "Typing :: Typed"
@@ -53,6 +53,7 @@ mongomock = "^4.1.2"
 pre-commit = "^2.20.0"
 pytest-cov = "^4.0.0"
 python-dotenv = "^1.0.0"
+pandas = "^1.4.0"
 
 [tool.poetry.group.docs]
 optional = true

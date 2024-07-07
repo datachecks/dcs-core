@@ -13,7 +13,9 @@
 #  limitations under the License.
 
 from abc import ABC
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+
+from datachecks.core.common.models.configuration import DataSourceLanguageSupport
 
 
 class DataSource(ABC):
@@ -24,9 +26,17 @@ class DataSource(ABC):
     NUMERIC_PYTHON_TYPES_FOR_PROFILING = ["int", "float"]
     TEXT_PYTHON_TYPES_FOR_PROFILING = ["str"]
 
-    def __init__(self, data_source_name: str, data_connection: Dict):
+    def __init__(
+        self,
+        data_source_name: str,
+        data_connection: Dict,
+        language_support: Optional[
+            DataSourceLanguageSupport
+        ] = DataSourceLanguageSupport.SQL,
+    ):
         self._data_source_name: str = data_source_name
         self.data_connection: Dict = data_connection
+        self.language_support = language_support
 
     @property
     def data_source_name(self) -> str:

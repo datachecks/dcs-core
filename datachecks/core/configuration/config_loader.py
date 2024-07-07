@@ -123,8 +123,21 @@ def parse_config(
 
     if path:
         with open(path, encoding=encoding) as conf_data:
-            return yaml.load(conf_data, Loader=loader)
+            yaml_data_str = conf_data.read()
     elif data:
-        return yaml.load(data, Loader=loader)
+        yaml_data_str = data
     else:
         raise ValueError("Either a path or data should be defined as input")
+
+    # yaml_data_str = yaml_data_str.replace("on:", "for_temp:")
+    yaml_data_str_replaces = re.sub(r"\bon\b:", "for_temp:", yaml_data_str)
+    conf_dict = yaml.load(yaml_data_str_replaces, Loader=loader)
+
+    for key, value in conf_dict.items():
+        if key != "data_sources" and key.startswith("validations"):
+            if isinstance(value, list):
+                for validation in value:
+                    for k, v in validation.items():
+                        if "for_temp" in v:
+                            v["on"] = v.pop("for_temp")
+    return conf_dict
