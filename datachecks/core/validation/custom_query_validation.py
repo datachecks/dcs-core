@@ -12,46 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from dataclasses import dataclass
-from typing import Optional, Union
+from datachecks.core.datasource.sql_datasource import SQLDataSource
+from datachecks.core.validation.base import Validation
 
 
-@dataclass
-class Dataset:
-    """
-    Dataset resource
-    """
-
-    name: str
-    data_source: str
-    description: Optional[str] = None
-
-
-@dataclass
-class Table:
-    """
-    Database Table resource
-    """
-
-    data_source: str
-    name: str
-
-
-@dataclass
-class Index:
-    """
-    Search Index resource
-    """
-
-    data_source: str
-    name: str
-
-
-@dataclass
-class Field:
-    """
-    Search Field resource
-    """
-
-    belongs_to: Union[Table, Index]
-    name: str
+class CustomSqlValidation(Validation):
+    def _generate_metric_value(self):
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_custom_sql(query=self.query)
+        else:
+            raise ValueError("Invalid data source type")

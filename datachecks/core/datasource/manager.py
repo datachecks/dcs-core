@@ -16,7 +16,10 @@ from dataclasses import asdict
 from typing import Dict, List
 
 from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.core.common.models.configuration import DataSourceConfiguration
+from datachecks.core.common.models.configuration import (
+    Configuration,
+    DataSourceConfiguration,
+)
 from datachecks.core.datasource.base import DataSource
 
 
@@ -39,10 +42,22 @@ class DataSourceManager:
         "mssql": "MssqlDataSource",
     }
 
-    def __init__(self, config: Dict[str, DataSourceConfiguration]):
-        self._data_source_configs: Dict[str, DataSourceConfiguration] = config
+    def __init__(self, config: Configuration):
+        self._config = config
         self._data_sources: Dict[str, DataSource] = {}
-        self._initialize_data_sources()
+
+    def connect(self):
+        for name, data_source_config in self._config.data_sources.items():
+            self._data_sources[data_source_config.name] = self._create_data_source(
+                data_source_config=data_source_config
+            )
+        for data_source in self._data_sources.values():
+            try:
+                data_source.connect()
+            except Exception as e:
+                raise DataChecksDataSourcesConnectionError(
+                    f"Failed to connect to data source {data_source.data_source_name} [{str(e)}]"
+                )
 
     @property
     def get_data_sources(self) -> Dict[str, DataSource]:
@@ -51,17 +66,6 @@ class DataSourceManager:
         :return:
         """
         return self._data_sources
-
-    def _initialize_data_sources(self):
-        """
-        Initialize the data sources
-        :return:
-        """
-        for name, data_source_config in self._data_source_configs.items():
-            self._data_sources[data_source_config.name] = self._create_data_source(
-                data_source_config=data_source_config
-            )
-            self._data_sources[data_source_config.name].connect()
 
     def _create_data_source(
         self, data_source_config: DataSourceConfiguration
