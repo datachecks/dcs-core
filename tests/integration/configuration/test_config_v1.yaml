@@ -24,30 +24,24 @@ data_sources:
       password: !ENV ${DB2_PASS}  # Password to use for authentication ENV variables
       database: dc_db_2
 
-# Metrics to generate
-metrics:
-  - name: count_us_parts
-    metric_type: document_count
-    resource: search_datastore.product_data_us
-    filters:
+# Validations
+validations for search_datastore.product_data_us:
+  - count_us_parts:
+      on: count_documents
       where: '{"match_all" : {}}'
-  - name: count_us_parts_valid
-    metric_type: row_count
-    resource: product_db.products
-    filters:
+
+validations for product_db.products:
+  - count_us_parts_valid:
+      on: count_rows
       where: "is_valid is True and country_code = 'US'"
-  - name: custom_sql_example
-    metric_type: custom_sql
-    resource: product_db.products
-    query: |
-      SELECT count(*) FROM product_db.products left join
-      product_db.products on search_datastore.product_data_us.id = product_db.products.id
-      where product_db.products.is_valid is True and product_db.products.country_code = 'US'
-  - name: count_us_parts_not_valid
-    metric_type: row_count
-    resource: search_staging_db.products
-    filters:
-      where: "is_valid is False and country_code = 'US'"
-  - name: combined_metric_example_percentage
-    metric_type: combined
-    expression: mul(div(count_us_parts, count_us_parts_valid), 100)
+  - custom_sql_example:
+      on: custom_sql
+      query: |
+        SELECT count(*) FROM product_db.products left join
+        product_db.products on search_datastore.product_data_us.id = product_db.products.id
+        where product_db.products.is_valid is True and product_db.products.country_code = 'US'
+
+validations for search_staging_db.products:
+    - count_us_parts_not_valid:
+        on: count_rows
+        where: "is_valid is False and country_code = 'US'"

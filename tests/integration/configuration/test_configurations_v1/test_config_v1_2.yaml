@@ -1,0 +1,4 @@
+validations for search_staging_db.products:
+  - count_us_parts_not_valid:
+      on: count_rows
+      where: "is_valid is False and country_code = 'US'"

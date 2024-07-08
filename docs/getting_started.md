@@ -87,18 +87,13 @@ data_sources:
       username: dbuser
       password: dbpass
       database: dcs_demo
-metrics:
-  - name: count_of_products
-    metric_type: row_count
-    resource: product_db.products
-    validation:
+validations for product_db.products:
+  - count_of_products:
+      on: count_rows
       threshold: "> 0 & < 1000"
-  - name: max_product_price_in_india
-    metric_type: max
-    resource: product_db.products.price
-    filters:
+  - max_product_price_in_india:
+      on: max(price)
       where: "country_code = 'IN'"
-    validation:
       threshold: "< 190"
 ```
 
@@ -129,11 +124,12 @@ datachecks inspect --config-path ./dcs_config.yaml --html-report
 ### Run Datachecks in Python
 
 ```python
-from datachecks.core import load_configuration, Inspect
+from datachecks.core import Inspect
 
 
 if __name__ == "__main__":
-    inspect = Inspect(load_configuration("dcs_config.yaml"))
+    inspect = Inspect()
+    inspect.add_configuration_yaml_file("dcs_config.yaml")
     inspect_output = inspect.run()
     print(inspect_output.metrics)
     # User the metrics to send or store somewhere

@@ -71,14 +71,13 @@ nav:
       - Search Engines:
           - OpenSearch: integrations/opensearch.md
           - ElasticSearch: integrations/elasticsearch.md
-  - Metrics:
-      - Reliability Metrics: metrics/reliability.md
-      - Numeric Distribution Metrics: metrics/numeric_distribution.md
-      - Uniqueness Metrics: metrics/uniqueness.md
-      - Completeness Metrics: metrics/completeness.md
-      - Special Metrics:
-          - Combined Metrics: metrics/combined.md
-          - Custom SQL Metrics: metrics/custom_sql.md
+  - Validations:
+      - Reliability: validations/reliability.md
+      - Distribution: validations/numeric_distribution.md
+      - Uniqueness: validations/uniqueness.md
+      - Completeness: validations/completeness.md
+      - Special Validation:
+          - Custom SQL Validation: validations/custom_sql.md
   - Support:
       - Contact: support/contact.md
       - Telemetry: support/usage_analytics.md
@@ -96,4 +95,4 @@ extra:
     - icon: fontawesome/brands/slack
       link: https://join.slack.com/t/datachecks/shared_invite/zt-1zqsigy4i-s5aadIh2mjhdpVWU0PstPg
 
-copyright: "&copy; 2023 BY WATERDIP LABS"
+copyright: "&copy; 2024 BY WATERDIP LABS"
