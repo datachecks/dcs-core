@@ -1,0 +1,78 @@
+# Data sources to query
+data_sources:
+  - name: iris_pgsql
+    type: postgres
+    connection:
+      host: 127.0.0.1
+      port: 5421
+      username: postgres
+      password: postgres
+      database: dcs_db
+      schema: public
+
+validations for iris_pgsql.dcs_iris:
+  # Numeric Metrics
+  - sepal length min size:
+      on: min(sepal_length)
+      threshold: "= 0"
+  - sepal length max size:
+      on: max(sepal_length)
+      threshold: "= 150"
+  - sepal length avg size:
+      on: avg(sepal_length)
+      threshold: "> 0 & < 1000"
+  - sepal length sum size:
+      on: sum(sepal_length)
+      threshold: "> 0 & < 1000"
+  - sepal length variance size:
+      on: variance(sepal_length)
+      threshold: "< 1"
+  - sepal length stddev size:
+      on: stddev(sepal_length)
+      threshold: "< 0.5"
+
+  # Uniqueness Metrics
+  - species duplicate count:
+      on: count_duplicate(species)
+      threshold: "< 100"
+  - species distinct count:
+      on: count_distinct(species)
+      threshold: "> 0"
+
+  # Completeness Metrics
+  - sepal length null count:
+      on: count_null(sepal_length)
+      threshold: "= 0"
+  - sepal length null percentage:
+      on: percent_null(sepal_length)
+      threshold: "= 0"
+  - species empty string count:
+      on: count_empty_string(species)
+      threshold: "= 0"
+  - species empty string percentage:
+      on: percent_empty_string(species)
+      threshold: "= 0"
+
+  # Custom Metrics
+  - sepal length custom sql example:
+      on: custom_sql
+      query: "SELECT avg(sepal_length) * 2 FROM dcs_iris"
+      threshold: "> 0 & < 10"
+
+  # Reliability Metrics
+  - dcs_iris rows count:
+      on: count_rows
+      threshold: "> 0"
+  - dcs_iris last update count:
+      on: freshness(timestamp)
+      threshold: "> 0"
+
+  # Filtered Metrics
+  - dcs_iris rows count with filter:
+      on: count_rows
+      threshold: "< 50"
+      where: "species = 'virginica'"
+  - dcs_iris min with filter:
+      on: min(sepal_length)
+      threshold: "= 4"
+      where: "species = 'virginica'"
