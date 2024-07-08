@@ -74,21 +74,20 @@ class MetricManager:
         self.data_source_manager = data_source_manager
         self.metrics: Dict[str, Metric] = {}
         self.combined: Dict[str, Metric] = {}
-        if metric_config:
-            self._build_metrics(
-                config={
-                    k: v
-                    for (k, v) in metric_config.items()
-                    if v.metric_type != MetricsType.COMBINED.value
-                }
-            )
-            self._build_combined_metrics(
-                config={
-                    k: v
-                    for (k, v) in metric_config.items()
-                    if v.metric_type == MetricsType.COMBINED.value
-                }
-            )
+        self._build_metrics(
+            config={
+                k: v
+                for (k, v) in metric_config.items()
+                if v.metric_type != MetricsType.COMBINED.value
+            }
+        )
+        self._build_combined_metrics(
+            config={
+                k: v
+                for (k, v) in metric_config.items()
+                if v.metric_type == MetricsType.COMBINED.value
+            }
+        )
 
     def _build_metrics(self, config: Dict[str, MetricConfiguration]):
         for metric_name, metric_config in config.items():

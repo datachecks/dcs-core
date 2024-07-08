@@ -2,7 +2,7 @@ version: '3'
 
 services:
   test-dc-opensearch: # This is also the hostname of the container within the Docker network (i.e. https://test-dc-opensearch/)
-    image: opensearchproject/opensearch:2.5.0 # Specifying the latest available image - modify if you want a specific version
+    image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
     container_name: test-dc-opensearch
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
@@ -27,7 +27,7 @@ services:
       - test-opensearch-net # All of the containers will join the same Docker bridge network
   test-dc-postgres:
     container_name: test-postgres_container
-    image: postgres:13.15
+    image: postgres
     environment:
       POSTGRES_DB: dc_db
       POSTGRES_USER: postgres

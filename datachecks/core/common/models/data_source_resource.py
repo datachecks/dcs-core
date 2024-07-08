@@ -17,17 +17,6 @@ from typing import Optional, Union
 
 
 @dataclass
-class Dataset:
-    """
-    Dataset resource
-    """
-
-    name: str
-    data_source: str
-    description: Optional[str] = None
-
-
-@dataclass
 class Table:
     """
     Database Table resource

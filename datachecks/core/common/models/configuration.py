@@ -11,19 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import re
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.common.models.validation import (
-    Threshold,
-    Validation,
-    ValidationFunction,
-    ValidationFunctionType,
-)
+from datachecks.core.common.models.validation import Validation
 
 
 class DataSourceType(str, Enum):
@@ -36,11 +31,6 @@ class DataSourceType(str, Enum):
     REDSHIFT = "redshift"
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
-
-
-class DataSourceLanguageSupport(str, Enum):
-    SQL = "sql"
-    DSL_ES = "dsl_es"
 
 
 @dataclass
@@ -80,84 +70,6 @@ class DataSourceConfiguration:
     name: str
     type: DataSourceType
     connection_config: DataSourceConnectionConfiguration
-    language_support: Optional[DataSourceLanguageSupport] = None
-
-
-@dataclass
-class ValidationConfig:
-    name: str
-    on: str
-    threshold: Optional[Threshold] = None
-    where: Optional[str] = None
-    query: Optional[str] = None
-    regex: Optional[str] = None
-    values: Optional[List] = None
-
-    def _on_field_validation(self):
-        if self.on is None:
-            raise ValueError("on field is required")
-        dataset_validation_functions = [
-            ValidationFunction.FAILED_ROWS,
-            ValidationFunction.COUNT_ROWS,
-            ValidationFunction.COUNT_DOCUMENTS,
-            ValidationFunction.CUSTOM_SQL,
-            ValidationFunction.COMPARE_COUNT_ROWS,
-        ]
-        if self.on.strip() not in dataset_validation_functions:
-            self._validation_function_type = ValidationFunctionType.FIELD
-            if not re.match(r"^(\w+)\(([ \w-]+)\)$", self.on.strip()):
-                raise ValueError(f"on field must be a valid function, was {self.on}")
-            else:
-                column_validation_function = re.search(
-                    r"^(\w+)\(([ \w-]+)\)$", self.on.strip()
-                ).group(1)
-
-                if column_validation_function not in [v for v in ValidationFunction]:
-                    raise ValueError(
-                        f"{column_validation_function} is not a valid validation function"
-                    )
-
-                if column_validation_function in dataset_validation_functions:
-                    raise ValueError(
-                        f"{column_validation_function} is a table function, should not have column name"
-                    )
-
-                self._validation_function = ValidationFunction(
-                    column_validation_function
-                )
-                self._validation_field_name = re.search(
-                    r"^(\w+)\(([ \w-]+)\)$", self.on.strip()
-                ).group(2)
-        else:
-            self._validation_function_type = ValidationFunctionType.DATASET
-            self._validation_function = ValidationFunction(self.on)
-            self._validation_field_name = None
-
-    def __post_init__(self):
-        self._on_field_validation()
-
-    @property
-    def get_validation_function(self) -> ValidationFunction:
-        return ValidationFunction(self._validation_function)
-
-    @property
-    def get_validation_function_type(self) -> ValidationFunctionType:
-        return self._validation_function_type
-
-    @property
-    def get_validation_field_name(self) -> str:
-        return self._validation_field_name if self._validation_field_name else None
-
-
-@dataclass
-class ValidationConfigByDataset:
-    """
-    Validation configuration group
-    """
-
-    data_source: str
-    dataset: str
-    validations: Dict[str, ValidationConfig]
 
 
 @dataclass
@@ -223,7 +135,6 @@ class Configuration:
     Configuration for the data checks
     """
 
-    data_sources: Optional[Dict[str, DataSourceConfiguration]] = None
-    validations: Optional[Dict[str, ValidationConfigByDataset]] = None
-    metrics: Optional[Dict[str, MetricConfiguration]] = None
+    data_sources: Dict[str, DataSourceConfiguration]
+    metrics: Dict[str, MetricConfiguration]
     storage: Optional[MetricStorageConfiguration] = None
