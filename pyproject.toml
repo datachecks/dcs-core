@@ -66,6 +66,7 @@ mkdocs-material = "^8.5.6"
 # When adding, update also: README + dev deps just above
 postgres = ["psycopg2-binary"]
 mysql = ["pymysql"]
+ms_sql = ["pyodbc"]
 opensearch = ["opensearch-py"]
 bigquery = ["sqlalchemy-bigquery"]
 databricks = ["databricks-sql-connector"]

@@ -2563,6 +2563,7 @@ all = ["databricks-sql-connector", "elasticsearch", "opensearch-py", "psycopg2-b
 bigquery = ["sqlalchemy-bigquery"]
 databricks = ["databricks-sql-connector"]
 elasticsearch = ["elasticsearch"]
+ms-sql = ["pyodbc"]
 mysql = ["pymysql"]
 opensearch = ["opensearch-py"]
 postgres = ["psycopg2-binary"]
@@ -2572,4 +2573,4 @@ snowflake = ["snowflake-sqlalchemy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "85f57e566cb5b6f6eb554bac58b66eaa8e83dc152d098be0fe65bcf0bff4dd85"
+content-hash = "3e25c5f2b5bbcef16312f52561dece5996f789d91dfb181864fef8fd18bfe7f9"
