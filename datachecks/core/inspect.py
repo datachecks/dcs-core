@@ -15,7 +15,7 @@ import sys
 import traceback
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import requests
 from loguru import logger
@@ -33,11 +33,6 @@ from datachecks.core.common.models.metric import (
     MetricValue,
     TableMetrics,
 )
-from datachecks.core.common.models.validation import ValidationInfo
-from datachecks.core.configuration.configuration_parser_v1 import (
-    load_configuration,
-    load_configuration_from_yaml_str,
-)
 from datachecks.core.datasource.base import DataSource
 from datachecks.core.datasource.manager import DataSourceManager
 from datachecks.core.datasource.sql_datasource import SQLDataSource
@@ -51,7 +46,6 @@ from datachecks.core.utils.tracking import (
     send_event_json,
 )
 from datachecks.core.utils.utils import truncate_error
-from datachecks.core.validation.manager import ValidationManager
 from datachecks.integrations.storage.local_file import LocalFileMetricRepository
 
 requests.packages.urllib3.disable_warnings(
@@ -62,7 +56,6 @@ requests.packages.urllib3.disable_warnings(
 @dataclass
 class InspectOutput:
     metrics: Dict[str, Union[DataSourceMetrics, CombinedMetrics]]
-    validations: Dict[str, ValidationInfo]
 
     def get_metric_values(self) -> List[MetricValue]:
         """
@@ -111,23 +104,35 @@ class InspectOutput:
 class Inspect:
     def __init__(
         self,
-        configuration: Optional[Configuration] = None,
+        configuration: Configuration,
         #  auto_profile: bool = False, # Disabled for now
     ):
-        if configuration is None:
-            self.configuration = Configuration()
-        else:
-            self.configuration = configuration
-
-        self.data_source_manager = DataSourceManager(self.configuration)
-        self.validation_manager = ValidationManager(
-            application_configs=self.configuration,
-            data_source_manager=self.data_source_manager,
-        )
-
+        self.configuration = configuration
         # self._auto_profile = auto_profile # Disabled for now
         self.execution_time_taken = 0
         self.is_storage_enabled = False
+        try:
+            self.data_source_manager = DataSourceManager(configuration.data_sources)
+            self.data_source_names = self.data_source_manager.get_data_source_names()
+            self.metric_manager = MetricManager(
+                metric_config=configuration.metrics,
+                data_source_manager=self.data_source_manager,
+            )
+            if self.configuration.storage is not None:
+                self.is_storage_enabled = True
+                self.metric_repository: MetricRepository = self._initiate_storage(
+                    self.configuration.storage
+                )
+
+        except Exception as ex:
+            logger.error(f"Error while initializing Inspect: {ex}")
+            if is_tracking_enabled():
+                event_json = create_error_event(
+                    exception=ex,
+                )
+                send_event_json(event_json)
+            traceback.print_exc(file=sys.stdout)
+            raise ex
 
     def _initiate_storage(
         self, metric_storage_config: MetricStorageConfiguration
@@ -154,6 +159,55 @@ class Inspect:
                     index_metrics={},
                 )
         return results
+
+    def _generate_data_source_profile_metrics(
+        self, base_datasource_metrics: Dict[str, DataSourceMetrics]
+    ):
+        """
+        Generate the data source profile metrics
+        """
+        data_sources: Dict[str, DataSource] = self.data_source_manager.get_data_sources
+
+        # Iterate over all the data sources
+        for data_source_name, data_source in data_sources.items():
+            if isinstance(data_source, SQLDataSource):
+                data_source_metrics: DataSourceMetrics = base_datasource_metrics[
+                    data_source_name
+                ]
+                profiler = DataSourceProfiling(data_source=data_source)
+                list_metrics: List[
+                    Union[TableMetrics, IndexMetrics]
+                ] = profiler.generate()
+
+                # Add the metrics to the data source metrics
+                for table_or_index_metrics in list_metrics:
+                    # If metrics is a table metrics, add it to the table metrics
+                    if isinstance(table_or_index_metrics, TableMetrics):
+                        if (
+                            table_or_index_metrics.table_name
+                            not in data_source_metrics.table_metrics
+                        ):
+                            data_source_metrics.table_metrics[
+                                table_or_index_metrics.table_name
+                            ] = table_or_index_metrics
+                        else:
+                            data_source_metrics.table_metrics[
+                                table_or_index_metrics.table_name
+                            ].metrics.update(table_or_index_metrics.metrics)
+
+                    # If metrics is an index metrics, add it to the index metrics
+                    elif isinstance(table_or_index_metrics, IndexMetrics):
+                        if (
+                            table_or_index_metrics.index_name
+                            not in data_source_metrics.index_metrics
+                        ):
+                            data_source_metrics.index_metrics[
+                                table_or_index_metrics.index_name
+                            ] = table_or_index_metrics
+                        else:
+                            data_source_metrics.index_metrics[
+                                table_or_index_metrics.index_name
+                            ].metrics.update(table_or_index_metrics.metrics)
 
     @staticmethod
     def _prepare_results(
@@ -210,18 +264,12 @@ class Inspect:
                     expression=expression, metrics={result.identity: result}
                 )
 
-    def add_configuration_yaml_file(self, file_path: str):
-        load_configuration(
-            configuration_path=file_path, configuration=self.configuration
-        )
-        self.validation_manager.set_validation_configs(self.configuration.validations)
-
-    def add_validations_yaml_str(self, yaml_str: str):
-        configuration = load_configuration_from_yaml_str(yaml_string=yaml_str)
-        self.configuration.validations = configuration.validations
-
-    def add_spark_session(self, spark_session, data_source_name: str = "spark_df"):
-        pass
+    def _save_all_metrics(self, metric_values: List[MetricValue]):
+        """
+        This method will save all the metrics in the given list. Will use the repository to save the metrics.
+        Repository will be selected based on the configuration.
+        """
+        self.metric_repository.save_all_metrics(metric_values)
 
     def run(self) -> InspectOutput:
         """
@@ -231,14 +279,7 @@ class Inspect:
         error = None
         inspect_info = None
         try:
-            self.data_source_manager.connect()
-            self.validation_manager.build_validations()
-
             # Initiate the data source metrics
-            metric_manager = MetricManager(
-                metric_config=self.configuration.metrics,
-                data_source_manager=self.data_source_manager,
-            )
             datasource_metrics: Dict[
                 str, DataSourceMetrics
             ] = self._base_data_source_metrics()
@@ -248,14 +289,14 @@ class Inspect:
             combined_metric_values: List[MetricValue] = []
 
             # generate metric values for dataset metrics and populate the datasource_metrics
-            for metric in metric_manager.metrics.values():
+            for metric in self.metric_manager.metrics.values():
                 metric_value = metric.get_metric_value()
                 if metric_value is not None:
                     metric_values.append(metric_value)
             self._prepare_results(metric_values, datasource_metrics=datasource_metrics)
 
             # generate metric values for combined metrics and populate the combined_metrics
-            for combined_metric in metric_manager.combined.values():
+            for combined_metric in self.metric_manager.combined.values():
                 metric_value = combined_metric.get_metric_value(
                     metric_values=metric_values
                 )
@@ -265,25 +306,16 @@ class Inspect:
                 combined_metric_values, combined_metrics=combined_metrics
             )
 
-            validation_infos: Dict[str, ValidationInfo] = {}
+            # generate metric values for profile metrics
+            # Disabled for now
+            # if self._auto_profile:
+            #    self._generate_data_source_profile_metrics(datasource_metrics)
 
-            for datasource, _ in self.validation_manager.get_validations.items():
-                for dataset, _ in self.validation_manager.get_validations[
-                    datasource
-                ].items():
-                    for _, validation in self.validation_manager.get_validations[
-                        datasource
-                    ][dataset].items():
-                        validation_info = validation.get_validation_info()
-                        validation_infos[
-                            validation.get_validation_identity()
-                        ] = validation_info
-
-            output = InspectOutput(
-                metrics={**datasource_metrics, **combined_metrics},
-                validations=validation_infos,
-            )
+            output = InspectOutput(metrics={**datasource_metrics, **combined_metrics})
             inspect_info = output.get_inspect_info()
+
+            if self.is_storage_enabled:
+                self._save_all_metrics(output.get_metric_values())
 
             return output
         except Exception as ex:
