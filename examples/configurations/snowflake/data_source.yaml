@@ -1,0 +1,11 @@
+data_sources:
+  - name: test_snowflake
+    type: snowflake
+    connection:
+      account: !ENV ${SF_ACCOUNT}
+      username: !ENV ${SF_USER}
+      password: !ENV ${SF_PASS}
+      database: TEST_DCS
+      schema: PUBLIC
+      warehouse: COMPUTE_WH
+      role: accountadmin

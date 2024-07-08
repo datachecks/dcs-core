@@ -31,7 +31,7 @@ class CountDuplicateValidation(Validation):
             return self.data_source.query_get_duplicate_count(
                 index_name=self.dataset_name,
                 field=self.field_name,
-                filters=self.where_filter if self.where_filter else None,
+                where_filter=self.where_filter if self.where_filter else None,
             )
         else:
             raise ValueError("Invalid data source type")

@@ -1,0 +1,8 @@
+# Data sources to query
+data_sources:
+  - name: iris_bigquery
+    type: bigquery
+    connection:
+      project: !ENV ${GOOGLE_PROJECT_ID}
+      dataset: !ENV ${GOOGLE_BIGQUERY_DATASET}
+      credentials_base64: !ENV ${GOOGLE_APPLICATION_CREDENTIALS_BASE64}

@@ -1,0 +1,10 @@
+# Data sources to query
+data_sources:
+  - name: iris_databricks
+    type: databricks
+    connection:
+      host: !ENV ${DATABRICKS_HOST}
+      token: !ENV ${DATABRICKS_TOKEN}
+      http_path: !ENV ${DATABRICKS_HTTP_PATH}
+      catalog: test_dcs
+      schema: test_schema

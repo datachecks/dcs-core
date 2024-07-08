@@ -1,0 +1,10 @@
+# Data sources to query
+data_sources:
+  - name: iris_mysql
+    type: mysql
+    connection:
+      host: 127.0.0.1
+      port: 3306
+      username: !ENV ${MYSQL_USER}
+      password: !ENV ${MYSQL_PASS}
+      database: dcs_db

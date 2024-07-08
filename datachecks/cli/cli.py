@@ -25,7 +25,7 @@ from rich.table import Table, Text
 
 from datachecks.__version__ import __version__
 from datachecks.core import Configuration, Inspect
-from datachecks.core.configuration.configuration_parser_v1 import load_configuration
+from datachecks.core.configuration.configuration_parser import load_configuration
 
 # from datachecks.core.common.models.metric import DataSourceMetrics
 from datachecks.core.inspect import InspectOutput

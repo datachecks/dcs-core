@@ -15,7 +15,7 @@ import pytest
 
 from datachecks.core.common.models.configuration import DataSourceType
 from datachecks.core.common.models.validation import ValidationFunction
-from datachecks.core.configuration.configuration_parser_v1 import (
+from datachecks.core.configuration.configuration_parser import (
     load_configuration_from_yaml_str,
 )
 

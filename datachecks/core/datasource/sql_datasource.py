@@ -31,6 +31,7 @@ class SQLDataSource(DataSource):
 
         self.connection: Union[Connection, None] = None
         self.database: str = data_connection.get("database")
+        self.use_sa_text_query = True
 
     def is_connected(self) -> bool:
         """
@@ -40,6 +41,16 @@ class SQLDataSource(DataSource):
 
     def close(self):
         self.connection.close()
+
+    def fetchall(self, query):
+        if self.use_sa_text_query:
+            return self.connection.execute(text(query)).fetchall()
+        return self.connection.execute(query).fetchall()
+
+    def fetchone(self, query):
+        if self.use_sa_text_query:
+            return self.connection.execute(text(query)).fetchone()
+        return self.connection.execute(query).fetchone()
 
     def qualified_table_name(self, table_name: str) -> str:
         """
@@ -80,15 +91,14 @@ class SQLDataSource(DataSource):
         query = f"SELECT COUNT(*) FROM {qualified_table_name} AS row_count"
         if filters:
             query += f" WHERE {filters}"
-
-        return self.connection.execute(text(query)).fetchone()[0]
+        return self.fetchone(query)[0]
 
     def query_get_custom_sql(self, query: str) -> Union[int, float, None]:
         """
         Get the first row of the custom sql query
         :param query: custom sql query
         """
-        row = self.connection.execute(text(query)).fetchone()
+        row = self.fetchone(query)
         if row is not None:
             return row[0]
         else:
@@ -108,7 +118,7 @@ class SQLDataSource(DataSource):
 
         if filters:
             query += " WHERE {}".format(filters)
-        var = self.connection.execute(text(query)).fetchone()[0]
+        var = self.fetchone(query)[0]
         return var
 
     def query_get_min(self, table: str, field: str, filters: str = None) -> int:
@@ -124,7 +134,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return self.connection.execute(text(query)).fetchone()[0]
+        return self.fetchone(query)[0]
 
     def query_get_avg(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -139,7 +149,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return round(self.connection.execute(text(query)).fetchone()[0], 2)
+        return round(self.fetchone(query)[0], 2)
 
     def query_get_sum(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -154,7 +164,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return round(self.connection.execute(text(query)).fetchone()[0], 2)
+        return round(self.fetchone(query)[0], 2)
 
     def query_get_variance(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -169,7 +179,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return round(self.connection.execute(text(query)).fetchone()[0], 2)
+        return round(self.fetchone(query)[0], 2)
 
     def query_get_stddev(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -184,7 +194,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return round(self.connection.execute(text(query)).fetchone()[0], 2)
+        return round(self.fetchone(query)[0], 2)
 
     def query_get_null_count(self, table: str, field: str, filters: str = None) -> int:
         """
@@ -200,7 +210,7 @@ class SQLDataSource(DataSource):
         )
         if filters:
             query += " AND {}".format(filters)
-        return self.connection.execute(text(query)).fetchone()[0]
+        return self.fetchone(query)[0]
 
     def query_get_empty_string_count(
         self, table: str, field: str, filters: str = None
@@ -218,7 +228,7 @@ class SQLDataSource(DataSource):
         )
         if filters:
             query += " AND {}".format(filters)
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         return result[0] if result else 0
 
     def query_get_empty_string_percentage(
@@ -239,7 +249,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         if result and result[1] > 0:
             return round((result[0] / result[1]) * 100, 2)
         return 0.0
@@ -259,7 +269,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        return self.connection.execute(text(query)).fetchone()[0]
+        return self.fetchone(query)[0]
 
     def query_get_null_percentage(
         self, table: str, field: str, filters: str = None
@@ -279,7 +289,7 @@ class SQLDataSource(DataSource):
         if filters:
             query += " WHERE {}".format(filters)
 
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         if result:
             return round((result[0] / result[1]) * 100, 2)
         return 0
@@ -295,7 +305,7 @@ class SQLDataSource(DataSource):
         query = f"""
             SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
         """
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         if result:
             return int((datetime.utcnow() - result[0]).total_seconds())
         return 0
@@ -318,7 +328,7 @@ class SQLDataSource(DataSource):
             FROM {qualified_table_name}
             """
 
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         return {
             "avg": result[0],
             "min": result[1],
@@ -345,7 +355,7 @@ class SQLDataSource(DataSource):
             FROM {qualified_table_name}
             """
 
-        result = self.connection.execute(text(query)).fetchone()
+        result = self.fetchone(query)
         return {
             "distinct_count": result[0],
             "missing_count": result[1],
@@ -368,5 +378,5 @@ class SQLDataSource(DataSource):
             HAVING COUNT(*) > 1
             """
 
-        result = self.connection.execute(text(query)).fetchall()
+        result = self.fetchall(query)
         return len(result) if result else 0

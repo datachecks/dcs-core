@@ -1,0 +1,9 @@
+# Data sources to query
+data_sources:
+  - name: iris_opensearch
+    type: opensearch
+    connection:
+      host: 127.0.0.1
+      port: 9205
+      username: !ENV ${OS_USER}
+      password: !ENV ${OS_PASS}

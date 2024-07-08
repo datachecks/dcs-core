@@ -18,7 +18,7 @@ from datachecks.core.common.models.configuration import (
     MetricStorageType,
 )
 from datachecks.core.common.models.validation import Threshold, Validation
-from datachecks.core.configuration.configuration_parser import (
+from datachecks.core.configuration.configuration_parser_arc import (
     load_configuration_from_yaml_str,
 )
 

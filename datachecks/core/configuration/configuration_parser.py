@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import glob
+import re
 from abc import ABC
 from pathlib import Path
-from typing import Dict, List, TypeVar, Union
+from typing import Dict, List, Optional, TypeVar, Union
 
 from pyparsing import Combine, Group, Literal
 from pyparsing import Optional as OptionalParsing
@@ -25,12 +26,10 @@ from datachecks.core.common.models.configuration import (
     Configuration,
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
+    DataSourceLanguageSupport,
     DataSourceType,
-    LocalFileStorageParameters,
-    MetricConfiguration,
-    MetricsFilterConfiguration,
-    MetricStorageConfiguration,
-    MetricStorageType,
+    ValidationConfig,
+    ValidationConfigByDataset,
 )
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
@@ -99,144 +98,67 @@ class DataSourceConfigParser(ConfigParser):
 
         for config in config_list:
             name_ = config["name"]
+            data_source_type = DataSourceType(config["type"].lower())
+            if data_source_type in [
+                DataSourceType.ELASTICSEARCH,
+                DataSourceType.OPENSEARCH,
+            ]:
+                language_support = DataSourceLanguageSupport.DSL_ES
+            else:
+                language_support = DataSourceLanguageSupport.SQL
             data_source_configuration = DataSourceConfiguration(
                 name=name_,
                 type=DataSourceType(config["type"].lower()),
                 connection_config=self._data_source_connection_config_parser(
                     config=config
                 ),
+                language_support=language_support,
             )
             data_source_configurations[name_] = data_source_configuration
 
         return data_source_configurations
 
 
-class StorageConfigParser(ConfigParser):
-    @staticmethod
-    def _local_file_storage_config_parser(config: Dict) -> LocalFileStorageParameters:
-        if "params" not in config:
-            raise DataChecksConfigurationError(
-                "storage params should be provided for local file storage configuration"
-            )
-        if "path" not in config["params"]:
-            raise DataChecksConfigurationError(
-                "path should be provided for local file storage configuration"
-            )
-        storage_config = LocalFileStorageParameters(path=config["params"]["path"])
+class ValidationConfigParser(ConfigParser):
+    def parse(self, config: Dict) -> Dict[str, ValidationConfigByDataset]:
+        validation_group: Dict[str, ValidationConfigByDataset] = {}
+        for key, validations in config.items():
+            match = re.search(r"^(validations for)\s([ \w-]+)\.([ \w-]+)$", key)
+            if match:
+                data_source, dataset = match.group(2), match.group(3)
+                validation_dict = {}
+                for validation in validations:
+                    if not isinstance(validation, dict):
+                        raise DataChecksConfigurationError(
+                            message=f"Validation must be a dictionary"
+                        )
+                    if len(validation) != 1:
+                        raise DataChecksConfigurationError(
+                            message=f"Validation must have only one name"
+                        )
+                    validation_name, value = next(iter(validation.items()))
 
-        return storage_config
+                    validation_config = ValidationConfig(
+                        name=validation_name,
+                        on=value.get("on"),
+                        threshold=self._parse_threshold_str(value.get("threshold"))
+                        if value.get("threshold")
+                        else None,
+                        where=value.get("where"),
+                        query=value.get("query"),
+                        regex=value.get("regex"),
+                        values=value.get("values"),
+                    )
+                    validation_dict[validation_name] = validation_config
 
-    def parse(self, config: Dict) -> Union[MetricStorageConfiguration, None]:
-        if config["type"] == "local_file":
-            storage_config = MetricStorageConfiguration(
-                type=MetricStorageType.LOCAL_FILE,
-                params=self._local_file_storage_config_parser(config=config),
-            )
-            return storage_config
-        else:
-            return None
-
-
-class MetricsConfigParser(ConfigParser):
-    def __init__(self, data_source_configurations: Dict[str, DataSourceConfiguration]):
-        self.data_source_configurations = data_source_configurations
-
-    @staticmethod
-    def _duplicate_metric_names_check(config: List[Dict]):
-        names = []
-        for metric_yaml_configuration in config:
-            if metric_yaml_configuration["name"] in names:
-                raise DataChecksConfigurationError(
-                    f"Duplicate metric names found: {metric_yaml_configuration['name']}"
+                validation_group[
+                    f"{data_source}.{dataset}"
+                ] = ValidationConfigByDataset(
+                    data_source=data_source,
+                    dataset=dataset,
+                    validations=validation_dict,
                 )
-            names.append(metric_yaml_configuration["name"])
-
-    @staticmethod
-    def _parse_combined_metric_config(configuration: Dict) -> MetricConfiguration:
-        expression_str = configuration["expression"]
-        metric_configuration = MetricConfiguration(
-            name=configuration["name"],
-            metric_type=MetricsType(configuration["metric_type"].lower()),
-            expression=expression_str,
-        )
-        return metric_configuration
-
-    @staticmethod
-    def _parse_resource_table(resource_str: str) -> Table:
-        splits = resource_str.split(".")
-        if len(splits) != 2:
-            raise ValueError(f"Invalid resource string {resource_str}")
-        return Table(data_source=splits[0], name=splits[1])
-
-    @staticmethod
-    def _parse_resource_index(resource_str: str) -> Index:
-        splits = resource_str.split(".")
-        if len(splits) != 2:
-            raise ValueError(f"Invalid resource string {resource_str}")
-        return Index(data_source=splits[0], name=splits[1])
-
-    @staticmethod
-    def _parse_resource_field(resource_str: str, belongs_to: str) -> Field:
-        splits = resource_str.split(".")
-        if len(splits) != 3:
-            raise ValueError(f"Invalid resource string {resource_str}")
-        if belongs_to == "table":
-            return Field(
-                belongs_to=Table(data_source=splits[0], name=splits[1]), name=splits[2]
-            )
-        elif belongs_to == "index":
-            return Field(
-                belongs_to=Index(data_source=splits[0], name=splits[1]), name=splits[2]
-            )
-
-    def _metric_resource_parser(
-        self,
-        resource_str: str,
-        data_source_type: DataSourceType,
-        metric_type: MetricsType,
-    ) -> Union[Table, Index, Field]:
-        if data_source_type in [
-            DataSourceType.OPENSEARCH,
-            DataSourceType.ELASTICSEARCH,
-        ]:
-            if metric_type in [MetricsType.DOCUMENT_COUNT]:
-                return self._parse_resource_index(resource_str)
-            else:
-                return self._parse_resource_field(resource_str, "index")
-        else:
-            if metric_type in [MetricsType.ROW_COUNT, MetricsType.CUSTOM_SQL]:
-                return self._parse_resource_table(resource_str)
-            else:
-                return self._parse_resource_field(resource_str, "table")
-
-    def _parse_generic_metric_configuration(
-        self, configuration: Dict, metric_type: MetricsType
-    ) -> MetricConfiguration:
-        resource_str = configuration["resource"]
-        data_source_name = resource_str.split(".")[0]
-
-        data_source_configuration: DataSourceConfiguration = (
-            self.data_source_configurations[data_source_name]
-        )
-
-        metric_configuration = MetricConfiguration(
-            name=configuration["name"],
-            metric_type=metric_type,
-            resource=self._metric_resource_parser(
-                resource_str=resource_str,
-                data_source_type=data_source_configuration.type,
-                metric_type=metric_type,
-            ),
-            filters=configuration.get("filters"),
-        )
-        if "filters" in configuration:
-            metric_configuration.filter = MetricsFilterConfiguration(
-                where=configuration["filters"]["where"]
-            )
-        if "query" in configuration:
-            metric_configuration.query = configuration["query"]
-
-        return metric_configuration
+        return validation_group
 
     @staticmethod
     def _parse_threshold_str(threshold: str) -> Threshold:
@@ -263,56 +185,20 @@ class MetricsConfigParser(ConfigParser):
                 f"Invalid threshold configuration {threshold}: {str(e)}"
             )
 
-    def _parse_validation_configuration(self, validation_config: Dict) -> Validation:
-        if "threshold" in validation_config:
-            threshold = self._parse_threshold_str(
-                threshold=validation_config["threshold"]
-            )
-            return Validation(threshold=threshold)
-        else:
-            raise DataChecksConfigurationError(
-                f"Invalid validation configuration {validation_config}"
-            )
-
-    def parse(self, config_list: List[Dict]) -> Dict[str, MetricConfiguration]:
-        self._duplicate_metric_names_check(config=config_list)
-        metric_configurations: Dict[str, MetricConfiguration] = {}
-
-        for config in config_list:
-            metric_type = MetricsType(config["metric_type"].lower())
-            if metric_type == MetricsType.COMBINED:
-                metric_configuration = self._parse_combined_metric_config(
-                    configuration=config
-                )
-            else:
-                metric_configuration = self._parse_generic_metric_configuration(
-                    configuration=config, metric_type=metric_type
-                )
-            if "validation" in config and config["validation"] is not None:
-                metric_configuration.validation = self._parse_validation_configuration(
-                    config["validation"]
-                )
-            metric_configurations[metric_configuration.name] = metric_configuration
-        return metric_configurations
-
 
 def _parse_configuration_from_dict(config_dict: Dict) -> Configuration:
     try:
-        data_source_configurations = DataSourceConfigParser().parse(
-            config_list=config_dict["data_sources"]
-        )
-        metric_configurations = MetricsConfigParser(
-            data_source_configurations=data_source_configurations
-        ).parse(config_list=config_dict["metrics"])
+        data_source_configurations = {}
+        if "data_sources" in config_dict:
+            data_source_configurations = DataSourceConfigParser().parse(
+                config_list=config_dict["data_sources"]
+            )
+        validate_configurations = ValidationConfigParser().parse(config_dict)
 
         configuration = Configuration(
-            data_sources=data_source_configurations, metrics=metric_configurations
+            data_sources=data_source_configurations, validations=validate_configurations
         )
 
-        if "storage" in config_dict and config_dict["storage"] is not None:
-            configuration.storage = StorageConfigParser().parse(
-                config=config_dict["storage"]
-            )
         return configuration
     except Exception as ex:
         raise DataChecksConfigurationError(
@@ -320,7 +206,9 @@ def _parse_configuration_from_dict(config_dict: Dict) -> Configuration:
         )
 
 
-def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
+def load_configuration_from_yaml_str(
+    yaml_string: str, configuration: Optional[Configuration] = None
+) -> Configuration:
     """
     Load configuration from a yaml string
     """
@@ -330,13 +218,22 @@ def load_configuration_from_yaml_str(yaml_string: str) -> Configuration:
         raise DataChecksConfigurationError(
             message=f"Failed to parse configuration: {str(ex)}"
         )
-    return _parse_configuration_from_dict(config_dict=config_dict)
+    from_dict = _parse_configuration_from_dict(config_dict=config_dict)
+    if configuration:
+        for k, v in from_dict.data_sources.items():
+            configuration.data_sources[k] = v
+        for k, v in from_dict.validations.items():
+            configuration.validations[k] = v
+    return from_dict
 
 
-def load_configuration(configuration_path: str) -> Configuration:
+def load_configuration(
+    configuration_path: str, configuration: Optional[Configuration] = None
+) -> Configuration:
     """
     Load configuration from a yaml file
-    :param configuration_path:
+    :param configuration_path: Configuration file path
+    :param configuration: Configuration
     :return:
     """
 
@@ -348,7 +245,9 @@ def load_configuration(configuration_path: str) -> Configuration:
     if path.is_file():
         with open(configuration_path) as config_yaml_file:
             yaml_string = config_yaml_file.read()
-            return load_configuration_from_yaml_str(yaml_string)
+            return load_configuration_from_yaml_str(
+                yaml_string, configuration=configuration
+            )
     else:
         config_files = glob.glob(f"{configuration_path}/*.yaml")
         if len(config_files) == 0:
@@ -378,4 +277,19 @@ def load_configuration(configuration_path: str) -> Configuration:
                 if "storage" in config_dict:
                     final_config_dict["storage"] = config_dict["storage"]
 
-            return _parse_configuration_from_dict(final_config_dict)
+                for key, value in config_dict.items():
+                    if key not in ["data_sources", "metrics", "storage"]:
+                        if key not in final_config_dict.keys():
+                            final_config_dict[key] = value
+                        else:
+                            if isinstance(final_config_dict[key], list):
+                                final_config_dict[key].extend(value)
+
+            from_dict = _parse_configuration_from_dict(final_config_dict)
+            if configuration:
+                for k, v in from_dict.data_sources.items():
+                    configuration.data_sources[k] = v
+                for k, v in from_dict.validations.items():
+                    configuration.validations[k] = v
+
+            return from_dict

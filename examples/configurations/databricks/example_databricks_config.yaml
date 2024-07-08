@@ -1,0 +1,3 @@
+validations for iris_databricks.dcs_iris:
+  - row count:
+      on: count_rows

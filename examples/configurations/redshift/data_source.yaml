@@ -1,0 +1,10 @@
+# Data sources to query
+data_sources:
+  - name: iris_redshift
+    type: redshift
+    connection:
+      host: !ENV ${REDSHIFT_HOST}
+      port: !ENV ${REDSHIFT_PORT}
+      username: !ENV ${REDSHIFT_USERNAME}
+      password: !ENV ${REDSHIFT_PASSWORD}
+      database: !ENV ${REDSHIFT_DATABASE}
