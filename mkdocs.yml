@@ -66,8 +66,9 @@ nav:
       - Data Warehouses:
           - BigQuery: integrations/bigquery.md
           - DataBricks: integrations/databricks.md
-          - AWS Redshift: integrations/redshift.md
           - Snowflake: integrations/snowflake.md
+          # TEMPORARILY INACTIVE
+          # - AWS Redshift: integrations/redshift.md
       - Search Engines:
           - OpenSearch: integrations/opensearch.md
           - ElasticSearch: integrations/elasticsearch.md
