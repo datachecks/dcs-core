@@ -33,13 +33,12 @@ loguru = "^0.7.0"
 rich = "^13.5.2"
 pyparsing = "^3.1.1"
 numpy = "1.26.4"
-sqlalchemy = "1.4.49"
+sqlalchemy = ">=2.0.14,<2.1.0"
 sqlalchemy-bigquery = { version="^1.8.0", optional=true }
 opensearch-py = { version="^2.2.0", optional=true }
-databricks-sql-connector = { version="^2.9.3", optional=true }
+databricks-sql-connector = { version="^3.3.0", optional=true }
 elasticsearch = { version="^7.17.3", optional=true }
 pymysql = { version="^1.1.0", optional=true, extras=["rsa"] }
-sqlalchemy-redshift = { version="^0.8.14", optional=true }
 snowflake-sqlalchemy = { version="^1.5.3", optional=true }
 pyodbc = { version="^5.0.1", optional=true }
 psycopg2-binary = {version = "^2.9.9", optional = true}
@@ -71,7 +70,6 @@ opensearch = ["opensearch-py"]
 bigquery = ["sqlalchemy-bigquery"]
 databricks = ["databricks-sql-connector"]
 elasticsearch = ["elasticsearch"]
-redshift = ["sqlalchemy-redshift"]
 snowflake = ["snowflake-sqlalchemy"]
 all = [
     "psycopg2-binary",
@@ -80,7 +78,6 @@ all = [
     "sqlalchemy-bigquery",
     "databricks-sql-connector",
     "elasticsearch",
-    "sqlalchemy-redshift",
     "snowflake-sqlalchemy",
     "pyodbc"
 ]

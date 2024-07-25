@@ -33,7 +33,8 @@ class DataSourceType(str, Enum):
     MYSQL = "mysql"
     MSSQL = "mssql"
     BIGQUERY = "bigquery"
-    REDSHIFT = "redshift"
+    # TEMPORARILY INACTIVE
+    # REDSHIFT = "redshift"
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
 
