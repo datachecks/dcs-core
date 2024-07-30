@@ -1,0 +1,9 @@
+# Data sources to query
+data_sources:
+  - name: iris_mssql
+    type: mssql
+    connection:
+      host: !ENV ${MSSQL_HOST}
+      username: !ENV ${MSSQL_USER}
+      password: !ENV ${MSSQL_PASS}
+      database: Test-dsc

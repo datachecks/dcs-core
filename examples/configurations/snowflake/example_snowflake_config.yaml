@@ -1,0 +1,33 @@
+validations for test_snowflake.raw_employee:
+  - snowflake_row_count:
+      on: min(salary)
+      threshold: " > 0"
+
+
+
+#metrics:
+#  - name: snowflake_row_count
+#    metric_type: row_count
+#    resource: test_snowflake.tgt_actor
+#
+#  - name: snowflake RAW_EMPLOYEE column_count
+#    metric_type: row_count
+#    resource: test_snowflake.RAW_EMPLOYEE
+#
+#  - name: null_count in salary
+#    metric_type: null_count
+#    resource: test_snowflake.RAW_EMPLOYEE.salary
+#    validation:
+#      threshold: " <= 1"
+#
+#  - name: duplicate count in last name
+#    metric_type: duplicate_count
+#    resource: test_snowflake.RAW_EMPLOYEE.lastname
+#    validation:
+#      threshold: " <= 1"
+#
+#  - name: duplicate count in first name
+#    metric_type: duplicate_count
+#    resource: test_snowflake.RAW_EMPLOYEE.firstname
+
+#snowflake://TESTDCS:Dbpass123@bp54281.central-india.azure/TEST_DCS/PUBLIC?role=ACCOUNTADMIN&warehouse=COMPUTE_WH

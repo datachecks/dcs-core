@@ -1,0 +1,4 @@
+validations for iris_elasticsearch.sepal_length:
+  - elasticsearch_distinct_count_price_with_filter:
+      on: count_distinct(sepal_length)
+      where: '{ "match": { "species": "versicolor" } }'

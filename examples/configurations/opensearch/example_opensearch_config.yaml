@@ -1,0 +1,4 @@
+validations for iris_opensearch.dcs_iris:
+  - opensearch_null_count_price_with_filter:
+      on: count_null(sepal_length)
+      where: '{ "match": { "species": "versicolor" } }'

@@ -1,0 +1,4 @@
+validations for iris_redshift.dcs_iris:
+  - redshift_duplicate_count_price:
+      on: count_distinct(sepal_length)
+      threshold: "<= 36"

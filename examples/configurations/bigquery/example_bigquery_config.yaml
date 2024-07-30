@@ -1,0 +1,3 @@
+validations for iris_bigquery.dcs_iris:
+  - avg sepal length:
+      on: avg(sepal_length)

@@ -1,0 +1,20 @@
+# Data sources to query
+data_sources:
+  - name: date_testing_dcs
+    type: postgres
+    connection:
+      host: 127.0.0.1
+      port: 5421
+      username: !ENV ${PGSQL_USER}
+      password: !ENV ${PGSQL_PASS}
+      database: postgres
+      schema: public
+metrics:
+  # Custom Query Metrics
+  - name: date pattern should match dd MMM yyyy
+    metric_type: custom_sql
+    resource: date_testing_dcs.date_testing
+    query: |
+      select count(*) from date_testing where date !~ '(\d{1,2})\s(\w{3})\s(\d{4})';
+    validation:
+      threshold: "= 0"

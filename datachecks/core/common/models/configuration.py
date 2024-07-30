@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from datachecks.core.common.models.data_source_resource import Field, Index, Table
 from datachecks.core.common.models.metric import MetricsType
@@ -37,6 +37,7 @@ class DataSourceType(str, Enum):
     # REDSHIFT = "redshift"
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
+    SPARK_DF = "spark_df"
 
 
 class DataSourceLanguageSupport(str, Enum):
@@ -70,6 +71,8 @@ class DataSourceConnectionConfiguration:
     role: Optional[str] = None  # Snowflake specific configuration
 
     driver: Optional[str] = None  # SQL Server specific configuration
+
+    spark_session: Optional[Any] = None  # Spark specific configuration
 
 
 @dataclass
@@ -224,7 +227,20 @@ class Configuration:
     Configuration for the data checks
     """
 
-    data_sources: Optional[Dict[str, DataSourceConfiguration]] = None
-    validations: Optional[Dict[str, ValidationConfigByDataset]] = None
+    data_sources: Optional[Dict[str, DataSourceConfiguration]] = field(
+        default_factory=dict
+    )
+    validations: Optional[Dict[str, ValidationConfigByDataset]] = field(
+        default_factory=dict
+    )
     metrics: Optional[Dict[str, MetricConfiguration]] = None
     storage: Optional[MetricStorageConfiguration] = None
+
+    def add_spark_session(self, data_source_name: str, spark_session):
+        self.data_sources[data_source_name] = DataSourceConfiguration(
+            name=data_source_name,
+            type=DataSourceType.SPARK_DF,
+            connection_config=DataSourceConnectionConfiguration(
+                spark_session=spark_session
+            ),
+        )

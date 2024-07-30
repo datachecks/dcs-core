@@ -1,0 +1,11 @@
+# Data sources to query
+data_sources:
+  - name: iris_pgsql
+    type: postgres
+    connection:
+      host: 127.0.0.1
+      port: 5421
+      username: !ENV ${PGSQL_USER}
+      password: !ENV ${PGSQL_PASS}
+      database: dcs_db
+      schema: public

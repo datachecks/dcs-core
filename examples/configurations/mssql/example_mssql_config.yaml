@@ -1,0 +1,4 @@
+
+validations for iris_mssql.dcs_iris:
+  - row count:
+      on: count_rows

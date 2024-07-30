@@ -77,6 +77,13 @@ class DataSourceManager:
         """
         data_source_name = data_source_config.name
         data_source_type = data_source_config.type
+        if data_source_type == "spark_df":
+            from datachecks.integrations.databases.spark_df import SparkDFDataSource
+
+            return SparkDFDataSource(
+                data_source_name,
+                {"spark_session": data_source_config.connection_config.spark_session},
+            )
         try:
             module_name = (
                 f"datachecks.integrations.databases.{data_source_config.type.value}"

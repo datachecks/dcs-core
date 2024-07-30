@@ -34,7 +34,7 @@ from datachecks.core.common.models.metric import (
     TableMetrics,
 )
 from datachecks.core.common.models.validation import ValidationInfo
-from datachecks.core.configuration.configuration_parser_v1 import (
+from datachecks.core.configuration.configuration_parser import (
     load_configuration,
     load_configuration_from_yaml_str,
 )
@@ -61,8 +61,8 @@ requests.packages.urllib3.disable_warnings(
 
 @dataclass
 class InspectOutput:
-    metrics: Dict[str, Union[DataSourceMetrics, CombinedMetrics]]
     validations: Dict[str, ValidationInfo]
+    metrics: Optional[Dict[str, Union[DataSourceMetrics, CombinedMetrics]]] = None
 
     def get_metric_values(self) -> List[MetricValue]:
         """
@@ -85,21 +85,21 @@ class InspectOutput:
     def get_inspect_info(self):
         metrics_count, datasource_count, combined_metrics_count = 0, 0, 0
         table_count, index_count = 0, 0
-        for ds_met in self.metrics.values():
-            if isinstance(ds_met, DataSourceMetrics):
-                datasource_count = datasource_count + 1
-                for table_met in ds_met.table_metrics.values():
-                    table_count = table_count + 1
-                    metrics_count = metrics_count + len(
-                        list(table_met.metrics.values())
-                    )
-                for index_met in ds_met.index_metrics.values():
-                    index_count = index_count + 1
-                    metrics_count = metrics_count + len(
-                        list(index_met.metrics.values())
-                    )
-            else:
-                metrics_count += 1
+        # for ds_met in self.metrics.values():
+        #     if isinstance(ds_met, DataSourceMetrics):
+        #         datasource_count = datasource_count + 1
+        #         for table_met in ds_met.table_metrics.values():
+        #             table_count = table_count + 1
+        #             metrics_count = metrics_count + len(
+        #                 list(table_met.metrics.values())
+        #             )
+        #         for index_met in ds_met.index_metrics.values():
+        #             index_count = index_count + 1
+        #             metrics_count = metrics_count + len(
+        #                 list(index_met.metrics.values())
+        #             )
+        #     else:
+        #         metrics_count += 1
         return {
             "metrics_count": metrics_count,
             "datasource_count": datasource_count,
@@ -112,7 +112,6 @@ class Inspect:
     def __init__(
         self,
         configuration: Optional[Configuration] = None,
-        #  auto_profile: bool = False, # Disabled for now
     ):
         if configuration is None:
             self.configuration = Configuration()
@@ -125,103 +124,21 @@ class Inspect:
             data_source_manager=self.data_source_manager,
         )
 
-        # self._auto_profile = auto_profile # Disabled for now
         self.execution_time_taken = 0
         self.is_storage_enabled = False
-
-    def _initiate_storage(
-        self, metric_storage_config: MetricStorageConfiguration
-    ) -> MetricRepository:
-        if metric_storage_config.type == MetricStorageType.LOCAL_FILE:
-            return LocalFileMetricRepository(self.configuration.storage.params.path)
-        else:
-            raise DataChecksRuntimeError(
-                f"Unsupported storage type: {self.configuration.storage.type}"
-            )
-
-    def _base_data_source_metrics(self) -> Dict[str, DataSourceMetrics]:
-        """
-        This method generates the base data source metrics.
-        This is an empty data source metrics with the data source name
-        """
-        data_sources: Dict[str, DataSource] = self.data_source_manager.get_data_sources
-        results: Dict[str, DataSourceMetrics] = {}
-        for data_source_name in data_sources.keys():
-            if data_source_name not in results:
-                results[data_source_name] = DataSourceMetrics(
-                    data_source=data_source_name,
-                    table_metrics={},
-                    index_metrics={},
-                )
-        return results
-
-    @staticmethod
-    def _prepare_results(
-        results: List[MetricValue],
-        datasource_metrics: Dict[str, DataSourceMetrics] = None,
-        combined_metrics: Dict[str, CombinedMetrics] = None,
-    ):
-        """
-        prepare_results is a function that prepares the
-        results of the metrics into a dictionary of data source metrics
-        args:
-            results: List[MetricValue]
-            base_datasource_metrics: Dict[str, DataSourceMetrics]
-
-        returns:
-            Dict[str, Union[DataSourceMetrics,CombinedMetrics]]
-        """
-        if datasource_metrics is not None:
-            for result in results:
-                data_source_name = result.data_source
-                data_source_metrics: DataSourceMetrics = datasource_metrics[
-                    data_source_name
-                ]
-                table_name = result.table_name
-                index_name = result.index_name
-                # If the index name is present, add the result to the index name
-                if index_name is not None:
-                    if index_name not in data_source_metrics.index_metrics:
-                        data_source_metrics.index_metrics[index_name] = IndexMetrics(
-                            index_name=index_name,
-                            data_source=data_source_name,
-                            metrics={},
-                        )
-                    data_source_metrics.index_metrics[index_name].metrics[
-                        result.identity
-                    ] = result
-
-                # If the table name is present, add the result to the table name
-                if table_name is not None:
-                    if table_name not in data_source_metrics.table_metrics:
-                        data_source_metrics.table_metrics[table_name] = TableMetrics(
-                            table_name=table_name,
-                            data_source=data_source_name,
-                            metrics={},
-                        )
-                    data_source_metrics.table_metrics[table_name].metrics[
-                        result.identity
-                    ] = result
-
-        else:
-            for result in results:
-                expression = result.expression
-                combined_metrics[expression] = CombinedMetrics(
-                    expression=expression, metrics={result.identity: result}
-                )
 
     def add_configuration_yaml_file(self, file_path: str):
         load_configuration(
             configuration_path=file_path, configuration=self.configuration
         )
-        self.validation_manager.set_validation_configs(self.configuration.validations)
 
     def add_validations_yaml_str(self, yaml_str: str):
-        configuration = load_configuration_from_yaml_str(yaml_string=yaml_str)
-        self.configuration.validations = configuration.validations
+        load_configuration_from_yaml_str(
+            yaml_string=yaml_str, configuration=self.configuration
+        )
 
     def add_spark_session(self, spark_session, data_source_name: str = "spark_df"):
-        pass
+        self.configuration.add_spark_session(data_source_name, spark_session)
 
     def run(self) -> InspectOutput:
         """
@@ -233,37 +150,6 @@ class Inspect:
         try:
             self.data_source_manager.connect()
             self.validation_manager.build_validations()
-
-            # Initiate the data source metrics
-            metric_manager = MetricManager(
-                metric_config=self.configuration.metrics,
-                data_source_manager=self.data_source_manager,
-            )
-            datasource_metrics: Dict[
-                str, DataSourceMetrics
-            ] = self._base_data_source_metrics()
-            combined_metrics: Dict[str, CombinedMetrics] = {}
-            # generate metric values for custom metrics
-            metric_values: List[MetricValue] = []
-            combined_metric_values: List[MetricValue] = []
-
-            # generate metric values for dataset metrics and populate the datasource_metrics
-            for metric in metric_manager.metrics.values():
-                metric_value = metric.get_metric_value()
-                if metric_value is not None:
-                    metric_values.append(metric_value)
-            self._prepare_results(metric_values, datasource_metrics=datasource_metrics)
-
-            # generate metric values for combined metrics and populate the combined_metrics
-            for combined_metric in metric_manager.combined.values():
-                metric_value = combined_metric.get_metric_value(
-                    metric_values=metric_values
-                )
-                if metric_value is not None:
-                    combined_metric_values.append(metric_value)
-            self._prepare_results(
-                combined_metric_values, combined_metrics=combined_metrics
-            )
 
             validation_infos: Dict[str, ValidationInfo] = {}
 
@@ -279,10 +165,7 @@ class Inspect:
                             validation.get_validation_identity()
                         ] = validation_info
 
-            output = InspectOutput(
-                metrics={**datasource_metrics, **combined_metrics},
-                validations=validation_infos,
-            )
+            output = InspectOutput(validations=validation_infos)
             inspect_info = output.get_inspect_info()
 
             return output
