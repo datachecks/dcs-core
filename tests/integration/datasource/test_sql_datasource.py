@@ -119,7 +119,8 @@ class TestSQLDatasourceQueries:
                 text(
                     f"""
                         CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} (
-                            name VARCHAR(50), last_fight timestamp, age INTEGER, weight FLOAT, description VARCHAR(100)
+                            name VARCHAR(50), last_fight timestamp, age INTEGER,
+                            weight FLOAT, description VARCHAR(100), weapon_id VARCHAR(50)
                         )
                     """
                 )
@@ -128,12 +129,18 @@ class TestSQLDatasourceQueries:
             utc_now = datetime.datetime.utcnow()
             insert_query = f"""
                 INSERT INTO {self.TABLE_NAME} VALUES
-                ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}', 1500, NULL, 'thor hammer'),
-                ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}', 90, 80, 'shield'),
-                ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}', 50, 70, 'suit'),
-                ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}', 40, 60, 'bow'),
-                ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35, 50, ''),
-                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}', 35, 50, '')
+                ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}',
+                    1500, NULL, 'thor hammer', 'e7194aaa-5516-4362-a5ff-6ff971976bec'),
+                ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}',
+                    90, 80, 'shield', 'e7194aaa-5516-4362-a5ff-6ff971976b'), -- invalid weapon_id
+                ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}',
+                    50, 70, 'suit', '1739c676-6108-4dd2-8984-2459df744936'),
+                ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}',
+                    40, 60, 'bow', '1739c676-6108-4dd2-8984-2459df746'), -- invalid weapon_id
+                ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
+                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8'), -- invalid weapon_id
+                ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
+                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8032c73')
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -305,3 +312,13 @@ class TestSQLDatasourceQueries:
             query=f"select count(*), avg(age) from {self.TABLE_NAME}"
         )
         assert row_count == 6
+
+    def test_should_run_valid_uuid(self, postgres_datasource: PostgresDataSource):
+        (
+            valid_count,
+            total_row_count,
+        ) = postgres_datasource.query_string_pattern_validity(
+            table=self.TABLE_NAME, field="weapon_id", predefined_regex_pattern="uuid"
+        )
+        assert valid_count == 3
+        assert total_row_count == 6

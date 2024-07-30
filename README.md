@@ -113,13 +113,13 @@ Datachecks supports sql and search data sources. Below are the list of supported
 
 ## Metric Types
 
-| Metric                                                                                       | Description                                                                                                      |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **[Reliability Metrics](https://docs.datachecks.io/metrics/reliability/)**                   | Reliability metrics detect whether tables/indices/collections are updating with timely data                      |
-| **[Numeric Distribution Metrics](https://docs.datachecks.io/metrics/numeric_distribution/)** | Numeric Distribution metrics detect changes in the numeric distributions i.e. of values, variance, skew and more |
-| **[Uniqueness Metrics](https://docs.datachecks.io/metrics/uniqueness/)**                     | Uniqueness metrics detect when data constraints are breached like duplicates, number of distinct values etc      |
-| **[Completeness Metrics](https://docs.datachecks.io/metrics/completeness/)**                 | Completeness metrics detect when there are missing values in datasets i.e. Null, empty value                     |
-| **Validity Metrics**                                                                         | Validity metrics detect whether data is formatted correctly and represents a valid value                         |
+| Validation Funtions                                                                     | Description                                                                                                      |
+|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| **[Reliability](https://docs.datachecks.io/validations/reliability/)**                | Reliability functions detect whether tables/indices/collections are updating with timely data                      |
+| **[Numeric Distribution](https://docs.datachecks.io/validations/numeric_distribution/)** | Numeric Distribution functions detect changes in the numeric distributions i.e. of values, variance, skew and more |
+| **[Uniqueness](https://docs.datachecks.io/validations/uniqueness/)**                 | Uniqueness functions detect when data constraints are breached like duplicates, number of distinct values etc      |
+| **[Completeness](https://docs.datachecks.io/validations/completeness/)**             | Completeness functions detect when there are missing values in datasets i.e. Null, empty value                   |
+| **[Validity](https://docs.datachecks.io/validations/validity/)**                     | Validity functions detect whether data is formatted correctly and represents a valid value                         |
 
 ## Overview
 

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
@@ -380,3 +380,44 @@ class SQLDataSource(DataSource):
 
         result = self.fetchall(query)
         return len(result) if result else 0
+
+    regex_pattern = {
+        "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    }
+
+    def query_string_pattern_validity(
+        self,
+        table: str,
+        field: str,
+        regex_pattern: str = None,
+        predefined_regex_pattern: str = None,
+        filters: str = None,
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid values based on the regex pattern
+        :param table: table name
+        :param field: column name
+        :param regex_pattern: regex pattern
+        :param predefined_regex_pattern: predefined regex pattern
+        :param filters: filter condition
+        :return: count of valid values, count of total row count
+        """
+        filters = f"AND {filters}" if filters else ""
+        qualified_table_name = self.qualified_table_name(table)
+
+        if not regex_pattern and not predefined_regex_pattern:
+            raise ValueError(
+                "Either regex_pattern or predefined_regex_pattern should be provided"
+            )
+
+        if predefined_regex_pattern:
+            regex_query = f"case when {field} ~ '{self.regex_pattern[predefined_regex_pattern]}' then 1 else 0 end"
+        else:
+            regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
+
+        query = f"""
+            select sum({regex_query}) as valid_count, count(*) as total_count
+            from {qualified_table_name} {filters}
+        """
+        result = self.fetchone(query)
+        return result[0], result[1]

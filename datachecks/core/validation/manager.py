@@ -67,6 +67,8 @@ class ValidationManager:
         ValidationFunction.COUNT_DOCUMENTS.value: "CountDocumentsValidation",
         ValidationFunction.COUNT_ROWS.value: "CountRowValidation",
         ValidationFunction.FRESHNESS.value: "FreshnessValueMetric",
+        ValidationFunction.COUNT_UUID.value: "CountUUIDValidation",
+        ValidationFunction.PERCENT_UUID.value: "PercentUUIDValidation",
     }
 
     def __init__(

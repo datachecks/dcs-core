@@ -43,5 +43,6 @@ Supported Validation functions are
 | Completeness         | [Null Percentage](https://docs.datachecks.io/metrics/completeness/#null-percentage)               |
 | Completeness         | [Empty Count](https://docs.datachecks.io/metrics/completeness/#empty-count)                       |
 | Completeness         | [Empty Percentage](https://docs.datachecks.io/metrics/completeness/#empty-percentage)             |
-| Special              | [Combined](https://docs.datachecks.io/metrics/combined/)                                          |
 | Special              | [Custom SQL](https://docs.datachecks.io/metrics/custom_sql/)                                      |
+| Validity             | [Count UUID](https://docs.datachecks.io/metrics/validations/#count-uuid)                           |
+| Validity             | [Percentage UUID](https://docs.datachecks.io/metrics/validations/#percentage-uuid)                 |

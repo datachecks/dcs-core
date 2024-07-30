@@ -77,6 +77,7 @@ nav:
       - Distribution: validations/numeric_distribution.md
       - Uniqueness: validations/uniqueness.md
       - Completeness: validations/completeness.md
+      - Validity: validations/validity.md
       - Special Validation:
           - Custom SQL Validation: validations/custom_sql.md
   - Support:
