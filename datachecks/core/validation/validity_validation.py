@@ -14,42 +14,37 @@
 
 from typing import Union
 
-from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.validation.base import Validation
 
 
-class CountDuplicateValidation(Validation):
+class CountUUIDValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
-            return self.data_source.query_get_duplicate_count(
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
                 table=self.dataset_name,
                 field=self.field_name,
+                predefined_regex_pattern="uuid",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
-        elif isinstance(self.data_source, SearchIndexDataSource):
-            return self.data_source.query_get_duplicate_count(
-                index_name=self.dataset_name,
-                field=self.field_name,
-                filters=self.where_filter if self.where_filter else None,
-            )
+            return valid_count
         else:
-            raise ValueError("Invalid data source type")
+            raise NotImplementedError(
+                "UUID validation is only supported for SQL data sources"
+            )
 
 
-class CountDistinctValidation(Validation):
+class PercentUUIDValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
-            return self.data_source.query_get_distinct_count(
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
                 table=self.dataset_name,
                 field=self.field_name,
+                predefined_regex_pattern="uuid",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
-        elif isinstance(self.data_source, SearchIndexDataSource):
-            return self.data_source.query_get_distinct_count(
-                index_name=self.dataset_name,
-                field=self.field_name,
-                filters=self.where_filter if self.where_filter else None,
-            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
         else:
-            raise ValueError("Invalid data source type")
+            raise NotImplementedError(
+                "UUID validation is only supported for SQL data sources"
+            )

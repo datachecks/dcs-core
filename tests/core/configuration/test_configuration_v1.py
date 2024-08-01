@@ -249,3 +249,35 @@ def test_parse_failed_rows_validation():
         configuration.validations["source.table"].validations["test"].query
         == "select * from source.table where age < 20\n"
     )
+
+
+def test_should_parse_count_uuid_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_uuid(species)
+          threshold: "<10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_UUID
+    )
+
+
+def test_should_parse_percentage_uuid_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_uuid(species)
+          threshold: "<10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_UUID
+    )
