@@ -79,7 +79,7 @@ class SQLDataSource(DataSource):
         Get the table metadata
         :return: query for table metadata
         """
-        return inspect(self.connection.engine).get_table_names(schema="public")
+        return inspect(self.connection.engine).get_table_names()
 
     def query_get_row_count(self, table: str, filters: str = None) -> int:
         """
