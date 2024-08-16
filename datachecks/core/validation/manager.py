@@ -47,6 +47,18 @@ from datachecks.core.validation.uniqueness_validation import (  # noqa F401 this
     CountDistinctValidation,
     CountDuplicateValidation,
 )
+from datachecks.core.validation.validity_validation import (  # noqa F401 this is used in globals
+    CountInvalidRegex,
+    CountInvalidValues,
+    CountUUIDValidation,
+    CountValidRegex,
+    CountValidValues,
+    PercentInvalidRegex,
+    PercentInvalidValues,
+    PercentUUIDValidation,
+    PercentValidRegex,
+    PercentValidValues,
+)
 
 
 class ValidationManager:
@@ -69,6 +81,14 @@ class ValidationManager:
         ValidationFunction.FRESHNESS.value: "FreshnessValueMetric",
         ValidationFunction.COUNT_UUID.value: "CountUUIDValidation",
         ValidationFunction.PERCENT_UUID.value: "PercentUUIDValidation",
+        ValidationFunction.COUNT_INVALID_VALUES.value: "CountInvalidValues",
+        ValidationFunction.PERCENT_INVALID_VALUES.value: "PercentInvalidValues",
+        ValidationFunction.COUNT_VALID_VALUES.value: "CountValidValues",
+        ValidationFunction.PERCENT_VALID_VALUES.value: "PercentValidValues",
+        ValidationFunction.COUNT_INVALID_REGEX.value: "CountInvalidRegex",
+        ValidationFunction.PERCENT_INVALID_REGEX.value: "PercentInvalidRegex",
+        ValidationFunction.COUNT_VALID_REGEX.value: "CountValidRegex",
+        ValidationFunction.PERCENT_VALID_REGEX.value: "PercentValidRegex",
     }
 
     def __init__(

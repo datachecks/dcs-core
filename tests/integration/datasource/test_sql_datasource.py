@@ -322,3 +322,27 @@ class TestSQLDatasourceQueries:
         )
         assert valid_count == 3
         assert total_row_count == 6
+
+    def test_should_run_count_invalid_values(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            invalid_count,
+            total_row_count,
+        ) = postgres_datasource.query_valid_invalid_values_validity(
+            table=self.TABLE_NAME, field="name", values=["thor"]
+        )
+        assert invalid_count == 1
+        assert total_row_count == 6
+
+    def test_should_run_count_invalid_regex(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            invalid_count,
+            total_row_count,
+        ) = postgres_datasource.query_valid_invalid_values_validity(
+            table=self.TABLE_NAME, field="name", regex_pattern=".la.*"
+        )
+        assert invalid_count == 2
+        assert total_row_count == 6

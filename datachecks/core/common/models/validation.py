@@ -98,7 +98,7 @@ class ValidationFunction(str, Enum):
     # Custom SQL
     CUSTOM_SQL = "custom_sql"
 
-    # Validity validations 43
+    # Validity validations 45
     # ========================================
     COUNT_INVALID_VALUES = "count_invalid_values"
     PERCENT_INVALID_VALUES = "percent_invalid_values"
@@ -106,6 +106,8 @@ class ValidationFunction(str, Enum):
     PERCENT_VALID_VALUES = "percent_valid_values"
     COUNT_INVALID_REGEX = "count_invalid_regex"
     PERCENT_INVALID_REGEX = "percent_invalid_regex"
+    COUNT_VALID_REGEX = "count_valid_regex"
+    PERCENT_VALID_REGEX = "percent_valid_regex"
 
     # -- String Format
     STRING_LENGTH_MAX = "string_length_max"
