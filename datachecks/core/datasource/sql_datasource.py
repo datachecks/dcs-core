@@ -381,10 +381,6 @@ class SQLDataSource(DataSource):
         result = self.fetchall(query)
         return len(result) if result else 0
 
-    regex_pattern = {
-        "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-    }
-
     def query_string_pattern_validity(
         self,
         table: str,
@@ -405,13 +401,18 @@ class SQLDataSource(DataSource):
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
 
+        regex_patterns = {
+            "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+        }
+
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
                 "Either regex_pattern or predefined_regex_pattern should be provided"
             )
 
         if predefined_regex_pattern:
-            regex_query = f"case when {field} ~ '{self.regex_pattern[predefined_regex_pattern]}' then 1 else 0 end"
+            regex_query = f"case when {field} ~ '{regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
         else:
             regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
 

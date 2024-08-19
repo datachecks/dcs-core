@@ -128,3 +128,30 @@ validations for iris_db.iris:
       pattern: "^(setosa|virginica)$"
       threshold: "> 90"
 ```
+
+
+## Count USA Phone Number
+
+The count USA phone number validation checks the number of valid USA phone numbers in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for customer_db.customers:
+  - count USA phone number for phone_number:
+      on: on: count_usa_phone(usa_phone_number)
+      threshold: "> 100"
+```
+
+## Percentage USA Phone Number
+
+The percentage USA phone number validation checks the percentage of valid USA phone numbers in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for customer_db.customers:
+  - percentage USA phone number for phone_number:
+      on: percent_usa_phone(usa_phone_number)
+      threshold: "> 90"
+```

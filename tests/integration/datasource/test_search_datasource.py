@@ -47,6 +47,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=10),
                 "weight": None,
                 "description": "thor hammer",
+                "usa_phone": "123-456-7890",
             },
         )
         opensearch_client.index(
@@ -57,6 +58,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=3),
                 "weight": 80,
                 "description": "shield",
+                "usa_phone": "(123) 456-7890",
             },
         )
         opensearch_client.index(
@@ -67,6 +69,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=4),
                 "weight": 70,
                 "description": "suit",
+                "usa_phone": "123 456 7890",
             },
         )
         opensearch_client.index(
@@ -77,6 +80,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=5),
                 "weight": 60,
                 "description": "bow",
+                "usa_phone": "+1 123-456-7890",
             },
         )
         opensearch_client.index(
@@ -87,6 +91,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
                 "weight": 50,
                 "description": "",
+                "usa_phone": "09123.456.7890",
             },
         )
         opensearch_client.index(
@@ -97,6 +102,7 @@ def populate_opensearch_datasource(opensearch_client: OpenSearch):
                 "last_fight": datetime.datetime.utcnow() - datetime.timedelta(days=6),
                 "weight": 50,
                 "description": "",
+                "usa_phone": "+1 (123) 456-7890",
             },
         )
         opensearch_client.indices.refresh(index=INDEX_NAME)
@@ -290,3 +296,17 @@ class TestSQLDatasourceQueries:
         assert profile["max_length"] == 15
         assert profile["min_length"] == 4
         assert profile["avg_length"] == 9.333333333333334
+
+    def test_should_return_row_count_for_valid_usa_phone_number(
+        self, opensearch_datasource: OpenSearchDataSource
+    ):
+        (
+            valid_count,
+            total_row_count,
+        ) = opensearch_datasource.query_string_pattern_validity(
+            index_name=INDEX_NAME,
+            field="usa_phone",
+            predefined_regex_pattern="usa_phone",
+        )
+        assert valid_count == 5
+        assert total_row_count == 6

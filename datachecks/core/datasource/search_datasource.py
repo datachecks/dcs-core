@@ -401,3 +401,48 @@ class SearchIndexDataSource(DataSource):
         response = self.client.search(index=index_name, body=query)["aggregations"]
 
         return len(response["duplicate_count"]["buckets"])
+
+    def query_string_pattern_validity(
+        self,
+        index_name: str,
+        field: str,
+        regex_pattern: str = None,
+        predefined_regex_pattern: str = None,
+        filters: Dict = None,
+    ) -> int:
+        """
+        Get the count of string pattern validity
+        :param index_name: name of the index
+        :param field: field name
+        :param regex_pattern: regex pattern
+        :param predefined_regex_pattern: predefined regex pattern
+        :param filters: filter condition
+        :return: count of valid values, count of total row count
+        """
+        regex_patterns = {
+            "usa_phone": "\\+?1?[-.\\s]?\\(?[0-9]{3}\\)?[-.\\s]?[0-9]{3}[-.\\s]?[0-9]{4}"
+        }
+
+        if not regex_pattern and not predefined_regex_pattern:
+            raise ValueError(
+                "Either regex_pattern or predefined_regex_pattern should be provided"
+            )
+
+        if predefined_regex_pattern:
+            regex_string = regex_patterns[predefined_regex_pattern]
+        else:
+            regex_string = regex_pattern
+
+        query = {
+            "track_total_hits": True,
+            "query": {"regexp": {f"{field}.keyword": regex_string}},
+        }
+
+        if filters:
+            query["query"]["bool"]["filter"] = filters
+
+        response = self.client.search(index=index_name, body=query)
+        total_count = self.client.count(
+            index=index_name, body={"query": {"match_all": {}}}
+        )
+        return response["hits"]["total"]["value"], total_count["count"]

@@ -14,6 +14,7 @@
 
 from typing import Union
 
+from datachecks.core.datasource.search_datasource import SearchIndexDataSource
 from datachecks.core.datasource.sql_datasource import SQLDataSource
 from datachecks.core.validation.base import Validation
 
@@ -228,3 +229,47 @@ class PercentValidRegex(Validation):
             raise NotImplementedError(
                 "Valid/Invalid values validation is only supported for SQL data sources"
             )
+
+
+class CountUSAPhoneValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="usa_phone",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        elif isinstance(self.data_source, SearchIndexDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                index_name=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="usa_phone",
+                filters=self.where_filter if self.where_filter else None,
+            )
+            return valid_count
+        else:
+            raise ValueError("Invalid data source type")
+
+
+class PercentUSAPhoneValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="usa_phone",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        elif isinstance(self.data_source, SearchIndexDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                index_name=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="usa_phone",
+                filters=self.where_filter if self.where_filter else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise ValueError("Invalid data source type")
