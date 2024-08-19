@@ -21,17 +21,18 @@ current_path = pathlib.Path(__file__).parent.resolve()
 
 def test_should_parse_single_config_file():
     configuration: Configuration = load_configuration(
-        f"{current_path}/test_config.yaml"
+        f"{current_path}/test_config_v1.yaml"
     )
     assert configuration is not None
     assert len(configuration.data_sources) == 3
-    assert len(configuration.metrics) == 5
+    assert len(configuration.validations) == 3
 
 
 def test_should_parse_multiple_config_files():
     configuration: Configuration = load_configuration(
-        f"{current_path}/test_configurations"
+        f"{current_path}/test_configurations_v1"
     )
+    print(configuration)
     assert configuration is not None
     assert len(configuration.data_sources) == 2
-    assert len(configuration.metrics) == 2
+    assert len(configuration.validations) == 2

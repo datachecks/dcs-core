@@ -14,7 +14,7 @@
 
 import pathlib
 
-from datachecks.core.configuration.configuration_parser_v1 import (
+from datachecks.core.configuration.configuration_parser import (
     Configuration,
     load_configuration,
 )

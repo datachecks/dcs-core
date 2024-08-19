@@ -76,7 +76,6 @@ jobs:
           pytest -p no:warnings --ignore=tests/integration/
 
   pytest:
-    if: false
     name: Pytest with Codecov
     strategy:
       matrix:

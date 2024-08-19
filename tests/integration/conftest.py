@@ -37,8 +37,10 @@ disable_warnings(InsecureRequestWarning)
 
 @pytest.fixture(scope="session")
 def docker_compose_file(pytestconfig):
-    base_directory = os.path.dirname(os.path.abspath(__file__)).replace(
-        "tests/integration", ""
+    base_directory = (
+        os.path.dirname(os.path.abspath(__file__))
+        .replace("\\", "/")
+        .replace("tests/integration", "")
     )
     return os.path.join(base_directory, "docker-compose-test.yaml")
 
