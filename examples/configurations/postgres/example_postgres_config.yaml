@@ -64,3 +64,16 @@ validations for iris_pgsql.dcs_iris:
       on: min(sepal_length)
       threshold: "= 4"
       where: "species = 'virginica'"
+
+  # String Length Validations
+  - species string length max:
+      on: string_length_max(species)
+      threshold: "<= 20"
+
+  - species string length min:
+      on: string_length_min(species)
+      threshold: ">= 5"
+
+  - species string length average:
+      on: string_length_average(species)
+      threshold: ">= 10"

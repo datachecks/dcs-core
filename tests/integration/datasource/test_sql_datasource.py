@@ -322,3 +322,33 @@ class TestSQLDatasourceQueries:
         )
         assert valid_count == 3
         assert total_row_count == 6
+
+    def test_should_return_string_length_max(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_string_max_length(
+            table=self.TABLE_NAME,
+            field="name",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == 11
+
+    def test_should_return_string_length_min(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_string_min_length(
+            table=self.TABLE_NAME,
+            field="name",
+            filters="name in ('black widow', 'iron man')",
+        )
+        assert result == 8
+
+    def test_should_return_string_length_avg(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        result = postgres_datasource.query_get_string_avg_length(
+            table=self.TABLE_NAME,
+            field="name",
+            filters="name in ('thor', 'black widow')",
+        )
+        assert result == 7.5

@@ -47,6 +47,13 @@ from datachecks.core.validation.uniqueness_validation import (  # noqa F401 this
     CountDistinctValidation,
     CountDuplicateValidation,
 )
+from datachecks.core.validation.validity_validation import (  # noqa F401 this is used in globals
+    CountUUIDValidation,
+    PercentUUIDValidation,
+    StringLengthAverageValidation,
+    StringLengthMaxValidation,
+    StringLengthMinValidation,
+)
 
 
 class ValidationManager:
@@ -69,6 +76,9 @@ class ValidationManager:
         ValidationFunction.FRESHNESS.value: "FreshnessValueMetric",
         ValidationFunction.COUNT_UUID.value: "CountUUIDValidation",
         ValidationFunction.PERCENT_UUID.value: "PercentUUIDValidation",
+        ValidationFunction.STRING_LENGTH_MAX.value: "StringLengthMaxValidation",
+        ValidationFunction.STRING_LENGTH_MIN.value: "StringLengthMinValidation",
+        ValidationFunction.STRING_LENGTH_AVERAGE.value: "StringLengthAverageValidation",
     }
 
     def __init__(
