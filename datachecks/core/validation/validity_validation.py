@@ -48,3 +48,75 @@ class PercentUUIDValidation(Validation):
             raise NotImplementedError(
                 "UUID validation is only supported for SQL data sources"
             )
+
+class StringLengthMaxValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_max_length(
+                table=self.dataset_name,
+                field=self.field_name,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for StringLengthMaxValidation")
+
+
+class StringLengthMinValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_min_length(
+                table=self.dataset_name,
+                field=self.field_name,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for StringLengthMinValidation")
+
+
+class StringLengthAverageValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_avg_length(
+                table=self.dataset_name,
+                field=self.field_name,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for StringLengthAverageValidation")
+
+
+# using profiling_sql_aggregates_string method of SQLDataSource
+# class StringLengthMaxValidation(Validation):
+#     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+#         if isinstance(self.data_source, SQLDataSource):
+#             aggregates = self.data_source.profiling_sql_aggregates_string(
+#                 table_name=self.dataset_name,
+#                 column_name=self.field_name
+#             )
+#             return aggregates['max_length']
+#         else:
+#             raise ValueError("Unsupported data source type for StringLengthMaxValidation")
+#
+#
+# class StringLengthMinValidation(Validation):
+#     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+#         if isinstance(self.data_source, SQLDataSource):
+#             aggregates = self.data_source.profiling_sql_aggregates_string(
+#                 table_name=self.dataset_name,
+#                 column_name=self.field_name
+#             )
+#             return aggregates['min_length']
+#         else:
+#             raise ValueError("Unsupported data source type for StringLengthMinValidation")
+#
+#
+# class StringLengthAverageValidation(Validation):
+#     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+#         if isinstance(self.data_source, SQLDataSource):
+#             aggregates = self.data_source.profiling_sql_aggregates_string(
+#                 table_name=self.dataset_name,
+#                 column_name=self.field_name
+#             )
+#             return aggregates['avg_length']
+#         else:
+#             raise ValueError("Unsupported data source type for StringLengthAverageValidation")

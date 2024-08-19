@@ -421,3 +421,46 @@ class SQLDataSource(DataSource):
         """
         result = self.fetchone(query)
         return result[0], result[1]
+
+    def query_get_string_max_length(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the maximum string length in a column of a table.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: maximum string length
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT MAX(LENGTH({field})) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+        return self.fetchone(query)[0]
+
+    def query_get_string_min_length(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the minimum string length in a column of a table.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: minimum string length
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT MIN(LENGTH({field})) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+        return self.fetchone(query)[0]
+
+    def query_get_string_avg_length(self, table: str, field: str, filters: str = None) -> float:
+        """
+        Get the average string length in a column of a table.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: average string length
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT AVG(LENGTH({field})) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+        return round(self.fetchone(query)[0], 2)
+
