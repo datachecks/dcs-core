@@ -120,7 +120,8 @@ class TestSQLDatasourceQueries:
                     f"""
                         CREATE TABLE IF NOT EXISTS {self.TABLE_NAME} (
                             name VARCHAR(50), last_fight timestamp, age INTEGER,
-                            weight FLOAT, description VARCHAR(100), weapon_id VARCHAR(50)
+                            weight FLOAT, description VARCHAR(100), weapon_id VARCHAR(50),
+                            usa_phone VARCHAR(50)
                         )
                     """
                 )
@@ -130,17 +131,18 @@ class TestSQLDatasourceQueries:
             insert_query = f"""
                 INSERT INTO {self.TABLE_NAME} VALUES
                 ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}',
-                    1500, NULL, 'thor hammer', 'e7194aaa-5516-4362-a5ff-6ff971976bec'),
+                    1500, NULL, 'thor hammer', 'e7194aaa-5516-4362-a5ff-6ff971976bec',
+                    '123-456-7890'),
                 ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}',
-                    90, 80, 'shield', 'e7194aaa-5516-4362-a5ff-6ff971976b'), -- invalid weapon_id
+                    90, 80, 'shield', 'e7194aaa-5516-4362-a5ff-6ff971976b', '(123) 456-7890'), -- invalid weapon_id
                 ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}',
-                    50, 70, 'suit', '1739c676-6108-4dd2-8984-2459df744936'),
+                    50, 70, 'suit', '1739c676-6108-4dd2-8984-2459df744936', '123 456 7890'),
                 ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}',
-                    40, 60, 'bow', '1739c676-6108-4dd2-8984-2459df746'), -- invalid weapon_id
+                    40, 60, 'bow', '1739c676-6108-4dd2-8984-2459df746', '+1 123-456-7890'), -- invalid weapon_id
                 ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
-                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8'), -- invalid weapon_id
+                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8', '09123.456.7890'), -- invalid weapon_id -- invalid phone
                 ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
-                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8032c73')
+                    35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8032c73', '+1 (123) 456-7890')
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -345,4 +347,17 @@ class TestSQLDatasourceQueries:
             table=self.TABLE_NAME, field="name", regex_pattern=".la.*"
         )
         assert invalid_count == 2
+
+    def test_should_return_row_count_for_valid_usa_phone_number(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            valid_count,
+            total_row_count,
+        ) = postgres_datasource.query_string_pattern_validity(
+            table=self.TABLE_NAME,
+            field="usa_phone",
+            predefined_regex_pattern="usa_phone",
+        )
+        assert valid_count == 5
         assert total_row_count == 6
