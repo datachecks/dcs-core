@@ -406,6 +406,7 @@ class SQLDataSource(DataSource):
             "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
             "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
+            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
         }
 
         if not regex_pattern and not predefined_regex_pattern:
