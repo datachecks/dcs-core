@@ -281,3 +281,139 @@ def test_should_parse_percentage_uuid_validation():
         .get_validation_function
         == ValidationFunction.PERCENT_UUID
     )
+
+
+def test_should_parse_count_invalid_values():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_invalid_values(species)
+          values: ["versicolor"]
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_INVALID_VALUES
+    )
+
+
+def test_should_parse_percent_invalid_values():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_invalid_values(species)
+          values: ["versicolor"]
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_INVALID_VALUES
+    )
+
+
+def test_should_parse_count_valid_values():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_valid_values(species)
+          values: ["versicolor"]
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_VALID_VALUES
+    )
+
+
+def test_should_parse_percent_valid_values():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_valid_values(species)
+          values: ["versicolor"]
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_VALID_VALUES
+    )
+
+
+def test_should_parse_count_invalid_regex():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_invalid_regex(species)
+          regex: ".e.*"
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_INVALID_REGEX
+    )
+
+
+def test_should_parse_percent_invalid_regex():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_invalid_regex(species)
+          regex: ".e.*"
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_INVALID_REGEX
+    )
+
+
+def test_should_parse_count_valid_regex():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_valid_regex(species)
+          regex: "^(setosa|virginica)$"
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_VALID_REGEX
+    )
+
+
+def test_should_parse_percent_valid_regex():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_valid_regex(species)
+          regex: "^(setosa|virginica)$"
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_VALID_REGEX
+    )

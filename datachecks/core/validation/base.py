@@ -85,12 +85,17 @@ class Validation(ABC):
 
         self.threshold = validation_config.threshold
         self.where_filter = None
+        self.values = None
+        self.regex_pattern = validation_config.regex
 
         if validation_config.where:
             if data_source.language_support == DataSourceLanguageSupport.DSL_ES:
                 self.where_filter = json.loads(validation_config.where)
             elif data_source.language_support == DataSourceLanguageSupport.SQL:
                 self.where_filter = validation_config.where
+        if validation_config.values:
+            if data_source.language_support == DataSourceLanguageSupport.SQL:
+                self.values = validation_config.values
 
     def get_validation_identity(self) -> str:
         return ValidationIdentity.generate_identity(

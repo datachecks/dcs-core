@@ -64,3 +64,45 @@ validations for iris_pgsql.dcs_iris:
       on: min(sepal_length)
       threshold: "= 4"
       where: "species = 'virginica'"
+
+  # Validity Validations
+  - dcs_iris invalid values count species:
+      on: count_invalid_values(species)
+      values: ["versicolor"]
+      threshold: "< 10"
+
+  - dcs_iris invalid values percent species:
+      on: percent_invalid_values(species)
+      values: ["virginica"]
+
+  - dcs_iris valid values count species:
+      on: count_valid_values(species)
+      values: ["virginica", "setosa"]
+
+  - dcs_iris valid values percent species:
+      on: percent_valid_values(species)
+      values: ["setosa"]
+
+  - dcs_iris count invalid regex species:
+      on: count_invalid_regex(species)
+      regex: ".e.*"
+
+  - dcs_iris count invalid regex percent species:
+      on: percent_invalid_regex(species)
+      regex: ".e.*"
+
+  - dcs_iris count valid regex species:
+      on: count_valid_regex(species)
+      regex: "^(setosa|virginica)$"
+
+  - dcs_iris count valid regex percent species:
+      on: percent_valid_regex(species)
+      regex: "^(setosa|virginica)$"
+
+validations for product_db.products:
+  - percentage uuid for product_id:
+      on: percent_uuid(product_id)
+      threshold: "> 90"
+  - count uuid for product_id:
+      on: count_uuid(product_id)
+      threshold: "> 100"

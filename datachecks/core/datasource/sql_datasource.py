@@ -402,7 +402,7 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return: count of valid values, count of total row count
         """
-        filters = f"AND {filters}" if filters else ""
+        filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
 
         if not regex_pattern and not predefined_regex_pattern:
@@ -418,6 +418,38 @@ class SQLDataSource(DataSource):
         query = f"""
             select sum({regex_query}) as valid_count, count(*) as total_count
             from {qualified_table_name} {filters}
+        """
+        result = self.fetchone(query)
+        return result[0], result[1]
+
+    def query_valid_invalid_values_validity(
+        self,
+        table: str,
+        field: str,
+        regex_pattern: str = None,
+        filters: str = None,
+        values: List[str] = None,
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid and invalid values
+        :param table: table name
+        :param field: column name
+        :param values: list of valid values
+        :param regex_pattern: regex pattern
+        :param filters: filter condition
+        :return: count of valid/invalid values and total count of valid/invalid values
+        """
+        filters = f"WHERE {filters}" if filters else ""
+        qualified_table_name = self.qualified_table_name(table)
+        if values:
+            values_str = ", ".join([f"'{value}'" for value in values])
+            regex_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
+        else:
+            regex_query = f"CASE WHEN {field} ~ '{regex_pattern}' THEN 1 ELSE 0 END"
+        query = f"""
+            SELECT SUM({regex_query}) AS valid_count, COUNT(*) as total_count
+            FROM {qualified_table_name}
+            {filters}
         """
         result = self.fetchone(query)
         return result[0], result[1]
