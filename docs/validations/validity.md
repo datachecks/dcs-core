@@ -155,3 +155,28 @@ validations for customer_db.customers:
       on: percent_usa_phone(usa_phone_number)
       threshold: "> 90"
 ```
+
+## Count Email
+
+The count email validation checks the number of valid email addresses in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for customer_db.customers:
+  - count email for email:
+      on: count_email(email)
+```
+
+## Percentage Email
+
+The percentage email validation checks the percentage of valid email addresses in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for customer_db.customers:
+  - percentage email for email:
+      on: percent_email(email)
+      threshold: "> 90"
+```

@@ -449,3 +449,35 @@ def test_should_parse_percent_usa_phone():
         .get_validation_function
         == ValidationFunction.PERCENT_USA_PHONE
     )
+
+
+def test_should_parse_count_email():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: count_email(email)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_EMAIL
+    )
+
+
+def test_should_parse_percent_email():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_email(email)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_EMAIL
+    )
