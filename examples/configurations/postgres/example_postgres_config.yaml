@@ -106,3 +106,18 @@ validations for product_db.products:
   - count uuid for product_id:
       on: count_uuid(product_id)
       threshold: "> 100"
+
+  # String Length Validations
+  - species string length max:
+      on: string_length_max(species)
+      threshold: "<= 20"
+
+  - species string length min:
+      on: string_length_min(species)
+      threshold: ">= 5"
+
+  - species string length average:
+      on: string_length_average(species)
+      threshold: ">= 10"
+
+

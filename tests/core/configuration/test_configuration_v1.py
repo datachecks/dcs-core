@@ -481,3 +481,51 @@ def test_should_parse_percent_email():
         .get_validation_function
         == ValidationFunction.PERCENT_EMAIL
     )
+
+
+def test_should_parse_string_length_min_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: string_length_min(name)
+          threshold: ">=5"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.STRING_LENGTH_MIN
+    )
+
+
+def test_should_parse_string_length_max_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: string_length_max(name)
+          threshold: "<=100"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.STRING_LENGTH_MAX
+    )
+
+
+def test_should_parse_string_length_avg_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: string_length_average(name)
+          threshold: ">=10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.STRING_LENGTH_AVERAGE
+    )

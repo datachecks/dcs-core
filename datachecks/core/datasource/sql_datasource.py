@@ -455,3 +455,36 @@ class SQLDataSource(DataSource):
         """
         result = self.fetchone(query)
         return result[0], result[1]
+
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LENGTH"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LENGTH"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(LENGTH"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+
+        query = f"SELECT {sql_function}({field})) FROM {qualified_table_name}"
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result

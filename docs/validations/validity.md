@@ -180,3 +180,40 @@ validations for customer_db.customers:
       on: percent_email(email)
       threshold: "> 90"
 ```
+## String Length Max
+
+The StringLengthMaxValidation checks the maximum length of strings in a specified column.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - product name max length:
+      on: string_length_max(product_name)
+      threshold: "<= 100"
+```
+
+## String Length Min
+
+The StringLengthMinValidation checks the minimum length of strings in a specified column.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - product name min length:
+      on: string_length_min(product_name)
+      threshold: ">= 5"
+```
+
+## String Length Average
+
+The StringLengthAverageValidation checks the average length of strings in a specified column.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - product name average length:
+      on: string_length_average(product_name)
+      threshold: ">= 10"

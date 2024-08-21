@@ -305,3 +305,48 @@ class PercentEmailValidation(Validation):
             raise NotImplementedError(
                 "Email validation is only supported for SQL data sources"
             )
+
+
+class StringLengthMaxValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_length_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                metric="max",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for StringLengthMaxValidation"
+            )
+
+
+class StringLengthMinValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_length_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                metric="min",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for StringLengthMinValidation"
+            )
+
+
+class StringLengthAverageValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_string_length_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                metric="avg",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for StringLengthAverageValidation"
+            )

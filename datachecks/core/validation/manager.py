@@ -62,6 +62,9 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     PercentUUIDValidation,
     PercentValidRegex,
     PercentValidValues,
+    StringLengthAverageValidation,
+    StringLengthMaxValidation,
+    StringLengthMinValidation,
 )
 
 
@@ -97,6 +100,9 @@ class ValidationManager:
         ValidationFunction.PERCENT_USA_PHONE.value: "PercentUSAPhoneValidation",
         ValidationFunction.COUNT_EMAIL.value: "CountEmailValidation",
         ValidationFunction.PERCENT_EMAIL.value: "PercentEmailValidation",
+        ValidationFunction.STRING_LENGTH_MAX.value: "StringLengthMaxValidation",
+        ValidationFunction.STRING_LENGTH_MIN.value: "StringLengthMinValidation",
+        ValidationFunction.STRING_LENGTH_AVERAGE.value: "StringLengthAverageValidation",
     }
 
     def __init__(
