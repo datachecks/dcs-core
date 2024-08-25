@@ -529,3 +529,67 @@ def test_should_parse_string_length_avg_validation():
         .get_validation_function
         == ValidationFunction.STRING_LENGTH_AVERAGE
     )
+
+
+def test_should_parse_count_usa_zip_code():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: count_usa_zip_code(usa_zip_code)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_USA_ZIP_CODE
+    )
+
+
+def test_should_parse_percent_usa_zip_code():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_usa_zip_code(usa_zip_code)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_USA_ZIP_CODE
+    )
+
+
+def test_should_parse_count_usa_state_code():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: count_usa_state_code(usa_state_code)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_USA_STATE_CODE
+    )
+
+
+def test_should_parse_percent_usa_state_code():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_usa_state_code(usa_state_code)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_USA_STATE_CODE
+    )
