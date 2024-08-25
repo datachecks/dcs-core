@@ -666,3 +666,35 @@ class PercentISINValidation(Validation):
             raise NotImplementedError(
                 "ISIN validation is only supported for SQL data sources"
             )
+
+
+class CountPermIDValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="perm_id",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "Perm ID validation is only supported for SQL data sources"
+            )
+
+
+class PercentPermIDValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="perm_id",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "Perm ID validation is only supported for SQL data sources"
+            )

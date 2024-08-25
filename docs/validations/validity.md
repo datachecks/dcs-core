@@ -422,3 +422,27 @@ validations for product_db.products:
   - percent_isin_of_user:
       on: percent_isin(isin_number)
 ```
+
+## Count PermID
+
+The count permid validation checks the number of valid permid in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count permid of users:
+     on: count_permid(perm_id)
+```
+
+## Percent PermID
+
+The percent permid validation checks the percentage of valid permid in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_permid_of_user:
+      on: percent_permid(perm_id)
+```

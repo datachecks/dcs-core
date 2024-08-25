@@ -57,6 +57,7 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     CountLatitudeValidation,
     CountLEIValidation,
     CountLongitudeValidation,
+    CountPermIDValidation,
     CountSEDOLValidation,
     CountSSNValidation,
     CountUSAPhoneValidation,
@@ -74,6 +75,7 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     PercentLatitudeValidation,
     PercentLEIValidation,
     PercentLongitudeValidation,
+    PercentPermIDValidation,
     PercentSEDOLValidation,
     PercentSSNValidation,
     PercentUSAPhoneValidation,
@@ -143,6 +145,8 @@ class ValidationManager:
         ValidationFunction.PERCENT_FIGI.value: "PercentFIGIValidation",
         ValidationFunction.COUNT_ISIN.value: "CountISINValidation",
         ValidationFunction.PERCENT_ISIN.value: "PercentISINValidation",
+        ValidationFunction.COUNT_PERM_ID.value: "CountPermIDValidation",
+        ValidationFunction.PERCENT_PERM_ID.value: "PercentPermIDValidation",
     }
 
     def __init__(

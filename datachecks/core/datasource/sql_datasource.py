@@ -412,6 +412,7 @@ class SQLDataSource(DataSource):
             "cusip": r"^[0-9A-Z]{9}$",
             "figi": r"^BBG[A-Z0-9]{9}$",
             "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
+            "perm_id": r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{3}$",
         }
 
         if not regex_pattern and not predefined_regex_pattern:

@@ -131,7 +131,8 @@ class TestSQLDatasourceQueries:
                             lei VARCHAR(20),
                             cusip VARCHAR(9),
                             figi VARCHAR(12),
-                            isin VARCHAR(12)
+                            isin VARCHAR(12),
+                            perm_id VARCHAR(50)
                         )
                     """
                 )
@@ -143,27 +144,27 @@ class TestSQLDatasourceQueries:
                 ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}',
                     1500, NULL, 'thor hammer', 'e7194aaa-5516-4362-a5ff-6ff971976bec',
                     '123-456-7890', 'jane.doe@domain', 'C2', 'ABCDE', 40.0678, -7555555554.0060,'856-45-6789','0067340',
-                    'JRIK0092LOAUCXTR6042','03783310','BBG000B9XRY4','US0378331005'), -- invalid email -- invalid usa_state_code  -- invalid usa_zip_code -- invalid cusip
+                    'JRIK0092LOAUCXTR6042','03783310','BBG000B9XRY4','US0378331005', '1234--5678-9012--3456-789'), -- invalid email -- invalid usa_state_code  -- invalid usa_zip_code -- invalid cusip -- invalid perm_id
                 ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}',
                     90, 80, 'shield', 'e7194aaa-5516-4362-a5ff-6ff971976b', '(123) 456-7890',
                     'john.doe@.com ', 'NY', '12-345', 34.0522, -118.2437,'000-12-3456', 'B01HL06',
-                    'CDR300OS7OJENVEDDW89','037833100','BBG000BL2H25','US5949181045'), -- invalid weapon_id --invalid email -- invalid usa_zip_code -- invalid ssn
+                    'CDR300OS7OJENVEDDW89','037833100','BBG000BL2H25','US5949181045', '1234567890123456789'), -- invalid weapon_id --invalid email -- invalid usa_zip_code -- invalid ssn
                 ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}',
                     50, 70, 'suit', '1739c676-6108-4dd2-8984-2459df744936', '123 456 7890',
                     'contact@company..org', 'XY', '85001', 37.7749, -122.4194,'859-99-9999','4155586',
-                    'VXQ400F1OBWAVPBJP86','594918104','BBG000B3YB97','US38259P5088'), -- invalid email -- invalid usa_state_code -- invalid lei
+                    'VXQ400F1OBWAVPBJP86','594918104','BBG000B3YB97','US38259P5088', '123456789012345678'), -- invalid email -- invalid usa_state_code -- invalid lei -- invalid perm_id
                 ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}',
                     40, 60, 'bow', '1739c676-6108-4dd2-8984-2459df746', '+1 123-456-7890',
                     'user@@example.com', 'TX', '30301', 51.1657, 10.4515,'123-45-67890','12345',
-                    'FKRD00GCEYWDCNYLNF60','38259P508','BBG000B57Y12','US83165F1026'), -- invalid weapon_id --invalid email -- invalid ssn -- invalid sedol
+                    'FKRD00GCEYWDCNYLNF60','38259P508','BBG000B57Y12','US83165F1026', '5647382910564738291'), -- invalid weapon_id --invalid email -- invalid ssn -- invalid sedol
                 ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
                     35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8', '09123.456.7890',
                     'contact@company.org', 'ZZ', '123456', 51.5074, -0.1278,'666-45-6789','34A56B7',
-                    '6R5J00FMIANQQH6JMN56','83165F102','BBG000B9XRY','US0231351067'), -- invalid weapon_id -- invalid phone -- invalid usa_state_code -- invalid usa_zip_code -- invalid ssn -- invalid sedol -- invalid figi
+                    '6R5J00FMIANQQH6JMN56','83165F102','BBG000B9XRY','US0231351067', '1234-5678-9012-3456-78X'), -- invalid weapon_id -- invalid phone -- invalid usa_state_code -- invalid usa_zip_code -- invalid ssn -- invalid sedol -- invalid figi -- invalid perm_id
                 ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
                     35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8032c73', '+1 (123) 456-7890',
                     'jane_smith123@domain.co.uk', 'FL', '90210', 483.8566, 2.3522,'001-01-0001','456VGHY',
-                    '0FPB00BBRHUYOE7DSK19','023135106','BBG000B6R530','US037833100') -- invalid isin -- invalid sedol
+                    '0FPB00BBRHUYOE7DSK19','023135106','BBG000B6R530','US037833100', '2345-6789-0123-4567-890') -- invalid isin -- invalid sedol
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -557,4 +558,18 @@ class TestSQLDatasourceQueries:
             table=self.TABLE_NAME, field="isin", predefined_regex_pattern="isin"
         )
         assert valid_count == 5
+        assert total_row_count == 6
+
+    def test_should_return_row_count_for_valid_perm_id(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            valid_count,
+            total_row_count,
+        ) = postgres_datasource.query_string_pattern_validity(
+            table=self.TABLE_NAME,
+            field="perm_id",
+            predefined_regex_pattern="perm_id",
+        )
+        assert valid_count == 3
         assert total_row_count == 6
