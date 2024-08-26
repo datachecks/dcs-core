@@ -48,12 +48,14 @@ from datachecks.core.validation.uniqueness_validation import (  # noqa F401 this
     CountDuplicateValidation,
 )
 from datachecks.core.validation.validity_validation import (  # noqa F401 this is used in globals
+    CountEmailValidation,
     CountInvalidRegex,
     CountInvalidValues,
     CountUSAPhoneValidation,
     CountUUIDValidation,
     CountValidRegex,
     CountValidValues,
+    PercentEmailValidation,
     PercentInvalidRegex,
     PercentInvalidValues,
     PercentUSAPhoneValidation,
@@ -93,6 +95,8 @@ class ValidationManager:
         ValidationFunction.PERCENT_VALID_REGEX.value: "PercentValidRegex",
         ValidationFunction.COUNT_USA_PHONE.value: "CountUSAPhoneValidation",
         ValidationFunction.PERCENT_USA_PHONE.value: "PercentUSAPhoneValidation",
+        ValidationFunction.COUNT_EMAIL.value: "CountEmailValidation",
+        ValidationFunction.PERCENT_EMAIL.value: "PercentEmailValidation",
     }
 
     def __init__(
