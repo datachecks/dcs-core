@@ -121,3 +121,19 @@ validations for product_db.products:
       threshold: ">= 10"
 
 
+# Geolocation Validations
+  - location latitude count:
+      on: count_latitude(latitude)
+      threshold: "> 100"
+
+  - location latitude percentage:
+      on: percent_latitude(latitude)
+      threshold: "> 80"
+
+  - location longitude count:
+      on: count_longitude(longitude)
+      threshold: "> 100"
+
+  - location longitude percentage:
+      on: percent_longitude(longitude)
+      threshold: "> 80"
