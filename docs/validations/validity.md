@@ -217,3 +217,58 @@ validations for product_db.products:
   - product name average length:
       on: string_length_average(product_name)
       threshold: ">= 10"
+
+
+# Geolocation Validations
+
+## Count Latitude
+
+The `CountLatitudeValidation` checks the number of non-null and valid latitude values (ranging between -90 and 90) in a specified column.
+
+**Example**
+
+```yaml
+validations for location_db.geolocation:
+  - location latitude count:
+      on: count_latitude(latitude_column_name)
+      threshold: "> 100"
+```
+
+## Percent Latitude
+
+The `PercentLatitudeValidation` checks the percentage of non-null and valid latitude values (ranging between -90 and 90) in a specified column.
+
+**Example**
+
+```yaml
+validations for location_db.geolocation:
+  - location latitude percentage:
+      on: percent_latitude(latitude_column_name)
+      threshold: "> 80"
+```
+
+## Count Longitude
+
+The `CountLongitudeValidation` checks the number of non-null and valid longitude values (ranging between -180 and 180) in a specified column.
+
+**Example**
+
+```yaml
+validations for location_db.geolocation:
+  - location longitude count:
+      on: count_longitude(longitude_column_name)
+      threshold: "> 100"
+```
+
+## Percent Longitude
+
+The `PercentLongitudeValidation` checks the percentage of non-null and valid longitude values (ranging between -180 and 180) in a specified column.
+
+**Example**
+
+```yaml
+validations for location_db.geolocation:
+  - location longitude percentage:
+      on: percent_longitude(longitude_column_name)
+      threshold: "> 80"
+```

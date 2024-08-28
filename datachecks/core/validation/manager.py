@@ -51,6 +51,8 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     CountEmailValidation,
     CountInvalidRegex,
     CountInvalidValues,
+    CountLatitudeValidation,
+    CountLongitudeValidation,
     CountUSAPhoneValidation,
     CountUSAStateCodeValidation,
     CountUSAZipCodeValidation,
@@ -60,6 +62,8 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     PercentEmailValidation,
     PercentInvalidRegex,
     PercentInvalidValues,
+    PercentLatitudeValidation,
+    PercentLongitudeValidation,
     PercentUSAPhoneValidation,
     PercentUSAStateCodeValidation,
     PercentUSAZipCodeValidation,
@@ -111,6 +115,10 @@ class ValidationManager:
         ValidationFunction.PERCENT_USA_STATE_CODE.value: "PercentUSAStateCodeValidation",
         ValidationFunction.COUNT_USA_ZIP_CODE.value: "CountUSAZipCodeValidation",
         ValidationFunction.PERCENT_USA_ZIP_CODE.value: "PercentUSAZipCodeValidation",
+        ValidationFunction.COUNT_LATITUDE.value: "CountLatitudeValidation",
+        ValidationFunction.PERCENT_LATITUDE.value: "PercentLatitudeValidation",
+        ValidationFunction.COUNT_LONGITUDE.value: "CountLongitudeValidation",
+        ValidationFunction.PERCENT_LONGITUDE.value: "PercentLongitudeValidation",
     }
 
     def __init__(

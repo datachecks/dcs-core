@@ -593,3 +593,67 @@ def test_should_parse_percent_usa_state_code():
         .get_validation_function
         == ValidationFunction.PERCENT_USA_STATE_CODE
     )
+
+
+def test_should_parse_count_latitude_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_latitude(latitude_column)
+          threshold: ">10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_LATITUDE
+    )
+
+
+def test_should_parse_percent_latitude_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_latitude(latitude_column)
+          threshold: ">10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_LATITUDE
+    )
+
+
+def test_should_parse_count_longitude_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_longitude(longitude_column)
+          threshold: ">10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_LONGITUDE
+    )
+
+
+def test_should_parse_percent_longitude_validation():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_longitude(longitude_column)
+          threshold: ">10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_LONGITUDE
+    )

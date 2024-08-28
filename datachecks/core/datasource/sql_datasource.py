@@ -569,3 +569,32 @@ class SQLDataSource(DataSource):
 
         result = self.fetchone(query)
         return result[0], result[1]
+
+    def query_geolocation_metric(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        qualified_table_name = self.qualified_table_name(table)
+
+        valid_query = f"SELECT COUNT({field}) FROM {qualified_table_name} WHERE {field} IS NOT NULL AND {field} "
+
+        if field.lower().startswith("lat"):
+            valid_query += "BETWEEN -90 AND 90"
+        elif field.lower().startswith("lon"):
+            valid_query += "BETWEEN -180 AND 180"
+
+        if filters:
+            valid_query += f" AND {filters}"
+
+        valid_count = self.fetchone(valid_query)[0]
+
+        if operation == "percent":
+            total_query = f"SELECT COUNT(*) FROM {qualified_table_name}"
+            if filters:
+                total_query += f" WHERE {filters}"
+
+            total_count = self.fetchone(total_query)[0]
+
+            result = (valid_count / total_count) * 100 if total_count > 0 else 0
+            return round(result, 2)
+
+        return valid_count

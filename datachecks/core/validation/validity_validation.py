@@ -418,3 +418,61 @@ class PercentUSAStateCodeValidation(Validation):
             raise NotImplementedError(
                 "USA State Code validation is only supported for SQL data sources"
             )
+
+
+class CountLatitudeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_geolocation_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for CountLatitudeValidation")
+
+
+class PercentLatitudeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_geolocation_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentLatitudeValidation"
+            )
+
+
+class CountLongitudeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_geolocation_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for CountLongitudeValidation"
+            )
+
+
+class PercentLongitudeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_geolocation_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentLongitudeValidation"
+            )
