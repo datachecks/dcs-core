@@ -405,6 +405,7 @@ class SQLDataSource(DataSource):
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
             "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
         }
 
         if not regex_pattern and not predefined_regex_pattern:
@@ -488,3 +489,83 @@ class SQLDataSource(DataSource):
 
         result = self.fetchone(query)[0]
         return round(result, 2) if metric.lower() == "avg" else result
+
+    def query_get_usa_state_code_validity(
+        self, table: str, field: str, filters: str = None
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid USA state codes
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of valid state codes, count of total row count
+        """
+        # List of valid state codes
+        valid_state_codes = [
+            "AL",
+            "AK",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "FL",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY",
+        ]
+
+        valid_state_codes_str = ", ".join(f"'{code}'" for code in valid_state_codes)
+
+        filters = f"WHERE {filters}" if filters else ""
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        regex_query = f"CASE WHEN {field} ~ '^[A-Z]{{2}}$' AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
+
+        query = f"""
+            SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
+            FROM {qualified_table_name} {filters}
+        """
+
+        result = self.fetchone(query)
+        return result[0], result[1]

@@ -122,7 +122,8 @@ class TestSQLDatasourceQueries:
                             name VARCHAR(50), last_fight timestamp, age INTEGER,
                             weight FLOAT, description VARCHAR(100), weapon_id VARCHAR(50),
                             usa_phone VARCHAR(50),
-                            email VARCHAR(50)
+                            email VARCHAR(50),
+                            usa_state_code VARCHAR(5), usa_zip_code VARCHAR(50)
                         )
                     """
                 )
@@ -133,22 +134,22 @@ class TestSQLDatasourceQueries:
                 INSERT INTO {self.TABLE_NAME} VALUES
                 ('thor', '{(utc_now - datetime.timedelta(days=10)).strftime("%Y-%m-%d")}',
                     1500, NULL, 'thor hammer', 'e7194aaa-5516-4362-a5ff-6ff971976bec',
-                    '123-456-7890', 'jane.doe@domain'), -- invalid email
+                    '123-456-7890', 'jane.doe@domain', 'C2', 'ABCDE'), -- invalid email -- invalid usa_state_code  -- invalid usa_zip_code
                 ('captain america', '{(utc_now - datetime.timedelta(days=3)).strftime("%Y-%m-%d")}',
                     90, 80, 'shield', 'e7194aaa-5516-4362-a5ff-6ff971976b', '(123) 456-7890',
-                    'john.doe@.com '), -- invalid weapon_id --invalid email
+                    'john.doe@.com ', 'NY', '12-345'), -- invalid weapon_id --invalid email -- invalid usa_zip_code
                 ('iron man', '{(utc_now - datetime.timedelta(days=4)).strftime("%Y-%m-%d")}',
                     50, 70, 'suit', '1739c676-6108-4dd2-8984-2459df744936', '123 456 7890',
-                    'contact@company..org'), -- invalid email
+                    'contact@company..org', 'XY', '85001'), -- invalid email -- invalid usa_state_code
                 ('hawk eye', '{(utc_now - datetime.timedelta(days=5)).strftime("%Y-%m-%d")}',
                     40, 60, 'bow', '1739c676-6108-4dd2-8984-2459df746', '+1 123-456-7890',
-                    'user@@example.com'), -- invalid weapon_id --invalid email
+                    'user@@example.com', 'TX', '30301'), -- invalid weapon_id --invalid email
                 ('clark kent', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
                     35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8', '09123.456.7890',
-                    'contact@company.org'), -- invalid weapon_id -- invalid phone
+                    'contact@company.org', 'ZZ', '123456'), -- invalid weapon_id -- invalid phone -- invalid usa_state_code -- invalid usa_zip_code
                 ('black widow', '{(utc_now - datetime.timedelta(days=6)).strftime("%Y-%m-%d")}',
                     35, 50, '', '7be61b2c-45dc-4889-97e3-9202e8032c73', '+1 (123) 456-7890',
-                    'jane_smith123@domain.co.uk')
+                    'jane_smith123@domain.co.uk', 'FL', '90210')
             """
 
             postgresql_connection.execute(text(insert_query))
@@ -412,3 +413,30 @@ class TestSQLDatasourceQueries:
             metric="avg",
         )
         assert result == 7.5
+
+    def test_should_return_row_count_for_valid_usa_zip_code(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            valid_count,
+            total_row_count,
+        ) = postgres_datasource.query_string_pattern_validity(
+            table=self.TABLE_NAME,
+            field="usa_zip_code",
+            predefined_regex_pattern="usa_zip_code",
+        )
+        assert valid_count == 3
+        assert total_row_count == 6
+
+    def test_should_return_row_count_for_valid_usa_state_code(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        (
+            valid_count,
+            total_row_count,
+        ) = postgres_datasource.query_get_usa_state_code_validity(
+            table=self.TABLE_NAME,
+            field="usa_state_code",
+        )
+        assert valid_count == 3
+        assert total_row_count == 6

@@ -52,6 +52,8 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     CountInvalidRegex,
     CountInvalidValues,
     CountUSAPhoneValidation,
+    CountUSAStateCodeValidation,
+    CountUSAZipCodeValidation,
     CountUUIDValidation,
     CountValidRegex,
     CountValidValues,
@@ -59,6 +61,8 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     PercentInvalidRegex,
     PercentInvalidValues,
     PercentUSAPhoneValidation,
+    PercentUSAStateCodeValidation,
+    PercentUSAZipCodeValidation,
     PercentUUIDValidation,
     PercentValidRegex,
     PercentValidValues,
@@ -103,6 +107,10 @@ class ValidationManager:
         ValidationFunction.STRING_LENGTH_MAX.value: "StringLengthMaxValidation",
         ValidationFunction.STRING_LENGTH_MIN.value: "StringLengthMinValidation",
         ValidationFunction.STRING_LENGTH_AVERAGE.value: "StringLengthAverageValidation",
+        ValidationFunction.COUNT_USA_STATE_CODE.value: "CountUSAStateCodeValidation",
+        ValidationFunction.PERCENT_USA_STATE_CODE.value: "PercentUSAStateCodeValidation",
+        ValidationFunction.COUNT_USA_ZIP_CODE.value: "CountUSAZipCodeValidation",
+        ValidationFunction.PERCENT_USA_ZIP_CODE.value: "PercentUSAZipCodeValidation",
     }
 
     def __init__(
