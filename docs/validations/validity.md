@@ -217,6 +217,7 @@ validations for product_db.products:
   - product name average length:
       on: string_length_average(product_name)
       threshold: ">= 10"
+```
 
 
 # Geolocation Validations
@@ -271,4 +272,29 @@ validations for location_db.geolocation:
   - location longitude percentage:
       on: percent_longitude(longitude_column_name)
       threshold: "> 80"
+```
+```
+
+## Count SSN
+
+The count ssn validation checks the number of valid ssn(social security number) in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count ssn of users:
+     on: count_ssn(ssn_number)
+```
+
+## Percent SSN
+
+The percent ssn validation checks the percentage of valid ssn(social security number) in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_ssn_of_user:
+      on: percent_ssn(ssn_number)
 ```

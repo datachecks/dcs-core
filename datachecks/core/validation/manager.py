@@ -53,6 +53,7 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     CountInvalidValues,
     CountLatitudeValidation,
     CountLongitudeValidation,
+    CountSSNValidation,
     CountUSAPhoneValidation,
     CountUSAStateCodeValidation,
     CountUSAZipCodeValidation,
@@ -64,6 +65,7 @@ from datachecks.core.validation.validity_validation import (  # noqa F401 this i
     PercentInvalidValues,
     PercentLatitudeValidation,
     PercentLongitudeValidation,
+    PercentSSNValidation,
     PercentUSAPhoneValidation,
     PercentUSAStateCodeValidation,
     PercentUSAZipCodeValidation,
@@ -119,6 +121,8 @@ class ValidationManager:
         ValidationFunction.PERCENT_LATITUDE.value: "PercentLatitudeValidation",
         ValidationFunction.COUNT_LONGITUDE.value: "CountLongitudeValidation",
         ValidationFunction.PERCENT_LONGITUDE.value: "PercentLongitudeValidation",
+        ValidationFunction.COUNT_SSN.value: "CountSSNValidation",
+        ValidationFunction.PERCENT_SSN.value: "PercentSSNValidation",
     }
 
     def __init__(

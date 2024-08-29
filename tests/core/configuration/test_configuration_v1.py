@@ -657,3 +657,33 @@ def test_should_parse_percent_longitude_validation():
         .get_validation_function
         == ValidationFunction.PERCENT_LONGITUDE
     )
+
+
+def test_should_parse_count_ssn():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_ssn(ssn_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_SSN
+    )
+
+
+def test_should_parse_percent_ssn():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_ssn(ssn_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_SSN
+    )
