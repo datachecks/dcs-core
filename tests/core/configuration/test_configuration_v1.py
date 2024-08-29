@@ -687,3 +687,153 @@ def test_should_parse_percent_ssn():
         .get_validation_function
         == ValidationFunction.PERCENT_SSN
     )
+
+
+def test_should_parse_count_sedol():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_sedol(sedol_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_SEDOL
+    )
+
+
+def test_should_parse_percent_sedol():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_sedol(sedol_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_SEDOL
+    )
+
+
+def test_should_parse_count_cusip():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_cusip(cusip_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_CUSIP
+    )
+
+
+def test_should_parse_percent_cusip():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_cusip(cusip_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_CUSIP
+    )
+
+
+def test_should_parse_count_lei():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_lei(lei_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_LEI
+    )
+
+
+def test_should_parse_percent_lei():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_lei(lei_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_LEI
+    )
+
+
+def test_should_parse_count_figi():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_figi(figi_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_FIGI
+    )
+
+
+def test_should_parse_percent_figi():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_figi(figi_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_FIGI
+    )
+
+
+def test_should_parse_count_isin():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_isin(isin_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_ISIN
+    )
+
+
+def test_should_parse_percent_isin():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_isin(isin_number)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_ISIN
+    )
