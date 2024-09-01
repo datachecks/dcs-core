@@ -34,6 +34,7 @@ The count invalid values validation checks how many entries in a dataset are inv
 
 **Example**
 ```yaml title="dcs_config.yaml"
+validations for iris_db.iris:
   - invalid values count for species:
       on: count_invalid_values(species)
       values: ["versicolor"]
@@ -58,6 +59,7 @@ The count valid values validation checks how many entries in a dataset are valid
 **Example**
 
 ```yaml title="dcs_config.yaml"
+validations for iris_db.iris:
   - valid values count for species:
       on: count_valid_values(species)
       values: ["setosa", "virginica"]
@@ -84,6 +86,7 @@ The count invalid regex validation checks how many entries in a dataset are inva
 **Example**
 
 ```yaml title="dcs_config.yaml"
+validations for iris_db.iris:
   - invalid regex count for species:
       on: count_invalid_regex(species)
       pattern: "^(setosa|virginica)$"
@@ -110,6 +113,7 @@ The count valid regex validation checks how many entries in a dataset are valid 
 **Example**
 
 ```yaml title="dcs_config.yaml"
+validations for iris_db.iris:
   - valid regex count for species:
       on: count_valid_regex(species)
       pattern: "^(setosa|virginica)$"
@@ -297,4 +301,124 @@ The percent ssn validation checks the percentage of valid ssn(social security nu
 validations for product_db.products:
   - percent_ssn_of_user:
       on: percent_ssn(ssn_number)
+```
+
+## Count SEDOL
+
+The count sedol validation checks the number of valid sedol in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count sedol of users:
+     on: count_sedol(sedol_number)
+```
+
+## Percent SEDOL
+
+The percent sedol validation checks the percentage of valid sedol in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_sedol_of_user:
+      on: percent_sedol(sedol_number)
+```
+
+## Count CUSIP
+
+The count cusip validation checks the number of valid cusip in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count cusip of users:
+     on: count_cusip(cusip_number)
+```
+
+## Percent CUSIP
+
+The percent cusip validation checks the percentage of valid cusip in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_cusip_of_user:
+      on: percent_cusip(cusip_number)
+```
+
+## Count LEI
+
+The count lei validation checks the number of valid lei in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count lei of users:
+     on: count_lei(lei_number)
+```
+
+## Percent LEI
+
+The percent lei validation checks the percentage of valid lei in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_lei_of_user:
+      on: percent_lei(lei_number)
+```
+
+## Count FIGI
+
+The count figi validation checks the number of valid figi in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count figi of users:
+     on: count_figi(figi_number)
+```
+
+## Percent FIGI
+
+The percent figi validation checks the percentage of valid figi in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_figi_of_user:
+      on: percent_figi(figi_number)
+```
+
+## Count ISIN
+
+The count isin validation checks the number of valid isin in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count isin of users:
+     on: count_isin(isin_number)
+```
+
+## Percent ISIN
+
+The percent isin validation checks the percentage of valid isin in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_isin_of_user:
+      on: percent_isin(isin_number)
 ```

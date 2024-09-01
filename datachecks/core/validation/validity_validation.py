@@ -25,7 +25,6 @@ class CountUUIDValidation(Validation):
             valid_count, total_count = self.data_source.query_string_pattern_validity(
                 table=self.dataset_name,
                 field=self.field_name,
-                regex_pattern=self.regex_pattern,
                 predefined_regex_pattern="uuid",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -42,7 +41,6 @@ class PercentUUIDValidation(Validation):
             valid_count, total_count = self.data_source.query_string_pattern_validity(
                 table=self.dataset_name,
                 field=self.field_name,
-                regex_pattern=self.regex_pattern,
                 predefined_regex_pattern="uuid",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -507,4 +505,164 @@ class PercentSSNValidation(Validation):
         else:
             raise NotImplementedError(
                 "SSN values validation is only supported for SQL data sources"
+            )
+
+
+class CountSEDOLValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="sedol",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "SEDOL validation is only supported for SQL data sources"
+            )
+
+
+class PercentSEDOLValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="sedol",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "SEDOL validation is only supported for SQL data sources"
+            )
+
+
+class CountCUSIPValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="cusip",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "CUSIP validation is only supported for SQL data sources"
+            )
+
+
+class PercentCUSIPValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="cusip",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "CUSIP validation is only supported for SQL data sources"
+            )
+
+
+class CountLEIValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="lei",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "LEI validation is only supported for SQL data sources"
+            )
+
+
+class PercentLEIValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="lei",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "LEI validation is only supported for SQL data sources"
+            )
+
+
+class CountFIGIValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="figi",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "FIGI validation is only supported for SQL data sources"
+            )
+
+
+class PercentFIGIValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="figi",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "FIGI validation is only supported for SQL data sources"
+            )
+
+
+class CountISINValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="isin",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise NotImplementedError(
+                "ISIN validation is only supported for SQL data sources"
+            )
+
+
+class PercentISINValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_count = self.data_source.query_string_pattern_validity(
+                table=self.dataset_name,
+                field=self.field_name,
+                predefined_regex_pattern="isin",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return round(valid_count / total_count * 100, 2) if total_count > 0 else 0
+        else:
+            raise NotImplementedError(
+                "ISIN validation is only supported for SQL data sources"
             )
