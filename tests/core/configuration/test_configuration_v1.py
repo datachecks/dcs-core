@@ -837,3 +837,35 @@ def test_should_parse_percent_isin():
         .get_validation_function
         == ValidationFunction.PERCENT_ISIN
     )
+
+
+def test_should_parse_count_valid_perm_id():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: count_perm_id(perm_id)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_PERM_ID
+    )
+
+
+def test_should_parse_percent_valid_perm_id():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_perm_id(perm_id)
+            threshold: "<10"
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_PERM_ID
+    )
