@@ -62,6 +62,7 @@ from dcs_core.core.validation.uniqueness_validation import (  # noqa F401 this i
 )
 from dcs_core.core.validation.validity_validation import (  # noqa F401 this is used in globals
     CountCUSIPValidation,
+    CountDateNotInFutureValidation,
     CountEmailValidation,
     CountFIGIValidation,
     CountInvalidRegex,
@@ -70,9 +71,11 @@ from dcs_core.core.validation.validity_validation import (  # noqa F401 this is 
     CountLatitudeValidation,
     CountLEIValidation,
     CountLongitudeValidation,
+    CountNotInFutureValidation,
     CountPermIDValidation,
     CountSEDOLValidation,
     CountSSNValidation,
+    CountTimeStampValidation,
     CountUSAPhoneValidation,
     CountUSAStateCodeValidation,
     CountUSAZipCodeValidation,
@@ -80,6 +83,7 @@ from dcs_core.core.validation.validity_validation import (  # noqa F401 this is 
     CountValidRegex,
     CountValidValues,
     PercentCUSIPValidation,
+    PercentDateNotInFutureValidation,
     PercentEmailValidation,
     PercentFIGIValidation,
     PercentInvalidRegex,
@@ -88,9 +92,11 @@ from dcs_core.core.validation.validity_validation import (  # noqa F401 this is 
     PercentLatitudeValidation,
     PercentLEIValidation,
     PercentLongitudeValidation,
+    PercentNotInFutureValidation,
     PercentPermIDValidation,
     PercentSEDOLValidation,
     PercentSSNValidation,
+    PercentTimeStampValidation,
     PercentUSAPhoneValidation,
     PercentUSAStateCodeValidation,
     PercentUSAZipCodeValidation,
@@ -173,6 +179,12 @@ class ValidationManager:
         ValidationFunction.PERCENT_ALL_SPACE.value: "PercentageAllSpaceValidation",
         ValidationFunction.COUNT_NULL_KEYWORD.value: "CountNullKeywordValidation",
         ValidationFunction.PERCENT_NULL_KEYWORD.value: "PercentageNullKeywordValidation",
+        ValidationFunction.COUNT_TIMESTAMP_STRING.value: "CountTimeStampValidation",
+        ValidationFunction.PERCENT_TIMESTAMP_STRING.value: "PercentTimeStampValidation",
+        ValidationFunction.COUNT_NOT_IN_FUTURE.value: "CountNotInFutureValidation",
+        ValidationFunction.PERCENT_NOT_IN_FUTURE.value: "PercentNotInFutureValidation",
+        ValidationFunction.COUNT_DATE_NOT_IN_FUTURE.value: "CountDateNotInFutureValidation",
+        ValidationFunction.PERCENT_DATE_NOT_IN_FUTURE.value: "PercentDateNotInFutureValidation",
     }
 
     def __init__(

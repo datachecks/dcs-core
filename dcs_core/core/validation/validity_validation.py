@@ -698,3 +698,129 @@ class PercentPermIDValidation(Validation):
             raise NotImplementedError(
                 "Perm ID validation is only supported for SQL data sources"
             )
+
+
+class CountTimeStampValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_row_count = self.data_source.query_timestamp_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise ValueError(
+                "Unsupported data source type for CountTimeStampValidation"
+            )
+
+
+class PercentTimeStampValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            valid_count, total_row_count = self.data_source.query_timestamp_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return (
+                round((valid_count / total_row_count) * 100, 2)
+                if total_row_count > 0
+                else 0.0
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentTimeStampValidation"
+            )
+
+
+class CountNotInFutureValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            (
+                valid_count,
+                total_row_count,
+            ) = self.data_source.query_timestamp_not_in_future_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise ValueError(
+                "Unsupported data source type for CountNotInFutureValidation"
+            )
+
+
+class PercentNotInFutureValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            (
+                valid_count,
+                total_row_count,
+            ) = self.data_source.query_timestamp_not_in_future_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return (
+                round((valid_count / total_row_count) * 100, 2)
+                if total_row_count > 0
+                else 0.0
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentNotInFutureValidation"
+            )
+
+
+class CountDateNotInFutureValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            (
+                valid_count,
+                total_row_count,
+            ) = self.data_source.query_timestamp_date_not_in_future_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return valid_count
+        else:
+            raise ValueError(
+                "Unsupported data source type for CountDateNotInFutureValidation"
+            )
+
+
+class PercentDateNotInFutureValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            (
+                valid_count,
+                total_row_count,
+            ) = self.data_source.query_timestamp_date_not_in_future_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                predefined_regex="timestamp_iso",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+            return (
+                round((valid_count / total_row_count) * 100, 2)
+                if total_row_count > 0
+                else 0.0
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentDateNotInFutureValidation"
+            )
