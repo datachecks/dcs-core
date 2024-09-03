@@ -34,6 +34,11 @@ from datachecks.core.validation.numeric_validation import (  # noqa F401 this is
     AvgValidation,
     MaxValidation,
     MinValidation,
+    Percentile20Validation,
+    Percentile40Validation,
+    Percentile60Validation,
+    Percentile80Validation,
+    Percentile90Validation,
     StdDevValidation,
     SumValidation,
     VarianceValidation,
@@ -147,6 +152,11 @@ class ValidationManager:
         ValidationFunction.PERCENT_ISIN.value: "PercentISINValidation",
         ValidationFunction.COUNT_PERM_ID.value: "CountPermIDValidation",
         ValidationFunction.PERCENT_PERM_ID.value: "PercentPermIDValidation",
+        ValidationFunction.PERCENTILE_20.value: "Percentile20Validation",
+        ValidationFunction.PERCENTILE_40.value: "Percentile40Validation",
+        ValidationFunction.PERCENTILE_60.value: "Percentile60Validation",
+        ValidationFunction.PERCENTILE_80.value: "Percentile80Validation",
+        ValidationFunction.PERCENTILE_90.value: "Percentile90Validation",
     }
 
     def __init__(

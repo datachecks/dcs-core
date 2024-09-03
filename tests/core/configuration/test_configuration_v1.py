@@ -869,3 +869,83 @@ def test_should_parse_percent_valid_perm_id():
         .get_validation_function
         == ValidationFunction.PERCENT_PERM_ID
     )
+
+
+def test_should_parse_20th_percentile_validation():
+    yaml_string = """
+    validations for iris_pgsql.dcs_iris:
+      - sepal length 20th percentile:
+          on: percentile_20(sepal_length)
+          threshold: "< 5"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["iris_pgsql.dcs_iris"]
+        .validations["sepal length 20th percentile"]
+        .get_validation_function
+        == ValidationFunction.PERCENTILE_20
+    )
+
+
+def test_should_parse_40th_percentile_validation():
+    yaml_string = """
+    validations for iris_pgsql.dcs_iris:
+      - sepal length 40th percentile:
+          on: percentile_40(sepal_length)
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["iris_pgsql.dcs_iris"]
+        .validations["sepal length 40th percentile"]
+        .get_validation_function
+        == ValidationFunction.PERCENTILE_40
+    )
+
+
+def test_should_parse_60th_percentile_validation():
+    yaml_string = """
+    validations for iris_pgsql.dcs_iris:
+      - sepal length 60th percentile:
+          on: percentile_60(sepal_length)
+          threshold: "< 20"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["iris_pgsql.dcs_iris"]
+        .validations["sepal length 60th percentile"]
+        .get_validation_function
+        == ValidationFunction.PERCENTILE_60
+    )
+
+
+def test_should_parse_80th_percentile_validation():
+    yaml_string = """
+    validations for iris_pgsql.dcs_iris:
+      - sepal length 80th percentile:
+          on: percentile_80(sepal_length)
+          threshold: "< 30"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["iris_pgsql.dcs_iris"]
+        .validations["sepal length 80th percentile"]
+        .get_validation_function
+        == ValidationFunction.PERCENTILE_80
+    )
+
+
+def test_should_parse_90th_percentile_validation():
+    yaml_string = """
+    validations for iris_pgsql.dcs_iris:
+      - sepal length 90th percentile:
+          on: percentile_90(sepal_length)
+          threshold: "< 40"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["iris_pgsql.dcs_iris"]
+        .validations["sepal length 90th percentile"]
+        .get_validation_function
+        == ValidationFunction.PERCENTILE_90
+    )
