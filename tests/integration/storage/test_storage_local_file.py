@@ -20,10 +20,10 @@ from unittest.mock import patch
 import pytest
 import pytz
 
-from datachecks.core.common.errors import DataChecksRuntimeError
-from datachecks.core.common.models.metric import MetricsType, MetricValue
-from datachecks.core.utils.utils import write_to_file
-from datachecks.integrations.storage.local_file import LocalFileMetricRepository
+from dcs_core.core.common.errors import DataChecksRuntimeError
+from dcs_core.core.common.models.metric import MetricsType, MetricValue
+from dcs_core.core.utils.utils import write_to_file
+from dcs_core.integrations.storage.local_file import LocalFileMetricRepository
 
 INTEGRATION_TEST_DIR = "/tmp/datachecks/local_file_integration"
 
@@ -218,7 +218,7 @@ def test_should_throw_exception_if_base_dir_not_exists():
 
 def test_should_throw_exception_if_not_able_to_save_metric():
     with patch(
-        "datachecks.integrations.storage.local_file.write_to_file",
+        "dcs_core.integrations.storage.local_file.write_to_file",
         side_effect=Exception("mocked error"),
     ):
         with pytest.raises(DataChecksRuntimeError):
@@ -239,7 +239,7 @@ def test_should_throw_exception_if_not_able_to_save_metric():
 
 def test_should_throw_exception_if_not_able_to_save_all_metric():
     with patch(
-        "datachecks.integrations.storage.local_file.write_to_file",
+        "dcs_core.integrations.storage.local_file.write_to_file",
         side_effect=Exception("mocked error"),
     ):
         with pytest.raises(DataChecksRuntimeError):

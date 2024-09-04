@@ -18,7 +18,7 @@ import traceback
 
 from click.testing import CliRunner
 
-from datachecks.cli.cli import main
+from dcs_core.cli.cli import main
 
 
 def run_cli(args):

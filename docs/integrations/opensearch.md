@@ -2,7 +2,7 @@
 
 ## Install Dependencies
 ```bash
-pip install datachecks[opensearch]
+pip install dcs-core[opensearch]
 ```
 
 ## Define DataSource Connection in Configuration File

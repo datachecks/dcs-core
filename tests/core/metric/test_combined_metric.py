@@ -14,19 +14,19 @@
 
 from unittest.mock import Mock
 
-from datachecks.core.common.models.metric import MetricsType, MetricValue
-from datachecks.core.common.models.validation import Threshold, Validation
-from datachecks.core.metric.combined_metric import CombinedMetric
+from dcs_core.core.common.models.metric import MetricsType, MetricValue
+from dcs_core.core.common.models.validation import Threshold, Validation
+from dcs_core.core.metric.combined_metric import CombinedMetric
 
 
 class TestCombinedMetric:
     def test_should_return_combined_value_without_filter(self, mocker):
         mocker.patch(
-            "datachecks.core.metric.combined_metric.CombinedMetric._metric_expression_parser",
+            "dcs_core.core.metric.combined_metric.CombinedMetric._metric_expression_parser",
             return_value=None,
         )
         mocker.patch(
-            "datachecks.core.metric.combined_metric.CombinedMetric._perform_operation",
+            "dcs_core.core.metric.combined_metric.CombinedMetric._perform_operation",
             return_value=51,
         )
         combined = CombinedMetric(
@@ -108,11 +108,11 @@ class TestCombinedMetric:
 
     def test_should_return_combined_value_with_validation(self, mocker):
         mocker.patch(
-            "datachecks.core.metric.combined_metric.CombinedMetric._metric_expression_parser",
+            "dcs_core.core.metric.combined_metric.CombinedMetric._metric_expression_parser",
             return_value=None,
         )
         mocker.patch(
-            "datachecks.core.metric.combined_metric.CombinedMetric._perform_operation",
+            "dcs_core.core.metric.combined_metric.CombinedMetric._perform_operation",
             return_value=51,
         )
         combined = CombinedMetric(

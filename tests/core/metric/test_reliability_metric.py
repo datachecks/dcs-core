@@ -16,12 +16,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from datachecks.core.common.errors import DataChecksMetricGenerationError
-from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.common.models.validation import Threshold, Validation
-from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.datasource.sql_datasource import SQLDataSource
-from datachecks.core.metric.reliability_metric import (
+from dcs_core.core.common.errors import DataChecksMetricGenerationError
+from dcs_core.core.common.models.metric import MetricsType
+from dcs_core.core.common.models.validation import Threshold, Validation
+from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
+from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.core.metric.reliability_metric import (
     DocumentCountMetric,
     FreshnessValueMetric,
     RowCountMetric,

@@ -18,10 +18,8 @@ from _decimal import Decimal
 from loguru import logger
 from sqlalchemy import text
 
-from datachecks.core.common.models.configuration import (
-    DataSourceConnectionConfiguration,
-)
-from datachecks.integrations.databases.postgres import PostgresDataSource
+from dcs_core.core.common.models.configuration import DataSourceConnectionConfiguration
+from dcs_core.integrations.databases.postgres import PostgresDataSource
 from tests.utils import create_postgres_connection
 
 OPEN_SEARCH_DATA_SOURCE_NAME = "test_open_search_data_source"

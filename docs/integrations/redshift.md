@@ -3,7 +3,7 @@
 ## Install Dependencies
 
 ```bash
-pip install datachecks[redshift]
+pip install dcs-core[redshift]
 ```
 
 ## Define DataSource Connection in Configuration File

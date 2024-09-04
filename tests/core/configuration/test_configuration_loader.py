@@ -14,7 +14,7 @@
 
 import os
 
-from datachecks.core.configuration.config_loader import parse_config
+from dcs_core.core.configuration.config_loader import parse_config
 
 
 def test_config_env_loader():

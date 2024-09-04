@@ -14,7 +14,5 @@
 import pytest
 from sqlalchemy import text
 
-from datachecks.core.common.models.configuration import (
-    DataSourceConnectionConfiguration,
-)
+from dcs_core.core.common.models.configuration import DataSourceConnectionConfiguration
 from tests.utils import create_opensearch_client, create_postgres_connection

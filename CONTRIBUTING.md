@@ -1,4 +1,4 @@
-# Contributing to Datachecks
+# Contributing to DCS Core
 
 Thank you for considering contributing to Datachecks!
 
@@ -31,7 +31,7 @@ git clone git@github.com:USERNAME/datachecks.git
 #### Keeping Your Fork Up to Date
 ```bash
 # Add 'upstream' repo to list of remotes
-git remote add upstream https://github.com/waterdipai/datachecks
+git remote add upstream https://github.com/datachecks/dcs-core
 
 # Verify the new remote named 'upstream'
 git remote -v

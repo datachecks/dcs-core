@@ -14,7 +14,7 @@
 
 from datetime import datetime, timezone
 
-from datachecks.core.common.models.metric import MetricsType, MetricValue
+from dcs_core.core.common.models.metric import MetricsType, MetricValue
 
 
 class TestMetricValue:

@@ -14,7 +14,7 @@
 
 import pathlib
 
-from datachecks.core import Configuration, load_configuration
+from dcs_core.core import Configuration, load_configuration
 
 current_path = pathlib.Path(__file__).parent.resolve()
 

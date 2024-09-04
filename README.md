@@ -28,7 +28,7 @@
 APM (Application Performance Monitoring) tools are used to monitor the performance of applications. APM tools are mandatory part of dev stack. Without AMP tools, it is very difficult to monitor the performance of applications.
 
 <p align="center">
-    <img alt="why_data_observability" src="https://raw.githubusercontent.com/waterdipai/datachecks/main/docs/assets/datachecks_why_data_observability.svg" width="800">
+    <img alt="why_data_observability" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/datachecks_why_data_observability.svg" width="800">
 </p>
 
 But for Data products regular APM tools are not enough. We need a new kind of tools that can monitor the performance of Data applications.
@@ -47,7 +47,7 @@ You can generate with just one command. It generates a beautiful data quality re
 This html report can be shared with the team.
 
 <p align="center">
-    <img alt="why_data_observability" src="docs/assets/datachecks_dashboard.png" width="800">
+    <img alt="why_data_observability" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/datachecks_dashboard.png" width="800">
 </p>
 
 ### CLI: Data Quality Visualisation in Bash
@@ -55,7 +55,7 @@ This html report can be shared with the team.
 Data quality report can be generated in the terminal. It is very useful for debugging. All it takes is one command.
 
 <p align="center">
-    <img alt="why_data_observability" src="docs/assets/datachecks_cli_output.png" width="800">
+    <img alt="why_data_observability" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/datachecks_cli_output.png" width="800">
 </p>
 
 ## Getting Started
@@ -67,7 +67,7 @@ Install `datachecks` with the command that is specific to the database.
 To install all datachecks dependencies, use the below command.
 
 ```shell
-pip install datachecks -U
+pip install dcs-core -U
 ```
 
 ### Create the config file
@@ -84,13 +84,13 @@ For more details, please visit the [config guide](https://docs.datachecks.io/con
 **Generate Report in Terminal**
 
 ```shell
-datachecks inspect -C config.yaml
+dcs-core inspect -C config.yaml
 ```
 
 **Generate HTML Report**
 
 ```shell
-datachecks inspect -C config.yaml  --html-report
+dcs-core inspect -C config.yaml  --html-report
 ```
 
 Please visit the [Quick Start Guide](https://docs.datachecks.io/getting_started/)
@@ -124,13 +124,13 @@ Datachecks supports sql and search data sources. Below are the list of supported
 ## Overview
 
 <p align="center">
-    <img alt="datacheck_architecture" src="https://raw.githubusercontent.com/waterdipai/datachecks/main/docs/assets/data_check_architecture.svg" width="800">
+    <img alt="datacheck_architecture" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/data_check_architecture.svg" width="800">
 </p>
 
 ## What Datacheck does not do?
 
 <p align="middle">
-  <img alt="" src="https://raw.githubusercontent.com/waterdipai/datachecks/main/docs/assets/datachecks_does_not_do.svg" width="800"/>
+  <img alt="" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/datachecks_does_not_do.svg" width="800"/>
 </p>
 
 ## Community & Support

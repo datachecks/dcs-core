@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir poetry==1.1.13
 COPY . /app
 WORKDIR /app
 RUN poetry install
-ENTRYPOINT ["poetry", "python3", "run", "-m" , "datachecks"]
+ENTRYPOINT ["poetry", "python3", "run", "-m" , "dcs-core"]

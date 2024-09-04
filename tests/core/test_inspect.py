@@ -16,22 +16,22 @@ from unittest.mock import Mock
 
 import pytest
 
-from datachecks.core import Inspect
-from datachecks.core.common.models.configuration import (
+from dcs_core.core import Inspect
+from dcs_core.core.common.models.configuration import (
     Configuration,
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
     DataSourceType,
     MetricConfiguration,
 )
-from datachecks.core.common.models.data_source_resource import Table
-from datachecks.core.common.models.metric import (
+from dcs_core.core.common.models.data_source_resource import Table
+from dcs_core.core.common.models.metric import (
     DataSourceMetrics,
     MetricsType,
     MetricValue,
 )
-from datachecks.core.datasource.base import DataSource
-from datachecks.core.datasource.manager import DataSourceManager
+from dcs_core.core.datasource.base import DataSource
+from dcs_core.core.datasource.manager import DataSourceManager
 
 TABLE_NAME = "inspect_metric_test_table"
 

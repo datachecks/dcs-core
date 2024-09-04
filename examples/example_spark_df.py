@@ -18,7 +18,7 @@ import findspark
 import pandas as pd
 from pyspark.sql import SparkSession
 
-from datachecks.core import Inspect
+from dcs_core.core import Inspect
 
 os.environ["SPARK_HOME"] = "/opt/homebrew/Cellar/apache-spark/3.5.1/libexec/"
 

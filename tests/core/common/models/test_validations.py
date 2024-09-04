@@ -14,7 +14,7 @@
 
 import pytest
 
-from datachecks.core.common.models.configuration import ValidationConfig
+from dcs_core.core.common.models.configuration import ValidationConfig
 
 
 class TestValidationV1:

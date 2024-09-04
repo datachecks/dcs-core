@@ -17,10 +17,8 @@ import datetime
 import pytest
 from opensearchpy import OpenSearch
 
-from datachecks.core.common.models.configuration import (
-    DataSourceConnectionConfiguration,
-)
-from datachecks.integrations.databases.opensearch import OpenSearchDataSource
+from dcs_core.core.common.models.configuration import DataSourceConnectionConfiguration
+from dcs_core.integrations.databases.opensearch import OpenSearchDataSource
 from tests.utils import create_opensearch_client
 
 INDEX_NAME = "reliability_metric_test"
