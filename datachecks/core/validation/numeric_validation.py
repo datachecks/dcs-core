@@ -125,3 +125,68 @@ class StdDevValidation(Validation):
             )
         else:
             raise ValueError("Invalid data source type")
+
+
+class Percentile20Validation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_percentile(
+                table=self.dataset_name,
+                field=self.field_name,
+                percentile=0.2,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for Percentile20Validation")
+
+
+class Percentile40Validation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_percentile(
+                table=self.dataset_name,
+                field=self.field_name,
+                percentile=0.4,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for Percentile40Validation")
+
+
+class Percentile60Validation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_percentile(
+                table=self.dataset_name,
+                field=self.field_name,
+                percentile=0.6,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for Percentile60Validation")
+
+
+class Percentile80Validation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_percentile(
+                table=self.dataset_name,
+                field=self.field_name,
+                percentile=0.8,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for Percentile80Validation")
+
+
+class Percentile90Validation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_percentile(
+                table=self.dataset_name,
+                field=self.field_name,
+                percentile=0.9,
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for Percentile90Validation")

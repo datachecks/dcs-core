@@ -573,3 +573,43 @@ class TestSQLDatasourceQueries:
         )
         assert valid_count == 3
         assert total_row_count == 6
+
+    def test_should_return_20th_percentile_age(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        percentile_20 = postgres_datasource.query_get_percentile(
+            table=self.TABLE_NAME, field="age", percentile=0.2
+        )
+        assert percentile_20 == 35  # Expected 20th percentile value.
+
+    def test_should_return_40th_percentile_age(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        percentile_40 = postgres_datasource.query_get_percentile(
+            table=self.TABLE_NAME, field="age", percentile=0.4
+        )
+        assert percentile_40 == 40  # Expected 40th percentile value.
+
+    def test_should_return_60th_percentile_age(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        percentile_60 = postgres_datasource.query_get_percentile(
+            table=self.TABLE_NAME, field="age", percentile=0.6
+        )
+        assert percentile_60 == 50  # Expected 60th percentile value.
+
+    def test_should_return_80th_percentile_age(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        percentile_80 = postgres_datasource.query_get_percentile(
+            table=self.TABLE_NAME, field="age", percentile=0.8
+        )
+        assert percentile_80 == 90  # Expected 80th percentile value.
+
+    def test_should_return_90th_percentile_age(
+        self, postgres_datasource: PostgresDataSource
+    ):
+        percentile_90 = postgres_datasource.query_get_percentile(
+            table=self.TABLE_NAME, field="age", percentile=0.9
+        )
+        assert percentile_90 == 1500  # Expected 90th percentile value.

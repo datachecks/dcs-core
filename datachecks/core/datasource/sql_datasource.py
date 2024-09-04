@@ -605,3 +605,20 @@ class SQLDataSource(DataSource):
             return round(result, 2)
 
         return valid_count
+
+    def query_get_percentile(
+        self, table: str, field: str, percentile: float, filters: str = None
+    ) -> float:
+        """
+        Get the specified percentile value of a numeric column in a table.
+        :param table: table name
+        :param field: column name
+        :param percentile: percentile to calculate (e.g., 0.2 for 20th percentile)
+        :param filters: filter condition
+        :return: the value at the specified percentile
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT PERCENTILE_DISC({percentile}) WITHIN GROUP (ORDER BY {field}) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+        return round(self.fetchone(query)[0], 2)
