@@ -699,3 +699,28 @@ class SQLDataSource(DataSource):
             return round((result[0] / result[1]) * 100) if result[1] > 0 else 0
 
         return result[0] if result else 0
+
+    def query_get_null_keyword_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of NULL-like values (specific keywords) in the specified column.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of NULL-like keyword values
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f""" SELECT SUM(CASE WHEN LOWER({field}) IN ('nothing', 'nil', 'null', 'none', 'n/a') THEN 1 ELSE 0 END) AS null_count,COUNT(*) AS total_count
+                   FROM {qualified_table_name}"""
+
+        if filters:
+            query += f" AND {filters}"
+
+        result = self.fetchone(query)
+
+        if operation == "percent":
+            return round((result[0] / result[1]) * 100, 2) if result[1] > 0 else 0
+
+        return result[0] if result else 0

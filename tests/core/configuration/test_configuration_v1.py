@@ -1056,3 +1056,34 @@ def test_should_parse_percent_all_space():
         .get_validation_function
         == ValidationFunction.PERCENT_ALL_SPACE
     )
+
+
+def test_should_parse_count_null_keyword():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: count_null_keyword(keyword)
+            threshold: <=10
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_NULL_KEYWORD
+    )
+
+
+def test_should_parse_percent_null_keyword():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_null_keyboard(keyword)
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_NULL_KEYWORD
+    )

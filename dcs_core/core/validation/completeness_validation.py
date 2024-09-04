@@ -115,3 +115,29 @@ class PercentageAllSpaceValidation(Validation):
             )
         else:
             raise ValueError("Invalid data source type")
+
+
+class CountNullKeywordValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_null_keyword_count(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Invalid data source type")
+
+
+class PercentageNullKeywordValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> Union[float, int]:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_null_keyword_count(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Invalid data source type")

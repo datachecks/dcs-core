@@ -529,3 +529,28 @@ validations for product_db.products:
   - percent_all_space:
       on: percent_all_space(space)
 ```
+
+## COUNT_NULL_KEYWORD
+
+The count null keyword validation counts the number of null like keyword in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count_null_keyword:
+     on: count_null_keyword(keyword)
+     threshold: <=10
+```
+
+## PERCENT_NULL_KEYWORD
+
+The percent null keyword validation checks the percentage of null like keyword in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_null_keyword:
+     on: percent_null_keyboard(keyword)
+```

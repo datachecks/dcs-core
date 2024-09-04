@@ -105,6 +105,8 @@ class ValidationFunction(str, Enum):
     PERCENT_NAN = "percent_nan"
     COUNT_ALL_SPACE = "count_all_space"
     PERCENT_ALL_SPACE = "percent_all_space"
+    COUNT_NULL_KEYWORD = "count_null_keyword"
+    PERCENT_NULL_KEYWORD = "percent_null_keyboard"
 
     # Custom SQL
     CUSTOM_SQL = "custom_sql"
