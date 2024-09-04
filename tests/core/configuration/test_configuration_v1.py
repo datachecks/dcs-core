@@ -1025,3 +1025,34 @@ def test_should_parse_percent_negative_validation():
         .get_validation_function
         == ValidationFunction.PERCENT_NEGATIVE
     )
+
+
+def test_should_parse_count_all_space():
+    yaml_string = """
+    validations for source.table:
+        - test:
+             on: count_all_space(space)
+             threshold: = 0
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_ALL_SPACE
+    )
+
+
+def test_should_parse_percent_all_space():
+    yaml_string = """
+    validations for source.table:
+        - test:
+            on: percent_all_space(space)
+        """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_ALL_SPACE
+    )

@@ -22,8 +22,10 @@ from dcs_core.core.common.models.validation import ValidationFunction
 from dcs_core.core.datasource.manager import DataSourceManager
 from dcs_core.core.validation.base import Validation
 from dcs_core.core.validation.completeness_validation import (  # noqa F401 this is used in globals
+    CountAllSpaceValidation,
     CountEmptyStringValidation,
     CountNullValidation,
+    PercentageAllSpaceValidation,
     PercentageEmptyStringValidation,
     PercentageNullValidation,
 )
@@ -165,6 +167,8 @@ class ValidationManager:
         ValidationFunction.PERCENT_ZERO.value: "PercentZeroValidation",
         ValidationFunction.COUNT_NEGATIVE.value: "CountNegativeValidation",
         ValidationFunction.PERCENT_NEGATIVE.value: "PercentNegativeValidation",
+        ValidationFunction.COUNT_ALL_SPACE.value: "CountAllSpaceValidation",
+        ValidationFunction.PERCENT_ALL_SPACE.value: "PercentageAllSpaceValidation",
     }
 
     def __init__(
