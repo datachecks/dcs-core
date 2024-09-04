@@ -48,6 +48,15 @@ validations for iris_pgsql.dcs_iris:
       threshold: "< 10"
 
 
+  # **Negative Value Validations**
+  - price negative value count:
+      on: count_negative(price)
+      threshold: "< 2"
+
+  - price negative value percentage:
+      on: percent_negative(price)
+      threshold: "< 40"
+
   # Uniqueness Metrics
   - species duplicate count:
       on: count_duplicate(species)

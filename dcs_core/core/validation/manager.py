@@ -32,6 +32,7 @@ from dcs_core.core.validation.custom_query_validation import (  # noqa F401 this
 )
 from dcs_core.core.validation.numeric_validation import (  # noqa F401 this is used in globals
     AvgValidation,
+    CountNegativeValidation,
     CountZeroValidation,
     MaxValidation,
     MinValidation,
@@ -40,6 +41,7 @@ from dcs_core.core.validation.numeric_validation import (  # noqa F401 this is u
     Percentile60Validation,
     Percentile80Validation,
     Percentile90Validation,
+    PercentNegativeValidation,
     PercentZeroValidation,
     StdDevValidation,
     SumValidation,
@@ -161,6 +163,8 @@ class ValidationManager:
         ValidationFunction.PERCENTILE_90.value: "Percentile90Validation",
         ValidationFunction.COUNT_ZERO.value: "CountZeroValidation",
         ValidationFunction.PERCENT_ZERO.value: "PercentZeroValidation",
+        ValidationFunction.COUNT_NEGATIVE.value: "CountNegativeValidation",
+        ValidationFunction.PERCENT_NEGATIVE.value: "PercentNegativeValidation",
     }
 
     def __init__(
