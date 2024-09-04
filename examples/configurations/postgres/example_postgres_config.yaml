@@ -18,6 +18,35 @@ validations for iris_pgsql.dcs_iris:
   - sepal length stddev size:
       on: stddev(sepal_length)
       threshold: "< 0.5"
+  # Percentile Validations
+  - sepal length 20th percentile:
+      on: percentile_20(sepal_length)
+      threshold: "> 10"
+
+  - sepal length 40th percentile:
+      on: percentile_40(sepal_length)
+      threshold: "> 20"
+
+  - sepal length 60th percentile:
+      on: percentile_60(sepal_length)
+      threshold: "> 30"
+
+  - sepal length 80th percentile:
+      on: percentile_80(sepal_length)
+      threshold: "> 40"
+
+  - sepal length 90th percentile:
+      on: percentile_90(sepal_length)
+      threshold: "> 50"
+
+    # Zero Numeric Validations
+  - sepal length zero count:
+      on: count_zero(sepal_length)
+      threshold: "< 5"
+  - sepal length zero percent:
+      on: percent_zero(sepal_length)
+      threshold: "< 10"
+
 
   # Uniqueness Metrics
   - species duplicate count:
@@ -138,23 +167,3 @@ validations for product_db.products:
       on: percent_longitude(longitude)
       threshold: "> 80"
 
-  # Percentile Validations
-  - sepal length 20th percentile:
-      on: percentile_20(sepal_length)
-      threshold: "> 10"
-
-  - sepal length 40th percentile:
-      on: percentile_40(sepal_length)
-      threshold: "> 20"
-
-  - sepal length 60th percentile:
-      on: percentile_60(sepal_length)
-      threshold: "> 30"
-
-  - sepal length 80th percentile:
-      on: percentile_80(sepal_length)
-      threshold: "> 40"
-
-  - sepal length 90th percentile:
-      on: percentile_90(sepal_length)
-      threshold: "> 50"

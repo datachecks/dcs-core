@@ -446,3 +446,33 @@ validations for product_db.products:
   - percent_permid_of_user:
       on: percent_permid(perm_id)
 ```
+
+## Zero Value Validations
+
+Zero value validations are used to identify and validate fields that contain zero values, which are important for datasets where zero values might have specific implications, such as indicating missing or invalid data, or representing real-world conditions.
+
+## `COUNT_ZERO`
+
+`COUNT_ZERO` is used to count the number of rows where the specified field contains a zero value. It can be useful for detecting cases where zero might represent missing data or special conditions.
+
+**Example:**
+
+```yaml
+validations for product_db.products:
+  - price zero count:
+      on: count_zero(price)
+      threshold: "< 52"
+```
+
+## `PERCENT_ZERO`
+
+`PERCENT_ZERO` is used to calculate the percentage of rows where the specified field contains a zero value. This helps assess the proportion of zero values in a column, allowing the user to enforce percentage-based thresholds for data quality.
+
+**Example:**
+
+```yaml
+validations for product_db.products:
+  - price zero percent:
+      on: percent_zero(price)
+      threshold: "< 10"
+```

@@ -80,6 +80,8 @@ class ValidationFunction(str, Enum):
     PERCENTILE_60 = "percentile_60"
     PERCENTILE_80 = "percentile_80"
     PERCENTILE_90 = "percentile_90"
+    COUNT_ZERO = "count_zero"
+    PERCENT_ZERO = "percent_zero"
 
     # Reliability validations 3
     COUNT_ROWS = "count_rows"
