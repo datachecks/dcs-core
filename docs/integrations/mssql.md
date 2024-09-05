@@ -1,7 +1,7 @@
 # **MS SQL Server**
 ## Install Dependencies
 ```bash
-pip install datachecks[mssql]
+pip install dcs-core[mssql]
 ```
 
 

@@ -2,7 +2,7 @@
 
 ## Install Dependencies
 ```bash
-pip install datachecks[databricks]
+pip install dcs-core[databricks]
 ```
 
 ## Define DataSource Connection in Configuration File

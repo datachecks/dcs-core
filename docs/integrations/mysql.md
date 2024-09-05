@@ -1,7 +1,7 @@
 # **Mysql**
 ## Install Dependencies
 ```bash
-pip install datachecks[mysql]
+pip install dcs-core[mysql]
 ```
 
 ## Create a user

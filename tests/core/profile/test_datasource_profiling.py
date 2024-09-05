@@ -14,16 +14,16 @@
 from datetime import datetime, timezone
 from unittest.mock import Mock
 
-from datachecks.core.common.models.metric import MetricsType, MetricValue
-from datachecks.core.common.models.profile import NumericFieldProfile, TextFieldProfile
-from datachecks.core.datasource.sql_datasource import SQLDataSource
-from datachecks.core.profiling.datasource_profiling import DataSourceProfiling
+from dcs_core.core.common.models.metric import MetricsType, MetricValue
+from dcs_core.core.common.models.profile import NumericFieldProfile, TextFieldProfile
+from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.core.profiling.datasource_profiling import DataSourceProfiling
 
 
 class TestFieldProfiling:
     def test_should_generate_profile_for_sql_datasource_numeric_field(self, mocker):
         mocker.patch(
-            "datachecks.core.profiling.numeric_field_profiling.NumericSQLFieldProfiler.generate",
+            "dcs_core.core.profiling.numeric_field_profiling.NumericSQLFieldProfiler.generate",
             return_value=NumericFieldProfile(
                 field_name="test_field",
                 data_type="int",
@@ -49,7 +49,7 @@ class TestFieldProfiling:
 
     def test_should_generate_profile_for_sql_datasource_string_field(self, mocker):
         mocker.patch(
-            "datachecks.core.profiling.text_field_profiling.TextSQLFieldProfiler.generate",
+            "dcs_core.core.profiling.text_field_profiling.TextSQLFieldProfiler.generate",
             return_value=TextFieldProfile(
                 field_name="test_field",
                 data_type="str",

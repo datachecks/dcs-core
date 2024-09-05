@@ -16,7 +16,7 @@ import os
 
 import pytest
 
-from datachecks.core.utils.utils import ensure_directory_exists
+from dcs_core.core.utils.utils import ensure_directory_exists
 
 TEST_DIR = "/tmp/datachecks/test_dir"
 

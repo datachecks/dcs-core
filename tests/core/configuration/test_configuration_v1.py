@@ -13,9 +13,9 @@
 #  limitations under the License.
 import pytest
 
-from datachecks.core.common.models.configuration import DataSourceType
-from datachecks.core.common.models.validation import ValidationFunction
-from datachecks.core.configuration.configuration_parser import (
+from dcs_core.core.common.models.configuration import DataSourceType
+from dcs_core.core.common.models.validation import ValidationFunction
+from dcs_core.core.configuration.configuration_parser import (
     load_configuration_from_yaml_str,
 )
 

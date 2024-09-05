@@ -2,7 +2,7 @@
 
 ## Install Dependencies
 ```bash
-pip install datachecks[snowflake]
+pip install dcs-core[snowflake]
 ```
 
 ## Define DataSource Connection in Configuration File

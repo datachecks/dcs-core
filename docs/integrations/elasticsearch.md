@@ -2,7 +2,7 @@
 
 ## Install Dependencies
 ```bash
-pip install datachecks[elasticsearch]
+pip install dcs-core[elasticsearch]
 ```
 
 ## Define DataSource Connection in Configuration File

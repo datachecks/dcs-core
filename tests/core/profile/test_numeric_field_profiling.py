@@ -14,8 +14,8 @@
 
 from unittest.mock import Mock
 
-from datachecks.core.datasource.sql_datasource import SQLDataSource
-from datachecks.core.profiling.numeric_field_profiling import NumericSQLFieldProfiler
+from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.core.profiling.numeric_field_profiling import NumericSQLFieldProfiler
 
 
 class TestNumericSQLFieldProfiler:

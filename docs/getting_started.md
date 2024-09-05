@@ -10,7 +10,7 @@ Install Datachecks using the pip package manager.
 Below we are installing the package with the **postgres extra**, which is required for this example.
 
 ```bash
-pip install 'datachecks[postgres]' -U
+pip install 'dcs-core[postgres]' -U
 ```
 ## Quick Setup of Database & Test Data
 > Ignore if you already have a PostgreSql setup
@@ -104,7 +104,7 @@ Datachecks can be run in two ways using the CLI or the Python API.
 ### Run Datachecks in CLI
 
 ```bash
-datachecks inspect --config-path ./dcs_config.yaml
+dcs-core inspect --config-path ./dcs_config.yaml
 ```
 
 While running the above command, you should see the following output:
@@ -117,14 +117,14 @@ You can generate a beautiful data quality report with all the metrics with just 
 This html report can be shared with the team.
 
 ```bash
-datachecks inspect --config-path ./dcs_config.yaml --html-report
+dcs-core inspect --config-path ./dcs_config.yaml --html-report
 ```
 ![Getting Started](assets/datachecks_dashboard.png)
 
 ### Run Datachecks in Python
 
 ```python
-from datachecks.core import Inspect
+from dcs_core.core import Inspect
 
 
 if __name__ == "__main__":

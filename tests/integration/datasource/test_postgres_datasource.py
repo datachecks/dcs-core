@@ -14,8 +14,8 @@
 
 import pytest
 
-from datachecks.core.common.errors import DataChecksDataSourcesConnectionError
-from datachecks.integrations.databases.postgres import PostgresDataSource
+from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.integrations.databases.postgres import PostgresDataSource
 
 
 def test_should_throw_exception_when_postgres_connect_fail():

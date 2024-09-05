@@ -13,19 +13,16 @@
 #  limitations under the License.
 from unittest.mock import Mock
 
-from datachecks.core.common.models.configuration import (
-    MetricConfiguration,
-    MetricsFilterConfiguration,
-)
-from datachecks.core.common.models.data_source_resource import Field, Index, Table
-from datachecks.core.common.models.metric import MetricsType
-from datachecks.core.common.models.validation import Threshold, Validation
-from datachecks.core.datasource.base import DataSource
-from datachecks.core.datasource.manager import DataSourceManager
-from datachecks.core.datasource.search_datasource import SearchIndexDataSource
-from datachecks.core.metric.base import FieldMetrics
-from datachecks.core.metric.manager import MetricManager
-from datachecks.core.metric.reliability_metric import DocumentCountMetric
+from dcs_core.core.common.models.configuration import MetricConfiguration
+from dcs_core.core.common.models.data_source_resource import Field, Index, Table
+from dcs_core.core.common.models.metric import MetricsType
+from dcs_core.core.common.models.validation import Threshold, Validation
+from dcs_core.core.datasource.base import DataSource
+from dcs_core.core.datasource.manager import DataSourceManager
+from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
+from dcs_core.core.metric.base import FieldMetrics
+from dcs_core.core.metric.manager import MetricManager
+from dcs_core.core.metric.reliability_metric import DocumentCountMetric
 
 OPEN_SEARCH_DATA_SOURCE_NAME = "test_open_search_data_source"
 POSTGRES_DATA_SOURCE_NAME = "test_postgres_data_source"

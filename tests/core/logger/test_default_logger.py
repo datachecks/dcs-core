@@ -16,7 +16,7 @@ import unittest.mock as mock
 
 import pytest
 
-from datachecks.core.logger.default_logger import DefaultLogger
+from dcs_core.core.logger.default_logger import DefaultLogger
 
 
 class TestDefaultLogger:

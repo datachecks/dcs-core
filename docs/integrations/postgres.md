@@ -1,7 +1,7 @@
 # **PostgreSQL**
 ## Install Dependencies
 ```bash
-pip install datachecks[postgres]
+pip install dcs-core[postgres]
 ```
 
 ## Create a user

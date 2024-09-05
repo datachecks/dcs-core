@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "datachecks"
-version = "0.3.1"
+name = "dcs-core"
+version = "0.3.2"
 description = "Open Source Data Quality Monitoring"
 license = "Apache-2.0"
 authors = [
     "Waterdip Labs <hello@waterdip.ai>"
 ]
-repository = "https://github.com/waterdipai/datachecks"
+repository = "https://github.com/datachecks/dcs-core"
 readme = "README.md"
 classifiers = [
     "Intended Audience :: Developers",
@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Database :: Database Engines/Servers",
     "Typing :: Typed"
 ]
-packages = [{ include = "datachecks" }]
+packages = [{ include = "dcs_core" }]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
@@ -88,11 +88,11 @@ all = [
 ]
 
 [tool.poetry.scripts]
-datachecks = "datachecks.cli.cli:main"
+dcs-core = "dcs_core.cli.cli:main"
 
 [tool.coverage.run]
 omit = [
-    "datachecks/integrations/databases/*",
+    "dcs/integrations/databases/*",
 ]
 
 [build-system]

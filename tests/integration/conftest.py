@@ -19,11 +19,9 @@ import pytest
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
-from datachecks.core.common.models.configuration import (
-    DataSourceConnectionConfiguration,
-)
-from datachecks.integrations.databases.opensearch import OpenSearchDataSource
-from datachecks.integrations.databases.postgres import PostgresDataSource
+from dcs_core.core.common.models.configuration import DataSourceConnectionConfiguration
+from dcs_core.integrations.databases.opensearch import OpenSearchDataSource
+from dcs_core.integrations.databases.postgres import PostgresDataSource
 from tests.utils import is_opensearch_responsive, is_pgsql_responsive
 
 OS_USER_NAME = "admin"

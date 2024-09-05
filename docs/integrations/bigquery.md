@@ -2,7 +2,7 @@
 
 ## Install Dependencies
 ```bash
-pip install datachecks[bigquery]
+pip install dcs-core[bigquery]
 ```
 
 ## Define DataSource Connection in Configuration File

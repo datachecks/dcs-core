@@ -18,14 +18,14 @@ from opensearchpy import OpenSearch
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
-from datachecks.core.common.models.configuration import (
+from dcs_core.core.common.models.configuration import (
     DataSourceConfiguration,
     DataSourceConnectionConfiguration,
     DataSourceType,
     MetricConfiguration,
 )
-from datachecks.core.common.models.data_source_resource import Table
-from datachecks.core.common.models.metric import MetricsType
+from dcs_core.core.common.models.data_source_resource import Table
+from dcs_core.core.common.models.metric import MetricsType
 from tests.utils import create_opensearch_client, create_postgres_connection
 
 INDEX_NAME = "inspect_metric_test"
