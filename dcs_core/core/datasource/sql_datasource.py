@@ -649,3 +649,28 @@ class SQLDataSource(DataSource):
         else:
             result = self.fetchone(zero_query)[0]
             return result
+
+    def query_negative_metric(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        qualified_table_name = self.qualified_table_name(table)
+
+        negative_query = (
+            f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} < 0"
+        )
+
+        if filters:
+            negative_query += f" AND {filters}"
+
+        total_count_query = f"SELECT COUNT(*) FROM {qualified_table_name}"
+
+        if filters:
+            total_count_query += f" WHERE {filters}"
+
+        if operation == "percent":
+            query = f"SELECT (CAST(({negative_query}) AS float) / CAST(({total_count_query}) AS float)) * 100"
+        else:
+            query = negative_query
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if operation == "percent" else result

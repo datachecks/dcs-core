@@ -216,3 +216,31 @@ class PercentZeroValidation(Validation):
             )
         else:
             raise ValueError("Unsupported data source type for PercentZeroValidation")
+
+
+class CountNegativeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> int:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_negative_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for CountNegativeValidation")
+
+
+class PercentNegativeValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_negative_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError(
+                "Unsupported data source type for PercentNegativeValidation"
+            )

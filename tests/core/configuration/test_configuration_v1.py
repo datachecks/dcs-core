@@ -993,3 +993,35 @@ def test_should_parse_percent_zero_validation():
         .threshold.lt
         == 10
     )
+
+
+def test_should_parse_count_negative_validation():
+    yaml_string = """
+    validations for product_db.products:
+      - count_negative for price should be less than 2:
+          on: count_negative(price)
+          threshold: "< 2"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["count_negative for price should be less than 2"]
+        .get_validation_function
+        == ValidationFunction.COUNT_NEGATIVE
+    )
+
+
+def test_should_parse_percent_negative_validation():
+    yaml_string = """
+    validations for product_db.products:
+      - percent_negative for price should be less than 40%:
+          on: percent_negative(price)
+          threshold: "< 40"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["percent_negative for price should be less than 40%"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_NEGATIVE
+    )

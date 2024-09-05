@@ -475,4 +475,33 @@ validations for product_db.products:
   - price zero percent:
       on: percent_zero(price)
       threshold: "< 10"
+
+# **Numeric Negative Value Validations**
+
+The Numeric Negative Value Validations detect negative values in numeric fields within a dataset and ensure that they do not exceed or fall below a specified threshold.
+
+## **COUNT_NEGATIVE**
+
+This validation counts the number of negative values present in a given numeric field.
+
+**Example**
+
+```yaml
+validations for product_db.products:
+  - negative value count should be less than 2:
+      on: count_negative(price)
+      threshold: "< 2"
+```
+
+## **PERCENT_NEGATIVE**
+
+This validation calculates the percentage of negative values in a numeric field, relative to the total number of records.
+
+**Example**
+
+```yaml
+validations for product_db.products:
+  - negative value percentage should be less than 40%:
+      on: percent_negative(price)
+      threshold: "< 40"
 ```
