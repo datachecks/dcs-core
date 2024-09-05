@@ -190,3 +190,29 @@ class Percentile90Validation(Validation):
             )
         else:
             raise ValueError("Unsupported data source type for Percentile90Validation")
+
+
+class CountZeroValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> int:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_zero_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="count",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for CountZeroValidation")
+
+
+class PercentZeroValidation(Validation):
+    def _generate_metric_value(self, **kwargs) -> float:
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_zero_metric(
+                table=self.dataset_name,
+                field=self.field_name,
+                operation="percent",
+                filters=self.where_filter if self.where_filter is not None else None,
+            )
+        else:
+            raise ValueError("Unsupported data source type for PercentZeroValidation")

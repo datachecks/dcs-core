@@ -949,3 +949,47 @@ def test_should_parse_90th_percentile_validation():
         .get_validation_function
         == ValidationFunction.PERCENTILE_90
     )
+
+
+def test_should_parse_count_zero_validation():
+    yaml_string = """
+    validations for product_db.products:
+      - test:
+          on: count_zero(price)
+          threshold: "< 52"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_ZERO
+    )
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["test"]
+        .threshold.lt
+        == 52
+    )
+
+
+def test_should_parse_percent_zero_validation():
+    yaml_string = """
+    validations for product_db.products:
+      - test:
+          on: percent_zero(price)
+          threshold: "< 10"
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_ZERO
+    )
+    assert (
+        configuration.validations["product_db.products"]
+        .validations["test"]
+        .threshold.lt
+        == 10
+    )

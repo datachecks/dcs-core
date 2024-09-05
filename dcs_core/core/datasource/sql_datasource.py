@@ -622,3 +622,30 @@ class SQLDataSource(DataSource):
         if filters:
             query += f" WHERE {filters}"
         return round(self.fetchone(query)[0], 2)
+
+    def query_zero_metric(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        qualified_table_name = self.qualified_table_name(table)
+
+        zero_query = f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} = 0"
+
+        if filters:
+            zero_query += f" AND {filters}"
+
+        if operation == "percent":
+            total_count_query = f"SELECT COUNT(*) FROM {qualified_table_name}"
+            if filters:
+                total_count_query += f" WHERE {filters}"
+
+            zero_count = self.fetchone(zero_query)[0]
+            total_count = self.fetchone(total_count_query)[0]
+
+            if total_count == 0:
+                return 0.0
+
+            result = (zero_count / total_count) * 100
+            return round(result, 2)
+        else:
+            result = self.fetchone(zero_query)[0]
+            return result
