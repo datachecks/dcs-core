@@ -18,7 +18,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
-from dcs_core.core.datasource import SQLDataSource
+from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
 class DatabricksDataSource(SQLDataSource):
