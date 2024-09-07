@@ -17,7 +17,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.session import SparkSession
 from pyspark.sql.types import Row
 
-from dcs_core.core.datasource import SQLDataSource
+from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
 class SparkDfCursor:
