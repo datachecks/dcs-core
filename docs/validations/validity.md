@@ -277,7 +277,7 @@ validations for location_db.geolocation:
       on: percent_longitude(longitude_column_name)
       threshold: "> 80"
 ```
-```
+
 
 ## Count SSN
 
@@ -553,4 +553,76 @@ The percent null keyword validation checks the percentage of null like keyword i
 validations for product_db.products:
   - percent_null_keyword:
      on: percent_null_keyboard(keyword)
+```
+
+## Count Timestamp String
+
+The count timestamp string validation checks the number of valid timestamp string in ISO format in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count_valid_timestamp:
+     on: count_timestamp_string(timestamp)
+```
+
+## Percent Timestamp String
+
+The percent timestamp string validation checks the percentage of valid timestamp string in ISO format in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_valid_timestamp:
+     on: percent_timestamp_string(timestamp)
+```
+
+## Count Not In Future
+
+The count not in future validation checks the number of valid timestamp string that are not in future in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count_timestamp_not_in_future:
+     on: count_not_in_future(future_timestamp)
+```
+
+## Percent Not In Future
+
+The percent date not in future validation checks the percentage of valid timestamp string that are not in future in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_timestamp_not_in_future:
+     on: percent_not_in_future(future_timestamp)
+```
+
+## Count Date Not In Future
+
+The count date not in future validation checks the number of valid timestamp string with date that are not in future in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count_date_not_in_future:
+     on: count_date_not_in_future(future_timestamp)
+```
+
+## Percent Date Not In Future
+
+The percent date not in future validation checks the percentage of valid timestamp string with date that are not in future in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_date_not_in_future:
+     on: percent_date_not_in_future(future_timestamp)
 ```

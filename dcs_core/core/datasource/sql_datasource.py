@@ -724,3 +724,283 @@ class SQLDataSource(DataSource):
             return round((result[0] / result[1]) * 100, 2) if result[1] > 0 else 0
 
         return result[0] if result else 0
+
+    def query_timestamp_metric(
+        self,
+        table: str,
+        field: str,
+        operation: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param operation: Metric operation ("count" or "percent")
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Tuple containing valid count and total count (or percentage)
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
+
+        if predefined_regex == "timestamp_iso":
+            regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+         WITH extracted_timestamps AS (
+         SELECT
+            {field},
+            SUBSTRING({field} FROM '^(\d{{4}})') AS year,        -- Extract year
+            SUBSTRING({field} FROM '^\d{{4}}-(\d{{2}})') AS month, -- Extract month
+            SUBSTRING({field} FROM '^\d{{4}}-\d{{2}}-(\d{{2}})') AS day, -- Extract day
+            SUBSTRING({field} FROM 'T(\d{{2}})') AS hour,       -- Extract hour
+            SUBSTRING({field} FROM 'T\d{{2}}:(\d{{2}})') AS minute, -- Extract minute
+            SUBSTRING({field} FROM 'T\d{{2}}:\d{{2}}:(\d{{2}})') AS second, -- Extract second
+            SUBSTRING({field} FROM '([+-]\d{{2}}:\d{{2}}|Z)$') AS timezone -- Extract timezone
+         FROM {qualified_table_name}
+         {filters_clause}
+        ),
+         validated_timestamps AS (
+         SELECT
+            {field},
+            CASE
+                WHEN
+                    -- Validate each component with its specific rules
+                    year ~ '^\d{{4}}$' AND
+                    month ~ '^(0[1-9]|1[0-2])$' AND
+                    day ~ '^((0[1-9]|[12][0-9])|(30|31))$' AND
+                    hour ~ '^([01][0-9]|2[0-3])$' AND
+                    minute ~ '^[0-5][0-9]$' AND
+                    second ~ '^[0-5][0-9]$' AND
+                    (timezone IS NULL OR timezone ~ '^(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])$') AND
+                    -- Additional check for days in months (e.g., February)
+                    (
+                        (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                        (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                        (month = '02' AND day BETWEEN '01' AND
+                            CASE
+                                -- Handle leap years
+                                WHEN (year::int % 400 = 0 OR (year::int % 100 != 0 AND year::int % 4 = 0)) THEN '29'
+                                ELSE '28'
+                            END
+                        )
+                    )
+                THEN 1
+                ELSE 0
+            END AS is_valid
+         FROM extracted_timestamps
+        )
+         SELECT COUNT(*) AS valid_count, COUNT(*) AS total_count
+         FROM validated_timestamps
+         WHERE is_valid = 1;
+        """
+
+        try:
+            valid_count = self.fetchone(query)[0]
+            total_count_query = (
+                f"SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}"
+            )
+            total_count = self.fetchone(total_count_query)[0]
+
+            if operation == "count":
+                return valid_count, total_count
+            elif operation == "percent":
+                return valid_count, total_count
+            else:
+                raise ValueError(f"Unknown operation: {operation}")
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0
+
+    def query_timestamp_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        operation: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param operation: Metric operation ("count" or "percent")
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Tuple containing count of valid timestamps not in the future and total count
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
+
+        if predefined_regex == "timestamp_iso":
+            regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+         WITH extracted_timestamps AS (
+         SELECT
+            {field},
+            SUBSTRING({field} FROM '^(\d{{4}})') AS year,        -- Extract year
+            SUBSTRING({field} FROM '^\d{{4}}-(\d{{2}})') AS month, -- Extract month
+            SUBSTRING({field} FROM '^\d{{4}}-\d{{2}}-(\d{{2}})') AS day, -- Extract day
+            SUBSTRING({field} FROM 'T(\d{{2}})') AS hour,       -- Extract hour
+            SUBSTRING({field} FROM 'T\d{{2}}:(\d{{2}})') AS minute, -- Extract minute
+            SUBSTRING({field} FROM 'T\d{{2}}:\d{{2}}:(\d{{2}})') AS second, -- Extract second
+            SUBSTRING({field} FROM '([+-]\d{{2}}:\d{{2}}|Z)$') AS timezone -- Extract timezone
+         FROM {qualified_table_name}
+         {filters_clause}
+        ),
+         validated_timestamps AS (
+         SELECT
+            {field},
+            CASE
+                WHEN
+                    year ~ '^\d{{4}}$' AND
+                    month ~ '^(0[1-9]|1[0-2])$' AND
+                    day ~ '^((0[1-9]|[12][0-9])|(30|31))$' AND
+                    hour ~ '^([01][0-9]|2[0-3])$' AND
+                    minute ~ '^[0-5][0-9]$' AND
+                    second ~ '^[0-5][0-9]$' AND
+                    (timezone IS NULL OR timezone ~ '^(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])$') AND
+                    (
+                        (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                        (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                        (month = '02' AND day BETWEEN '01' AND
+                            CASE
+                                WHEN (year::int % 400 = 0 OR (year::int % 100 != 0 AND year::int % 4 = 0)) THEN '29'
+                                ELSE '28'
+                            END
+                        )
+                    )
+                THEN 1
+                ELSE 0
+            END AS is_valid
+         FROM extracted_timestamps
+        ),
+         timestamps_not_in_future AS (
+         SELECT *
+         FROM validated_timestamps
+         WHERE is_valid = 1 AND ({field} ~ '{timestamp_iso_regex}') AND {field}::timestamp <= CURRENT_TIMESTAMP
+        )
+         SELECT COUNT(*) AS valid_count, (SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}) AS total_count
+         FROM timestamps_not_in_future;
+         """
+        try:
+            valid_count = self.fetchone(query)[0]
+            total_count_query = (
+                f"SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}"
+            )
+            total_count = self.fetchone(total_count_query)[0]
+
+            if operation == "count":
+                return valid_count, total_count
+            elif operation == "percent":
+                return valid_count, total_count
+            else:
+                raise ValueError(f"Unknown operation: {operation}")
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0
+
+    def query_timestamp_date_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        operation: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param operation: Metric operation ("count" or "percent")
+        :param predefined_regex: The regex pattern to use (e.g., "timestamp_iso")
+        :param filters: Optional filter condition
+        :return: Tuple containing count of valid dates not in the future and total count
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
+
+        if predefined_regex == "timestamp_iso":
+            regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+         WITH extracted_timestamps AS (
+         SELECT
+            {field},
+            SUBSTRING({field} FROM '^(\d{{4}})') AS year,        -- Extract year
+            SUBSTRING({field} FROM '^\d{{4}}-(\d{{2}})') AS month, -- Extract month
+            SUBSTRING({field} FROM '^\d{{4}}-\d{{2}}-(\d{{2}})') AS day -- Extract day
+         FROM {qualified_table_name}
+         {filters_clause}
+        ),
+         validated_dates AS (
+         SELECT
+            {field},
+            CASE
+                WHEN
+                    year ~ '^\d{{4}}$' AND
+                    month ~ '^(0[1-9]|1[0-2])$' AND
+                    day ~ '^((0[1-9]|[12][0-9])|(30|31))$' AND
+                    (
+                        (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                        (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                        (month = '02' AND day BETWEEN '01' AND
+                            CASE
+                                WHEN (year::int % 400 = 0 OR (year::int % 100 != 0 AND year::int % 4 = 0)) THEN '29'
+                                ELSE '28'
+                            END
+                        )
+                    )
+                THEN 1
+                ELSE 0
+            END AS is_valid
+         FROM extracted_timestamps
+        ),
+         dates_not_in_future AS (
+         SELECT *
+         FROM validated_dates
+         WHERE is_valid = 1
+         AND ({field} ~ '{timestamp_iso_regex}')
+         AND ({field})::date <= CURRENT_DATE  -- Compare only the date part against the current date
+        )
+         SELECT COUNT(*) AS valid_count, (SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}) AS total_count
+         FROM dates_not_in_future;
+        """
+
+        try:
+            valid_count = self.fetchone(query)[0]
+            total_count_query = (
+                f"SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}"
+            )
+            total_count = self.fetchone(total_count_query)[0]
+
+            if operation == "count":
+                return valid_count, total_count
+            elif operation == "percent":
+                return valid_count, total_count
+            else:
+                raise ValueError(f"Unknown operation: {operation}")
+
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0

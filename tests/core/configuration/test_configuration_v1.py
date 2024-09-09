@@ -1087,3 +1087,93 @@ def test_should_parse_percent_null_keyword():
         .get_validation_function
         == ValidationFunction.PERCENT_NULL_KEYWORD
     )
+
+
+def test_should_parse_count_timestamp_string():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_timestamp_string(timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_TIMESTAMP_STRING
+    )
+
+
+def test_should_parse_percent_timestamp_string():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_timestamp_string(timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_TIMESTAMP_STRING
+    )
+
+
+def test_should_parse_count_not_in_future():
+    yaml_string = """
+    validations for source.table:
+      - test:
+           on: count_not_in_future(future_timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_NOT_IN_FUTURE
+    )
+
+
+def test_should_parse_percent_not_in_future():
+    yaml_string = """
+    validations for source.table:
+      - test:
+           on: percent_not_in_future(future_timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_NOT_IN_FUTURE
+    )
+
+
+def test_should_parse_count_date_not_in_future():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: count_date_not_in_future(future_timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.COUNT_DATE_NOT_IN_FUTURE
+    )
+
+
+def test_should_parse_percent_date_not_in_future():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: percent_date_not_in_future(future_timestamp)
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.PERCENT_DATE_NOT_IN_FUTURE
+    )
