@@ -24,9 +24,11 @@ from dcs_core.core.validation.base import Validation
 from dcs_core.core.validation.completeness_validation import (  # noqa F401 this is used in globals
     CountAllSpaceValidation,
     CountEmptyStringValidation,
+    CountNullKeywordValidation,
     CountNullValidation,
     PercentageAllSpaceValidation,
     PercentageEmptyStringValidation,
+    PercentageNullKeywordValidation,
     PercentageNullValidation,
 )
 from dcs_core.core.validation.custom_query_validation import (  # noqa F401 this is used in globals
@@ -169,6 +171,8 @@ class ValidationManager:
         ValidationFunction.PERCENT_NEGATIVE.value: "PercentNegativeValidation",
         ValidationFunction.COUNT_ALL_SPACE.value: "CountAllSpaceValidation",
         ValidationFunction.PERCENT_ALL_SPACE.value: "PercentageAllSpaceValidation",
+        ValidationFunction.COUNT_NULL_KEYWORD.value: "CountNullKeywordValidation",
+        ValidationFunction.PERCENT_NULL_KEYWORD.value: "PercentageNullKeywordValidation",
     }
 
     def __init__(
