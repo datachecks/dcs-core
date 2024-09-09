@@ -78,7 +78,7 @@ class DataSourceManager:
         data_source_name = data_source_config.name
         data_source_type = data_source_config.type
         if data_source_type == "spark_df":
-            from datachecks.integrations.databases.spark_df import SparkDFDataSource
+            from dcs_core.integrations.databases.spark_df import SparkDFDataSource
 
             return SparkDFDataSource(
                 data_source_name,
@@ -86,7 +86,7 @@ class DataSourceManager:
             )
         try:
             module_name = (
-                f"datachecks.integrations.databases.{data_source_config.type.value}"
+                f"dcs_core.integrations.databases.{data_source_config.type.value}"
             )
             module = importlib.import_module(module_name)
             data_source_class = self.DATA_SOURCE_CLASS_NAME_MAPPER[

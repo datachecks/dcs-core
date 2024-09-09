@@ -505,3 +505,27 @@ validations for product_db.products:
       on: percent_negative(price)
       threshold: "< 40"
 ```
+## COUNT_ALL_SPACE
+
+The count all space validation counts columns with all space values in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - count_all_space_value:
+      on: count_all_space(space)
+      threshold: = 0
+```
+
+## PERCENT_ALL_SPACE
+
+The percent all space validation checks the percentage of columns with all space value in a dataset.
+
+**Example**
+
+```yaml title="dcs_config.yaml"
+validations for product_db.products:
+  - percent_all_space:
+      on: percent_all_space(space)
+```

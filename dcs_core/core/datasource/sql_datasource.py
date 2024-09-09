@@ -674,3 +674,28 @@ class SQLDataSource(DataSource):
 
         result = self.fetchone(query)[0]
         return round(result, 2) if operation == "percent" else result
+
+    def query_get_all_space_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of rows where the specified column contains only spaces.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of rows with only spaces
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f"""SELECT COUNT(CASE WHEN TRIM({field}) = '' THEN 1 END) AS space_count,COUNT(*) AS total_count FROM {qualified_table_name}
+        """
+
+        if filters:
+            query += f" AND {filters}"
+
+        result = self.fetchone(query)
+
+        if operation == "percent":
+            return round((result[0] / result[1]) * 100) if result[1] > 0 else 0
+
+        return result[0] if result else 0
