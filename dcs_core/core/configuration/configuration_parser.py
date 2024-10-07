@@ -75,6 +75,7 @@ class DataSourceConfigParser(ConfigParser):
             account=config["connection"].get("account"),
             warehouse=config["connection"].get("warehouse"),
             role=config["connection"].get("role"),
+            service_name=config["connection"].get("service_name"),
         )
         return connection_config
 

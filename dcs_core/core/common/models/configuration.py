@@ -74,6 +74,8 @@ class DataSourceConnectionConfiguration:
 
     spark_session: Optional[Any] = None  # Spark specific configuration
 
+    service_name: Optional[str] = None  # Oracle specific configuration
+
 
 @dataclass
 class DataSourceConfiguration:
