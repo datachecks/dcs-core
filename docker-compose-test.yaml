@@ -42,17 +42,22 @@ services:
     restart: unless-stopped
 
   test-dc-oracle:
-    image: oracle/database:21.3.0-xe
-    ports:
-      - 1521:1521
-      - 5500:5500
-    volumes:
-      - ./.oracle/oradata:/opt/oracle/oradata
-      - ./.oracle/scripts/setup:/opt/oracle/scripts/setup
-      - ./.oracle/scripts/startup:/opt/oracle/scripts/startup
+    image: gvenzl/oracle-xe
+    container_name: test-oracle-db
     environment:
-      - ORACLE_PWD=password
-      - ORACLE_CHARACTERSET=AL32UTF8
+      - ORACLE_PASSWORD=password
+      - ORACLE_DISABLE_ASYNCH_IO=true
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - test-oracle-data:/opt/oracle/oradata
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5500/em"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
 
 networks:
   test-opensearch-net:
@@ -64,4 +69,6 @@ volumes:
   test-opensearch-data:
   test-dc-mysql:
   test-postgres:
+    driver: local
+  test-oracle-data:
     driver: local

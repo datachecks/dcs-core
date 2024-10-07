@@ -38,6 +38,7 @@ class DataSourceType(str, Enum):
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
     SPARK_DF = "spark_df"
+    ORACLE = "oracle"
 
 
 class DataSourceLanguageSupport(str, Enum):

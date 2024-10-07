@@ -45,5 +45,5 @@ class OracleDataSource(SQLDataSource):
             return self.connection
         except Exception as e:
             raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to PostgresSQL data source: [{str(e)}]"
+                message=f"Failed to connect to Oracle data source: [{str(e)}]"
             )
