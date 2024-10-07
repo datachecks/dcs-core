@@ -38,6 +38,7 @@ class DataSourceType(str, Enum):
     SNOWFLAKE = "snowflake"
     DATABRICKS = "databricks"
     SPARK_DF = "spark_df"
+    ORACLE = "oracle"
 
 
 class DataSourceLanguageSupport(str, Enum):
@@ -73,6 +74,8 @@ class DataSourceConnectionConfiguration:
     driver: Optional[str] = None  # SQL Server specific configuration
 
     spark_session: Optional[Any] = None  # Spark specific configuration
+
+    service_name: Optional[str] = None  # Oracle specific configuration
 
 
 @dataclass

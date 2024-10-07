@@ -41,6 +41,24 @@ services:
       - test-postgres
     restart: unless-stopped
 
+  test-dc-oracle:
+    image: gvenzl/oracle-xe
+    container_name: test-oracle-db
+    environment:
+      - ORACLE_PASSWORD=password
+      - ORACLE_DISABLE_ASYNCH_IO=true
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - test-oracle-data:/opt/oracle/oradata
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5500/em"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+
 networks:
   test-opensearch-net:
   test-postgres:
@@ -51,4 +69,6 @@ volumes:
   test-opensearch-data:
   test-dc-mysql:
   test-postgres:
+    driver: local
+  test-oracle-data:
     driver: local

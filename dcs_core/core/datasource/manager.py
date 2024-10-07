@@ -40,6 +40,7 @@ class DataSourceManager:
         "redshift": "RedShiftDataSource",
         "snowflake": "SnowFlakeDataSource",
         "mssql": "MssqlDataSource",
+        "oracle": "OracleDataSource",
     }
 
     def __init__(self, config: Configuration):
