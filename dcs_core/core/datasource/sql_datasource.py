@@ -88,7 +88,7 @@ class SQLDataSource(DataSource):
         :param filters: optional filter
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = f"SELECT COUNT(*) FROM {qualified_table_name} AS row_count"
+        query = f"SELECT COUNT(*) FROM {qualified_table_name}"
         if filters:
             query += f" WHERE {filters}"
         return self.fetchone(query)[0]
