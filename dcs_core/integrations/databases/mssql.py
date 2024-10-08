@@ -30,6 +30,9 @@ class MssqlDataSource(SQLDataSource):
         Connect to the data source
         """
         try:
+            driver = (
+                self.data_connection.get("driver") or "ODBC Driver 18 for SQL Server"
+            )
             url = URL.create(
                 drivername="mssql+pyodbc",
                 username=self.data_connection.get("username"),
@@ -37,6 +40,7 @@ class MssqlDataSource(SQLDataSource):
                 host=self.data_connection.get("host"),
                 port=self.data_connection.get("port", 1433),
                 database=self.data_connection.get("database"),
+                query={"driver": driver, "TrustServerCertificate": "YES"},
             )
             schema = self.data_connection.get("schema") or "dbo"
             # For osx have to install
@@ -44,10 +48,8 @@ class MssqlDataSource(SQLDataSource):
             # brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
             # brew update
             # brew install msodbcsql mssql-tools
-            driver = self.data_connection.get("driver", "ODBC Driver 17 for SQL Server")
-            url_updated = f"{url}?driver={driver}"
             engine = create_engine(
-                url=url_updated,
+                url,
                 connect_args={"options": f"-csearch_path={schema}"},
                 isolation_level="AUTOCOMMIT",
             )
