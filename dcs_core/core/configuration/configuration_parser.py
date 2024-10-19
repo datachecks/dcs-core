@@ -145,6 +145,7 @@ class ValidationConfigParser(ConfigParser):
                         query=value.get("query"),
                         regex=value.get("regex"),
                         values=value.get("values"),
+                        ref=value.get("ref"),
                     )
                     validation_dict[validation_name] = validation_config
 

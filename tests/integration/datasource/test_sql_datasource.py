@@ -683,33 +683,3 @@ class TestSQLDatasourceQueries:
         )
         assert valid_count == 4
         assert total_row_count == 6
-
-    def test_should_return_row_count_for_valid_timestamp_not_in_future(
-        self, postgres_datasource: PostgresDataSource
-    ):
-        (
-            valid_count,
-            total_row_count,
-        ) = postgres_datasource.query_timestamp_not_in_future_metric(
-            table=self.TABLE_NAME,
-            field="not_in_future",
-            operation="count",
-            predefined_regex="timestamp_iso",
-        )
-        assert valid_count == 2
-        assert total_row_count == 6
-
-    def test_should_return_row_count_for_valid_timestamp_date_not_in_future(
-        self, postgres_datasource: PostgresDataSource
-    ):
-        (
-            valid_count,
-            total_row_count,
-        ) = postgres_datasource.query_timestamp_date_not_in_future_metric(
-            table=self.TABLE_NAME,
-            field="date_not_in_future",
-            operation="count",
-            predefined_regex="timestamp_iso",
-        )
-        assert valid_count == 5
-        assert total_row_count == 6

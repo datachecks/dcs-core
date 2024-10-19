@@ -20,7 +20,7 @@ from dcs_core.core.common.models.configuration import (
 )
 from dcs_core.core.common.models.validation import ValidationFunction
 from dcs_core.core.datasource.manager import DataSourceManager
-from dcs_core.core.validation.base import Validation
+from dcs_core.core.validation.base import DeltaValidation, Validation
 from dcs_core.core.validation.completeness_validation import (  # noqa F401 this is used in globals
     CountAllSpaceValidation,
     CountEmptyStringValidation,
@@ -54,6 +54,7 @@ from dcs_core.core.validation.numeric_validation import (  # noqa F401 this is u
 from dcs_core.core.validation.reliability_validation import (  # noqa F401 this is used in globals
     CountDocumentsValidation,
     CountRowValidation,
+    DeltaCountRowValidation,
     FreshnessValueMetric,
 )
 from dcs_core.core.validation.uniqueness_validation import (  # noqa F401 this is used in globals
@@ -126,6 +127,7 @@ class ValidationManager:
         ValidationFunction.CUSTOM_SQL.value: "CustomSqlValidation",
         ValidationFunction.COUNT_DOCUMENTS.value: "CountDocumentsValidation",
         ValidationFunction.COUNT_ROWS.value: "CountRowValidation",
+        ValidationFunction.DELTA_COUNT_ROWS.value: "DeltaCountRowValidation",
         ValidationFunction.FRESHNESS.value: "FreshnessValueMetric",
         ValidationFunction.COUNT_UUID.value: "CountUUIDValidation",
         ValidationFunction.PERCENT_UUID.value: "PercentUUIDValidation",
@@ -230,22 +232,45 @@ class ValidationManager:
             ) in validation_by_dataset.validations.items():
                 data_source = self.data_source_manager.get_data_source(data_source_name)
                 params = {}
-                validation: Validation = globals()[
-                    self.VALIDATION_CLASS_MAPPING[
+                if validation_config.get_is_delta_validation:
+                    reference_data_source = self.data_source_manager.get_data_source(
+                        validation_config.get_ref_data_source_name
+                    )
+                    base_class_name = self.VALIDATION_CLASS_MAPPING[
                         validation_config.get_validation_function
                     ]
-                ](
-                    name=validation_name,
-                    data_source=data_source,
-                    dataset_name=dataset_name,
-                    validation_name=validation_name,
-                    validation_config=validation_config,
-                    field_name=validation_config.get_validation_field_name,
-                    **params,
-                )
-                self.validations[data_source_name][dataset_name][
-                    validation_name
-                ] = validation
+                    validation: DeltaValidation = globals()[base_class_name](
+                        name=validation_name,
+                        data_source=data_source,
+                        dataset_name=dataset_name,
+                        validation_name=validation_name,
+                        validation_config=validation_config,
+                        field_name=validation_config.get_validation_field_name,
+                        reference_data_source=reference_data_source,
+                        reference_dataset_name=validation_config.get_ref_dataset_name,
+                        reference_field_name=validation_config.get_ref_field_name,
+                        **params,
+                    )
+                    self.validations[data_source_name][dataset_name][
+                        validation_name
+                    ] = validation
+                else:
+                    validation: Validation = globals()[
+                        self.VALIDATION_CLASS_MAPPING[
+                            validation_config.get_validation_function
+                        ]
+                    ](
+                        name=validation_name,
+                        data_source=data_source,
+                        dataset_name=dataset_name,
+                        validation_name=validation_name,
+                        validation_config=validation_config,
+                        field_name=validation_config.get_validation_field_name,
+                        **params,
+                    )
+                    self.validations[data_source_name][dataset_name][
+                        validation_name
+                    ] = validation
 
     def add_validation(self, validation: Validation):
         data_source_name = validation.data_source.data_source_name

@@ -27,6 +27,7 @@ from dcs_core.core.common.models.configuration import (
 )
 from dcs_core.core.common.models.validation import (
     ConditionType,
+    DeltaValidationInfo,
     ValidationFunction,
     ValidationInfo,
 )
@@ -165,6 +166,62 @@ class Validation(ABC):
             )
             if self.threshold is not None:
                 value.is_valid, value.reason = self._validate_threshold(metric_value)
+
+            return value
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            logger.error(f"Failed to generate metric {self.name}: {str(e)}")
+            return None
+
+
+class DeltaValidation(Validation, ABC):
+    def __init__(
+        self,
+        name: str,
+        validation_config: ValidationConfig,
+        data_source: DataSource,
+        dataset_name: str,
+        reference_data_source: DataSource,
+        reference_dataset_name: str,
+        reference_field_name: str = None,
+        **kwargs,
+    ):
+        super().__init__(name, validation_config, data_source, dataset_name, **kwargs)
+        self.reference_data_source = reference_data_source
+        self.reference_dataset_name = reference_dataset_name
+        self.reference_field_name = reference_field_name
+
+    @abstractmethod
+    def _generate_reference_metric_value(self, **kwargs) -> Union[float, int]:
+        pass
+
+    def get_validation_info(self, **kwargs) -> Union[ValidationInfo, None]:
+        try:
+            metric_value = self._generate_metric_value(**kwargs)
+            reference_metric_value = self._generate_reference_metric_value(**kwargs)
+            delta_value = abs(metric_value - reference_metric_value)
+
+            tags = {
+                "name": self.name,
+            }
+
+            value = DeltaValidationInfo(
+                name=self.name,
+                identity=self.get_validation_identity(),
+                data_source_name=self.data_source.data_source_name,
+                dataset=self.dataset_name,
+                validation_function=self.validation_config.get_validation_function,
+                field=self.field_name,
+                value=delta_value,
+                source_value=metric_value,
+                reference_value=reference_metric_value,
+                reference_datasource_name=self.reference_data_source.data_source_name,
+                reference_dataset=self.reference_dataset_name,
+                timestamp=datetime.datetime.utcnow(),
+                tags=tags,
+            )
+            if self.threshold is not None:
+                value.is_valid, value.reason = self._validate_threshold(delta_value)
 
             return value
         except Exception as e:

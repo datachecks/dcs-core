@@ -15,6 +15,7 @@
 import pytest
 
 from dcs_core.core.common.models.configuration import ValidationConfig
+from dcs_core.core.common.models.validation import Threshold, ValidationFunction
 
 
 class TestValidationV1:
@@ -32,22 +33,26 @@ class TestValidationV1:
 
     def test_table_validation_function_should_not_have_brackets(self):
         with pytest.raises(ValueError):
-            ValidationConfig(name="test", on="count_rows(age)", threshold="> 0")
-
-    def test_validation_function_malformed_with_space_should_not_throw_error(self):
-        with pytest.raises(ValueError):
-            validation = ValidationConfig(
-                name="test", on="count_rows ", threshold="> 0"
+            ValidationConfig(
+                name="test", on="count_rows(age)", threshold=Threshold(gte=0)
             )
 
+    def test_validation_function_malformed_with_space_should_not_throw_error(self):
+        validation = ValidationConfig(
+            name="test", on="count_rows ", threshold=Threshold(gte=0)
+        )
+        assert validation.get_validation_function == ValidationFunction.COUNT_ROWS
+
     def test_on_filed_with_valid_function_should_not_throw_error(self):
-        validation = ValidationConfig(name="test", on="min(age)", threshold="> 0")
+        validation = ValidationConfig(
+            name="test", on="min(age)", threshold=Threshold(gte=0)
+        )
         assert validation.on == "min(age)"
 
     def test_on_field_with_invalid_function_should_throw_error(self):
         with pytest.raises(ValueError):
-            ValidationConfig(name="test", on="min(age", threshold="> 0")
+            ValidationConfig(name="test", on="min(age", threshold=Threshold(gte=0))
 
     def test_column_name_should_not_have_special_char(self):
         with pytest.raises(ValueError):
-            ValidationConfig(name="test", on="min(age@)", threshold="> 0")
+            ValidationConfig(name="test", on="min(age@)", threshold=Threshold(gte=0))

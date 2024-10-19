@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
+from markdown_it.rules_block import reference
+
 from dcs_core.core.common.models.data_source_resource import Field, Index, Table
 from dcs_core.core.common.models.metric import MetricsType
 from dcs_core.core.common.models.validation import (
@@ -99,6 +101,21 @@ class ValidationConfig:
     query: Optional[str] = None
     regex: Optional[str] = None
     values: Optional[List] = None
+    ref: Optional[str] = None
+
+    def _ref_field_validation(self):
+        if self.ref is not None:
+            reference_resources = self.ref.strip().split(".")
+            if len(reference_resources) < 2 or len(reference_resources) > 3:
+                raise ValueError(
+                    "ref field should be in the format of <datasource_name>.<dataset_name>.<field_name>"
+                )
+            self._ref_data_source_name = reference_resources[0]
+            self._ref_dataset_name = reference_resources[1]
+            self._ref_field_name = None
+
+            if len(reference_resources) == 3:
+                self._ref_field_name = reference_resources[2]
 
     def _on_field_validation(self):
         if self.on is None:
@@ -108,15 +125,25 @@ class ValidationConfig:
             ValidationFunction.COUNT_ROWS,
             ValidationFunction.COUNT_DOCUMENTS,
             ValidationFunction.CUSTOM_SQL,
-            ValidationFunction.COMPARE_COUNT_ROWS,
+            ValidationFunction.DELTA_COUNT_ROWS,
         ]
-        if self.on.strip() not in dataset_validation_functions:
+
+        if self.on.strip().startswith("delta"):
+            self._is_delta_validation = True
+            on_statement = re.search(r"^delta\s+(.+)", self.on.strip()).group(1)
+        else:
+            self._is_delta_validation = False
+            on_statement = self.on.strip()
+
+        if on_statement not in dataset_validation_functions:
             self._validation_function_type = ValidationFunctionType.FIELD
-            if not re.match(r"^(\w+)\(([ \w-]+)\)$", self.on.strip()):
-                raise ValueError(f"on field must be a valid function, was {self.on}")
+            if not re.match(r"^(\w+)\(([ \w-]+)\)$", on_statement):
+                raise ValueError(
+                    f"on field must be a valid function, was {on_statement}"
+                )
             else:
                 column_validation_function = re.search(
-                    r"^(\w+)\(([ \w-]+)\)$", self.on.strip()
+                    r"^(\w+)\(([ \w-]+)\)$", on_statement
                 ).group(1)
 
                 if column_validation_function not in [v for v in ValidationFunction]:
@@ -131,21 +158,44 @@ class ValidationConfig:
 
                 self._validation_function = ValidationFunction(
                     column_validation_function
+                    if not self._is_delta_validation
+                    else f"delta_{column_validation_function}"
                 )
                 self._validation_field_name = re.search(
-                    r"^(\w+)\(([ \w-]+)\)$", self.on.strip()
+                    r"^(\w+)\(([ \w-]+)\)$", on_statement
                 ).group(2)
         else:
             self._validation_function_type = ValidationFunctionType.DATASET
-            self._validation_function = ValidationFunction(self.on)
+            self._validation_function = ValidationFunction(
+                on_statement
+                if not self._is_delta_validation
+                else f"delta_{on_statement}"
+            )
             self._validation_field_name = None
 
     def __post_init__(self):
         self._on_field_validation()
+        self._ref_field_validation()
 
     @property
     def get_validation_function(self) -> ValidationFunction:
         return ValidationFunction(self._validation_function)
+
+    @property
+    def get_is_delta_validation(self):
+        return self._is_delta_validation
+
+    @property
+    def get_ref_data_source_name(self):
+        return self._ref_data_source_name if self.ref is not None else None
+
+    @property
+    def get_ref_dataset_name(self):
+        return self._ref_dataset_name if self.ref is not None else None
+
+    @property
+    def get_ref_field_name(self):
+        return self._ref_field_name if self.ref is not None else None
 
     @property
     def get_validation_function_type(self) -> ValidationFunctionType:

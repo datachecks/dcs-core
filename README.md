@@ -73,11 +73,8 @@ pip install dcs-core -U
 ### Create the config file
 
 With a simple config file, you can generate data quality reports for your data sources. Below is the sample config example.
-For more details, please visit the [config guide](https://docs.datachecks.io/configuration/metric_configuration/)
+For more details, please visit the [config guide](https://docs.datachecks.io/dcs-oss/config/validation-config)
 
-<p align="center">
-    <img alt="why_data_observability" src="docs/assets/datachecks_config.png" width="800">
-</p>
 
 ### Run from CLI
 
@@ -93,33 +90,35 @@ dcs-core inspect -C config.yaml
 dcs-core inspect -C config.yaml  --html-report
 ```
 
-Please visit the [Quick Start Guide](https://docs.datachecks.io/getting_started/)
+Please visit the [Quick Start Guide](https://docs.datachecks.io/dcs-oss/introduction/getting-started)
 
 ## Supported Data Sources
 
 Datachecks supports sql and search data sources. Below are the list of supported data sources.
 
-| Data Source                                                             | Type                   | Supported  |
-| ----------------------------------------------------------------------- | ---------------------- | ---------- |
-| [Postgres](https://docs.datachecks.io/integrations/postgres/)           | Transactional Database | :thumbsup: |
-| [MySql](https://docs.datachecks.io/integrations/mysql/)                 | Transactional Database | :thumbsup: |
-| [MS SQL Server](https://docs.datachecks.io/integrations/mssql/)         | Transactional Database | :thumbsup: |
-| [OpenSearch](https://docs.datachecks.io/integrations/opensearch/)       | Search Engine          | :thumbsup: |
-| [Elasticsearch](https://docs.datachecks.io/integrations/elasticsearch/) | Search Engine          | :thumbsup: |
-| [GCP BigQuery](https://docs.datachecks.io/integrations/bigquery/)       | Data Warehouse         | :thumbsup: |
-| [DataBricks](https://docs.datachecks.io/integrations/databricks/)       | Data Warehouse         | :thumbsup: |
-| [Snowflake](https://docs.datachecks.io/integrations/snowflake/)         | Data Warehouse         | :thumbsup: |
-| AWS RedShift                                                            | Data Warehouse         | :x:        |
+| Data Source                                                                           | Type                   | Supported  |
+|---------------------------------------------------------------------------------------|------------------------|------------|
+| [Postgres](https://docs.datachecks.io/dcs-oss/integrations/transactional/postgres)    | Transactional Database | :thumbsup: |
+| [MySql](https://docs.datachecks.io/dcs-oss/integrations/transactional/mysql)          | Transactional Database | :thumbsup: |
+| [MS SQL Server](https://docs.datachecks.io/dcs-oss/integrations/transactional/mssql)  | Transactional Database | :thumbsup: |
+| [Oracle](https://docs.datachecks.io/dcs-oss/integrations/transactional/oracle)        | Transactional Database | :thumbsup: |
+| [DB2](https://docs.datachecks.io/dcs-oss/integrations/transactional/db2)              | Transactional Database | :thumbsup: |
+| [OpenSearch](https://docs.datachecks.io/dcs-oss/integrations/search/opensearch)       | Search Engine          | :thumbsup: |
+| [Elasticsearch](https://docs.datachecks.io/dcs-oss/integrations/search/elasticsearch) | Search Engine          | :thumbsup: |
+| [GCP BigQuery](https://docs.datachecks.io/dcs-oss/integrations/warehouse/bigquery)    | Data Warehouse         | :thumbsup: |
+| [DataBricks](https://docs.datachecks.io/dcs-oss/integrations/warehouse/databricks)    | Data Warehouse         | :thumbsup: |
+| [Snowflake](https://docs.datachecks.io/dcs-oss/integrations/warehouse/snowflake)      | Data Warehouse         | :thumbsup: |
+| [AWS RedShift](https://docs.datachecks.io/dcs-oss/integrations/warehouse/redshift)    | Data Warehouse         | :thumbsup: |
 
 ## Metric Types
 
-| Validation Funtions                                                                     | Description                                                                                                      |
-|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| **[Reliability](https://docs.datachecks.io/validations/reliability/)**                | Reliability functions detect whether tables/indices/collections are updating with timely data                      |
-| **[Numeric Distribution](https://docs.datachecks.io/validations/numeric_distribution/)** | Numeric Distribution functions detect changes in the numeric distributions i.e. of values, variance, skew and more |
-| **[Uniqueness](https://docs.datachecks.io/validations/uniqueness/)**                 | Uniqueness functions detect when data constraints are breached like duplicates, number of distinct values etc      |
-| **[Completeness](https://docs.datachecks.io/validations/completeness/)**             | Completeness functions detect when there are missing values in datasets i.e. Null, empty value                   |
-| **[Validity](https://docs.datachecks.io/validations/validity/)**                     | Validity functions detect whether data is formatted correctly and represents a valid value                         |
+| Validation Funtions                                                                      | Description                                                                                                        |
+|------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **[Reliability](https://docs.datachecks.io/dcs-oss/validations/reliability)**                   | Reliability functions detect whether tables/indices/collections are updating with timely data                      |
+| **[Numeric Distribution](https://docs.datachecks.io/dcs-oss/validations/distribution)** | Numeric Distribution functions detect changes in the numeric distributions i.e. of values, variance, skew and more |
+| **[Uniqueness](https://docs.datachecks.io/dcs-oss/validations/uniqueness)**                     | Uniqueness functions detect when data constraints are breached like duplicates, number of distinct values etc      |
+| **[Completeness](https://docs.datachecks.io/dcs-oss/validations/completeness)**                 | Completeness functions detect when there are missing values in datasets i.e. Null, empty value                     |
+| **[Validity](https://docs.datachecks.io/dcs-oss/validations/pattern-matching)**                         | Validity functions detect whether data is formatted correctly and represents a valid value                         |
 
 ## Overview
 

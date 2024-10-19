@@ -80,7 +80,7 @@ def inspect(
     Starts the datachecks inspection
     """
     try:
-        is_file_exists = os.path.isfile(config_path)
+        is_file_exists = os.path.exists(config_path)
         if not is_file_exists:
             raise Exception(
                 f"Invalid value for '-C' / '--config-path': File '{config_path}' does not exist."

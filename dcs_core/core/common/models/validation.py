@@ -182,7 +182,7 @@ class ValidationFunction(str, Enum):
     PERCENT_LONGITUDE = "percent_longitude"
 
     # CROSS Validation
-    COMPARE_COUNT_ROWS = "compare_count_rows"
+    DELTA_COUNT_ROWS = "delta_count_rows"
 
     # Failed rows
     FAILED_ROWS = "failed_rows"
@@ -201,3 +201,16 @@ class ValidationInfo:
     is_valid: Optional[bool] = None
     reason: Optional[str] = None
     tags: Dict[str, str] = None
+
+
+@dataclass
+class DeltaValidationInfo(ValidationInfo):
+    """
+    DeltaValidationInfo is a dataclass that represents the difference between two validation info.
+    """
+
+    source_value: Union[int, float] = None
+    reference_value: Union[int, float] = None
+    reference_datasource_name: str = None
+    reference_dataset: str = None
+    reference_field: Optional[str] = None
