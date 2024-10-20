@@ -28,7 +28,7 @@ services:
 
   dcs-test-postgres:
     container_name: dcs-test-postgres
-    image: postgres
+    image: postgres:16
     environment:
       POSTGRES_DB: dcs_db
       POSTGRES_USER: postgres

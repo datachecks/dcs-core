@@ -137,42 +137,8 @@ validations for iris_pgsql.dcs_iris:
       on: percent_valid_regex(species)
       regex: "^(setosa|virginica)$"
 
-validations for product_db.products:
-  - percentage uuid for product_id:
-      on: percent_uuid(product_id)
-      threshold: "> 90"
-  - count uuid for product_id:
-      on: count_uuid(product_id)
-      threshold: "> 100"
-
-  # String Length Validations
-  - species string length max:
-      on: string_length_max(species)
-      threshold: "<= 20"
-
-  - species string length min:
-      on: string_length_min(species)
-      threshold: ">= 5"
-
-  - species string length average:
-      on: string_length_average(species)
-      threshold: ">= 10"
-
-
-# Geolocation Validations
-  - location latitude count:
-      on: count_latitude(latitude)
-      threshold: "> 100"
-
-  - location latitude percentage:
-      on: percent_latitude(latitude)
-      threshold: "> 80"
-
-  - location longitude count:
-      on: count_longitude(longitude)
-      threshold: "> 100"
-
-  - location longitude percentage:
-      on: percent_longitude(longitude)
-      threshold: "> 80"
-
+  # delta validation
+  - reference count difference count rows:
+      on: delta count_rows
+      threshold: < 10
+      ref: iris_pgsql.dcs_diamond

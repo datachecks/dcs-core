@@ -1177,3 +1177,44 @@ def test_should_parse_percent_date_not_in_future():
         .get_validation_function
         == ValidationFunction.PERCENT_DATE_NOT_IN_FUTURE
     )
+
+
+def test_should_read_delta_validation_config():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: delta count_rows
+          threshold: "<10"
+          ref: source1.table1
+    """
+    configuration = load_configuration_from_yaml_str(yaml_string)
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_validation_function
+        == ValidationFunction.DELTA_COUNT_ROWS
+    )
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_ref_data_source_name
+        == "source1"
+    )
+    assert (
+        configuration.validations["source.table"]
+        .validations["test"]
+        .get_ref_dataset_name
+        == "table1"
+    )
+
+
+def test_should_throw_error_on_delta_function():
+    yaml_string = """
+    validations for source.table:
+      - test:
+          on: delta count_documents
+          threshold: "<10"
+          ref: source1.table1
+    """
+    with pytest.raises(Exception):
+        load_configuration_from_yaml_str(yaml_string)
