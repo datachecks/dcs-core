@@ -41,6 +41,7 @@ class DataSourceType(str, Enum):
     DATABRICKS = "databricks"
     SPARK_DF = "spark_df"
     ORACLE = "oracle"
+    DB2 = "db2"
 
 
 class DataSourceLanguageSupport(str, Enum):
@@ -78,6 +79,9 @@ class DataSourceConnectionConfiguration:
     spark_session: Optional[Any] = None  # Spark specific configuration
 
     service_name: Optional[str] = None  # Oracle specific configuration
+
+    security: Optional[str] = None  # IBM DB2 specific configuration
+    protocol: Optional[str] = None  # IBM DB2 specific configuration
 
 
 @dataclass

@@ -11,9 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import json
 import os
+
+if os.name == "nt":
+    ibm_db_home = os.getenv("IBM_DB_HOME")
+    if ibm_db_home:
+        dll_directory = os.path.join(ibm_db_home, "bin")
+        os.add_dll_directory(dll_directory)
+
+
 from typing import Any
 
 from elasticsearch import Elasticsearch
@@ -219,3 +226,40 @@ class RedShiftDataSource(DataSource):
         )
         engine = create_engine(url, echo=True)
         return engine.connect()
+
+
+class DB2DataSource(DataSource):
+    def __init__(self):
+        super().__init__()
+        self._connection = self.__create_connection()
+
+    def __create_connection(self) -> Any:
+        """
+        Connect to the DB2 data source using SQLAlchemy
+        """
+        url = self._build_connection_url()
+        engine = create_engine(url, echo=False)
+        return engine.connect()
+
+    def _build_connection_url(self) -> str:
+        """
+        Build the SQLAlchemy connection URL for DB2
+        """
+        host = os.environ.get("db2.host")
+        port = os.environ.get("db2.port")
+        database = os.environ.get("db2.database")
+        username = os.environ.get("db2.username")
+        password = os.environ.get("db2.password")
+
+        url = f"db2+ibm_db://{username}:{password}@{host}:{port}/{database}"
+
+        params = []
+        if os.environ.get("db2.security"):
+            params.append(f"SECURITY={os.environ.get('db2.security')}")
+        if os.environ.get("db2.protocol"):
+            params.append(f"PROTOCOL={os.environ.get('db2.protocol')}")
+        if os.environ.get("db2.schema"):
+            params.append(f"CURRENTSCHEMA={os.environ.get('db2.schema')}")
+        if params:
+            url += "?" + "&".join(params)
+        return url

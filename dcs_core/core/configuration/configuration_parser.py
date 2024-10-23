@@ -76,6 +76,8 @@ class DataSourceConfigParser(ConfigParser):
             warehouse=config["connection"].get("warehouse"),
             role=config["connection"].get("role"),
             service_name=config["connection"].get("service_name"),
+            security=config["connection"].get("security"),
+            protocol=config["connection"].get("protocol"),
         )
         return connection_config
 
@@ -138,9 +140,11 @@ class ValidationConfigParser(ConfigParser):
                     validation_config = ValidationConfig(
                         name=validation_name,
                         on=value.get("on"),
-                        threshold=self._parse_threshold_str(value.get("threshold"))
-                        if value.get("threshold")
-                        else None,
+                        threshold=(
+                            self._parse_threshold_str(value.get("threshold"))
+                            if value.get("threshold")
+                            else None
+                        ),
                         where=value.get("where"),
                         query=value.get("query"),
                         regex=value.get("regex"),

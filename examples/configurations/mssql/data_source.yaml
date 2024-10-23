@@ -7,3 +7,5 @@ data_sources:
       username: !ENV ${MSSQL_USER}
       password: !ENV ${MSSQL_PASS}
       database: Test-dsc
+      port: 1433
+      driver: "ODBC Driver 18 for SQL Server"
