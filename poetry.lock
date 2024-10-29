@@ -113,7 +113,7 @@ test = ["dateparser (==1.*)", "pre-commit", "pytest", "pytest-cov", "pytest-mock
 name = "asn1crypto"
 version = "1.5.1"
 description = "Fast ASN.1 parser and serializer with definitions for private keys, public keys, certificates, CRL, OCSP, CMS, PKCS#3, PKCS#7, PKCS#8, PKCS#12, PKCS#5, X.509 and TSP"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "asn1crypto-1.5.1-py2.py3-none-any.whl", hash = "sha256:db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67"},
@@ -573,7 +573,7 @@ toml = ["tomli"]
 name = "cryptography"
 version = "43.0.3"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "cryptography-43.0.3-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:bf7a1932ac4176486eab36a19ed4c0492da5d97123f1406cf15e41b05e787d2e"},
@@ -2938,7 +2938,7 @@ windows-terminal = ["colorama (>=0.4.6)"]
 name = "pyjwt"
 version = "2.9.0"
 description = "JSON Web Token implementation in Python"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "PyJWT-2.9.0-py3-none-any.whl", hash = "sha256:3b02fb0f44517787776cf48f2ae25d8e14f300e6d7545a4315cee571a415e850"},
@@ -3037,7 +3037,7 @@ files = [
 name = "pyopenssl"
 version = "24.2.1"
 description = "Python wrapper module around the OpenSSL library"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pyOpenSSL-24.2.1-py3-none-any.whl", hash = "sha256:967d5719b12b243588573f39b0c677637145c7a1ffedcd495a487e58177fbb8d"},
@@ -3728,7 +3728,7 @@ files = [
 name = "snowflake-connector-python"
 version = "3.12.3"
 description = "Snowflake Connector for Python"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "snowflake_connector_python-3.12.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:497a096fc379ef0846b2f1cf11a8d7620f0d090f08a77d9e93473845014d57d1"},
@@ -3806,7 +3806,7 @@ pandas = ["snowflake-connector-python[pandas]"]
 name = "sortedcontainers"
 version = "2.4.0"
 description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
@@ -4035,7 +4035,7 @@ files = [
 name = "tomlkit"
 version = "0.13.2"
 description = "Style preserving TOML library"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "tomlkit-0.13.2-py3-none-any.whl", hash = "sha256:7a974427f6e119197f670fbbbeae7bef749a6c14e793db934baefc1b5f03efde"},
