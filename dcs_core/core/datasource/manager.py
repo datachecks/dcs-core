@@ -41,6 +41,7 @@ class DataSourceManager:
         "snowflake": "SnowFlakeDataSource",
         "mssql": "MssqlDataSource",
         "oracle": "OracleDataSource",
+        "db2": "DB2DataSource",
     }
 
     def __init__(self, config: Configuration):

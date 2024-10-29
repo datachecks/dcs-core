@@ -1,0 +1,13 @@
+# Data sources to query
+data_sources:
+  - name: iris_db2
+    type: db2
+    connection:
+      host: !ENV ${DB2_HOST}
+      port: !ENV ${DB2_PORT}
+      username: !ENV ${DB2_USER}
+      password: !ENV ${DB2_PASS}
+      database: test-dcs-db2
+      security: !ENV ${DB2_SECURITY}
+      protocol: !ENV ${DB2_PROTOCOL}
+      schema: TEST-DCS

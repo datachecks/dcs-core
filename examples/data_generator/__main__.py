@@ -19,6 +19,7 @@ from examples.data_generator.datasets import DataSetName
 from examples.data_generator.datasource import (
     BigQueryDataSource,
     DataBricksDataSource,
+    DB2DataSource,
     ElasticSearchDataSource,
     MySqlDataSource,
     OpenSearchDataSource,
@@ -42,6 +43,7 @@ load_dotenv()
             "elasticsearch",
             "mysql",
             "redshift",
+            "db2",
         ]
     ),
     help="Data source name",
@@ -69,6 +71,8 @@ def execute(datasource, dataset):
         data_source = ElasticSearchDataSource()
     elif datasource == "redshift":
         data_source = RedShiftDataSource()
+    elif datasource == "db2":
+        data_source = DB2DataSource()
     else:
         raise Exception("Invalid datasource name")
 

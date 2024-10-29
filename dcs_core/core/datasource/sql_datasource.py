@@ -15,6 +15,7 @@
 from datetime import datetime
 from typing import Dict, List, Tuple, Union
 
+from loguru import logger
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Connection
 
@@ -32,6 +33,72 @@ class SQLDataSource(DataSource):
         self.connection: Union[Connection, None] = None
         self.database: str = data_connection.get("database")
         self.use_sa_text_query = True
+        self.regex_patterns = {
+            "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
+            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
+            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
+            "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
+            "cusip": r"^[0-9A-Z]{9}$",
+            "figi": r"^BBG[A-Z0-9]{9}$",
+            "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
+            "perm_id": r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{3}$",
+        }
+
+        self.valid_state_codes = [
+            "AL",
+            "AK",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "FL",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY",
+        ]
 
     def is_connected(self) -> bool:
         """
@@ -401,27 +468,13 @@ class SQLDataSource(DataSource):
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
 
-        regex_patterns = {
-            "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
-            "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
-            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
-            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
-            "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
-            "cusip": r"^[0-9A-Z]{9}$",
-            "figi": r"^BBG[A-Z0-9]{9}$",
-            "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
-            "perm_id": r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{3}$",
-        }
-
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
                 "Either regex_pattern or predefined_regex_pattern should be provided"
             )
 
         if predefined_regex_pattern:
-            regex_query = f"case when {field} ~ '{regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
+            regex_query = f"case when {field} ~ '{self.regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
         else:
             regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
 
@@ -507,61 +560,10 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return: count of valid state codes, count of total row count
         """
-        # List of valid state codes
-        valid_state_codes = [
-            "AL",
-            "AK",
-            "AZ",
-            "AR",
-            "CA",
-            "CO",
-            "CT",
-            "DE",
-            "FL",
-            "GA",
-            "HI",
-            "ID",
-            "IL",
-            "IN",
-            "IA",
-            "KS",
-            "KY",
-            "LA",
-            "ME",
-            "MD",
-            "MA",
-            "MI",
-            "MN",
-            "MS",
-            "MO",
-            "MT",
-            "NE",
-            "NV",
-            "NH",
-            "NJ",
-            "NM",
-            "NY",
-            "NC",
-            "ND",
-            "OH",
-            "OK",
-            "OR",
-            "PA",
-            "RI",
-            "SC",
-            "SD",
-            "TN",
-            "TX",
-            "UT",
-            "VT",
-            "VA",
-            "WA",
-            "WV",
-            "WI",
-            "WY",
-        ]
 
-        valid_state_codes_str = ", ".join(f"'{code}'" for code in valid_state_codes)
+        valid_state_codes_str = ", ".join(
+            f"'{code}'" for code in self.valid_state_codes
+        )
 
         filters = f"WHERE {filters}" if filters else ""
 
@@ -1002,5 +1004,5 @@ class SQLDataSource(DataSource):
                 raise ValueError(f"Unknown operation: {operation}")
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0

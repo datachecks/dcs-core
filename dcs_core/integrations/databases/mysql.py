@@ -18,10 +18,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
-from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.integrations.databases.db2 import DB2DataSource
 
 
-class MysqlDataSource(SQLDataSource):
+class MysqlDataSource(DB2DataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
 
