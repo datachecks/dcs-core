@@ -85,6 +85,59 @@ class MssqlDataSource(SQLDataSource):
 
         return f"IIF({field} LIKE '{pattern}', 1, 0)"
 
+    def query_get_variance(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the variance value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT VAR({}) FROM {}".format(field, qualified_table_name)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return round(self.fetchone(query)[0], 2)
+
+    def query_get_stddev(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the standard deviation value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT STDEV({}) FROM {}".format(field, qualified_table_name)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return round(self.fetchone(query)[0], 2)
+
+    def query_get_percentile(
+        self, table: str, field: str, percentile: float, filters: str = None
+    ) -> float:
+        """
+        Get the specified percentile value of a numeric column in a table.
+        :param table: table name
+        :param field: column name
+        :param percentile: percentile to calculate (e.g., 0.2 for 20th percentile)
+        :param filters: filter condition
+        :return: the value at the specified percentile
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"""
+            SELECT PERCENTILE_CONT({percentile}) WITHIN GROUP (ORDER BY {field})
+            OVER () AS percentile_value
+            FROM {qualified_table_name}
+        """
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)
+        return round(result[0], 2) if result and result[0] is not None else None
+
     def query_string_pattern_validity(
         self,
         table: str,

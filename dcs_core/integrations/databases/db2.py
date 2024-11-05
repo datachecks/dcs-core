@@ -67,6 +67,59 @@ class DB2DataSource(SQLDataSource):
 
         return url
 
+    def query_get_distinct_count(
+        self, table: str, field: str, filters: str = None
+    ) -> int:
+        """
+        Get the distinct count value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: distinct count as an integer
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT COUNT(DISTINCT CAST({field} AS VARCHAR(255))) FROM {qualified_table_name}"
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)
+        return result[0] if result else 0
+
+    def query_negative_metric(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Calculate a negative metric for a specified field in a Db2 table.
+        :param table: table name
+        :param field: column name
+        :param operation: type of operation, "percent" or "count"
+        :param filters: optional filter conditions
+        :return: percentage of negative values if operation is "percent", otherwise count of negatives
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        negative_query = (
+            f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} < 0"
+        )
+        if filters:
+            negative_query += f" AND {filters}"
+
+        total_count_query = f"SELECT COUNT(*) FROM {qualified_table_name}"
+        if filters:
+            total_count_query += f" WHERE {filters}"
+
+        if operation == "percent":
+            query = f"""
+            SELECT (CAST(({negative_query}) AS FLOAT) / NULLIF(CAST(({total_count_query}) AS FLOAT), 0)) * 100
+            FROM SYSIBM.SYSDUMMY1
+            """
+        else:
+            query = negative_query
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if operation == "percent" else result
+
     def query_string_pattern_validity(
         self,
         table: str,
