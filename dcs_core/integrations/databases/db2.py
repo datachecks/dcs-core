@@ -120,6 +120,44 @@ class DB2DataSource(SQLDataSource):
         result = self.fetchone(query)[0]
         return round(result, 2) if operation == "percent" else result
 
+    def query_get_null_keyword_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of NULL-like values (specific keywords) in the specified column for IBM DB2.
+        :param table: table name
+        :param field: column name
+        :param operation: type of operation ('count' or 'percent')
+        :param filters: filter condition
+        :return: count or percentage of NULL-like keyword values
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN {field} IS NULL
+                    OR TRIM(UPPER({field})) IN ('NOTHING', 'NIL', 'NULL', 'NONE', 'N/A')
+                    THEN 1
+                    ELSE 0
+                END) AS null_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name}
+        """
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)
+
+        if not result or result[1] == 0:
+            return 0
+
+        if operation == "percent":
+            return round((result[0] or 0) / result[1] * 100, 2)
+
+        return result[0] or 0
+
     def query_string_pattern_validity(
         self,
         table: str,

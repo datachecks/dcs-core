@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -137,6 +137,49 @@ class MssqlDataSource(SQLDataSource):
 
         result = self.fetchone(query)
         return round(result[0], 2) if result and result[0] is not None else None
+
+    def query_get_null_keyword_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of NULL-like values (specific keywords) in the specified column for MSSQL.
+        :param table: table name
+        :param field: column name
+        :param operation: type of operation ('count' or 'percent')
+        :param filters: filter condition
+        :return: count (int) or percentage (float) of NULL-like keyword values
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN {field} IS NULL
+                    OR LTRIM(RTRIM(LOWER(ISNULL({field}, '')))) IN ('nothing', 'nil', 'null', 'none', 'n/a', '')
+                    THEN 1
+                    ELSE 0
+                END) AS null_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name}
+        """
+
+        if filters:
+            query += f" AND {filters}"
+
+        result = self.fetchone(query)
+
+        if not result or not result[1]:
+            return 0
+
+        null_count = int(result[0] if result[0] is not None else 0)
+        total_count = int(result[1])
+
+        if operation == "percent":
+            return (
+                round((null_count / total_count) * 100, 2) if total_count > 0 else 0.0
+            )
+
+        return null_count
 
     def query_string_pattern_validity(
         self,

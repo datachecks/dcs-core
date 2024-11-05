@@ -96,17 +96,17 @@ class ValidationFunction(str, Enum):
 
     # Completeness validations 8
     COUNT_NULL = "count_null"
-    COUNT_NOT_NULL = "count_not_null"
+    COUNT_NOT_NULL = "count_not_null"  # todo not implemented
     PERCENT_NULL = "percent_null"
-    PERCENT_NOT_NULL = "percent_not_null"
+    PERCENT_NOT_NULL = "percent_not_null"  # todo not implemented
     COUNT_EMPTY_STRING = "count_empty_string"
     PERCENT_EMPTY_STRING = "percent_empty_string"
-    COUNT_NAN = "count_nan"
-    PERCENT_NAN = "percent_nan"
+    COUNT_NAN = "count_nan"  # todo not implemented
+    PERCENT_NAN = "percent_nan"  # todo not implemented
     COUNT_ALL_SPACE = "count_all_space"
     PERCENT_ALL_SPACE = "percent_all_space"
     COUNT_NULL_KEYWORD = "count_null_keyword"
-    PERCENT_NULL_KEYWORD = "percent_null_keyboard"
+    PERCENT_NULL_KEYWORD = "percent_null_keyword"
 
     # Custom SQL
     CUSTOM_SQL = "custom_sql"
