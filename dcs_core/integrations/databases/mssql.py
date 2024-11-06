@@ -24,6 +24,19 @@ from dcs_core.core.datasource.sql_datasource import SQLDataSource
 class MssqlDataSource(SQLDataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
+        self.regex_patterns = {
+            "uuid": r"[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%",
+            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "email": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
+            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
+            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
+            "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
+            "cusip": r"^[0-9A-Z]{9}$",
+            "figi": r"^BBG[A-Z0-9]{9}$",
+            "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
+            "perm_id": r"^[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{2,3}$",
+        }
 
     def connect(self) -> Any:
         """
@@ -181,6 +194,44 @@ class MssqlDataSource(SQLDataSource):
 
         return null_count
 
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LEN"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LEN"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(LEN"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+
+        if metric.lower() == "avg":
+            query = (
+                f'SELECT AVG(CAST(LEN("{field}") AS FLOAT)) FROM {qualified_table_name}'
+            )
+        else:
+            query = f'SELECT {sql_function}("{field}")) FROM {qualified_table_name}'
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result
+
     def query_string_pattern_validity(
         self,
         table: str,
@@ -217,7 +268,6 @@ class MssqlDataSource(SQLDataSource):
             FROM {qualified_table_name}
             {filters}
         """
-
         result = self.fetchone(query)
         return result[0], result[1]
 

@@ -158,6 +158,42 @@ class DB2DataSource(SQLDataSource):
 
         return result[0] or 0
 
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LENGTH"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LENGTH"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(CAST(LENGTH"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+
+        if metric.lower() == "avg":
+            query = f'SELECT {sql_function}("{field}") AS FLOAT)) FROM {qualified_table_name}'
+        else:
+            query = f'SELECT {sql_function}("{field}")) FROM {qualified_table_name}'
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result
+
     def query_string_pattern_validity(
         self,
         table: str,
@@ -188,7 +224,8 @@ class DB2DataSource(SQLDataSource):
         else:
             regex = regex_pattern
 
-        regex_query = f"CASE WHEN REGEXP_LIKE({field}, '{regex}') THEN 1 ELSE 0 END"
+        regex_query = f"""
+            CASE WHEN REGEXP_LIKE("{field}", '{regex}') THEN 1 ELSE 0 END"""
 
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -24,6 +24,19 @@ from dcs_core.integrations.databases.db2 import DB2DataSource
 class MysqlDataSource(DB2DataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
+        self.regex_patterns = {
+            "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
+            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
+            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
+            "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
+            "cusip": r"^[0-9A-Z]{9}$",
+            "figi": r"^BBG[A-Z0-9]{9}$",
+            "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
+            "perm_id": r"^[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{2,3}$",
+        }
 
     def connect(self) -> Any:
         """
@@ -118,3 +131,74 @@ class MysqlDataSource(DB2DataSource):
 
         result = self.fetchone(query)[0]
         return round(result, 2) if operation == "percent" else result
+
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LENGTH"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LENGTH"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(LENGTH"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+
+        query = f"SELECT {sql_function}({field})) FROM {qualified_table_name}"
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result
+
+    def query_string_pattern_validity(
+        self,
+        table: str,
+        field: str,
+        regex_pattern: str = None,
+        predefined_regex_pattern: str = None,
+        filters: str = None,
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid values based on the regex pattern.
+        :param table: table name
+        :param field: column name
+        :param regex_pattern: custom regex pattern
+        :param predefined_regex_pattern: predefined regex pattern
+        :param filters: filter condition
+        :return: count of valid values, count of total row count
+        """
+        filters = f"WHERE {filters}" if filters else ""
+        qualified_table_name = self.qualified_table_name(table)
+
+        if not regex_pattern and not predefined_regex_pattern:
+            raise ValueError(
+                "Either regex_pattern or predefined_regex_pattern should be provided"
+            )
+
+        if predefined_regex_pattern:
+            regex = self.regex_patterns[predefined_regex_pattern]
+        else:
+            regex = regex_pattern
+
+        regex_query = f"CASE WHEN {field} REGEXP '{regex}' THEN 1 ELSE 0 END"
+        query = f"""
+            SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
+            FROM {qualified_table_name} {filters}
+        """
+        result = self.fetchone(query)
+        return result[0], result[1]
