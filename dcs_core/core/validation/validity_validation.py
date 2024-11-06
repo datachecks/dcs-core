@@ -16,6 +16,7 @@ from typing import Union
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.integrations.databases.oracle import OracleDataSource
 from dcs_core.core.validation.base import Validation
 
 
@@ -61,7 +62,7 @@ class CountInvalidValues(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 values=self.values,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -84,7 +85,7 @@ class PercentInvalidValues(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 values=self.values,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -105,7 +106,7 @@ class CountValidValues(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 values=self.values,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -126,7 +127,7 @@ class PercentValidValues(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 values=self.values,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -149,7 +150,7 @@ class CountInvalidRegex(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 regex_pattern=self.regex_pattern,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -172,7 +173,7 @@ class PercentInvalidRegex(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 regex_pattern=self.regex_pattern,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -195,7 +196,7 @@ class CountValidRegex(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 regex_pattern=self.regex_pattern,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -218,7 +219,7 @@ class PercentValidRegex(Validation):
                 total_count,
             ) = self.data_source.query_valid_invalid_values_validity(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 regex_pattern=self.regex_pattern,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -282,6 +283,7 @@ class CountEmailValidation(Validation):
                 predefined_regex_pattern="email",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
+            print(valid_count, total_count)
             return valid_count
         else:
             raise NotImplementedError(

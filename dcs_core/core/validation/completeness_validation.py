@@ -16,6 +16,7 @@ from typing import Union
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
+from dcs_core.integrations.databases.oracle import OracleDataSource
 from dcs_core.core.validation.base import Validation
 
 
@@ -24,7 +25,7 @@ class CountNullValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_null_count(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -42,7 +43,7 @@ class PercentageNullValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_null_percentage(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -60,7 +61,7 @@ class CountEmptyStringValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_empty_string_count(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -78,7 +79,7 @@ class PercentageEmptyStringValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_empty_string_percentage(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
