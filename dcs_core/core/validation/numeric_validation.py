@@ -23,7 +23,6 @@ from dcs_core.core.validation.base import Validation
 class MinValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
-            print(self.where_filter)
             return self.data_source.query_get_min(
                 table=self.dataset_name,
                 field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,

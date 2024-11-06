@@ -283,7 +283,6 @@ class CountEmailValidation(Validation):
                 predefined_regex_pattern="email",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
-            print(valid_count, total_count)
             return valid_count
         else:
             raise NotImplementedError(
@@ -312,7 +311,7 @@ class StringLengthMaxValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_string_length_metric(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 metric="max",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -327,7 +326,7 @@ class StringLengthMinValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_string_length_metric(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 metric="min",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -342,7 +341,7 @@ class StringLengthAverageValidation(Validation):
         if isinstance(self.data_source, SQLDataSource):
             return self.data_source.query_get_string_length_metric(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
                 metric="avg",
                 filters=self.where_filter if self.where_filter is not None else None,
             )

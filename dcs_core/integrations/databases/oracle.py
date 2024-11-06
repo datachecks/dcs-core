@@ -30,13 +30,13 @@ class OracleDataSource(SQLDataSource):
             "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
             "email": r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
-            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
+            "ssn": r"^[0-6]\d{2}-(0[1-9]|[1-9]\d)-([1-9]\d{3}|\d{4})$",
             "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
             "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
             "cusip": r"^[0-9A-Z]{9}$",
             "figi": r"^BBG[A-Z0-9]{9}$",
             "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
-            "perm_id": r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{3}$",
+            "perm_id": r"^\d{4}([- ]?)\d{4}\1\d{4}\1\d{4}([- ]?)\d{3}$",
         }
 
     def connect(self) -> Any:
