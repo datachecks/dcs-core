@@ -670,7 +670,7 @@ class SQLDataSource(DataSource):
             total_count_query += f" WHERE {filters}"
 
         if operation == "percent":
-            query = f"SELECT (CAST(({negative_query}) AS float) / CAST(({total_count_query}) AS float)) * 100"
+            query = f"SELECT (CAST(({negative_query}) AS float) / CAST(({total_count_query}) AS float)) * 100 FROM {qualified_table_name}"
         else:
             query = negative_query
 
@@ -731,14 +731,12 @@ class SQLDataSource(DataSource):
         self,
         table: str,
         field: str,
-        operation: str,
         predefined_regex: str,
         filters: str = None,
     ) -> Union[float, int]:
         """
         :param table: Table name
         :param field: Column name
-        :param operation: Metric operation ("count" or "percent")
         :param predefined_regex: regex pattern
         :param filters: filter condition
         :return: Tuple containing valid count and total count (or percentage)
@@ -811,12 +809,7 @@ class SQLDataSource(DataSource):
             )
             total_count = self.fetchone(total_count_query)[0]
 
-            if operation == "count":
-                return valid_count, total_count
-            elif operation == "percent":
-                return valid_count, total_count
-            else:
-                raise ValueError(f"Unknown operation: {operation}")
+            return valid_count, total_count
 
         except Exception as e:
             print(f"Error occurred: {e}")
@@ -826,14 +819,12 @@ class SQLDataSource(DataSource):
         self,
         table: str,
         field: str,
-        operation: str,
         predefined_regex: str,
         filters: str = None,
     ) -> Union[float, int]:
         """
         :param table: Table name
         :param field: Column name
-        :param operation: Metric operation ("count" or "percent")
         :param predefined_regex: regex pattern
         :param filters: filter condition
         :return: Tuple containing count of valid timestamps not in the future and total count
@@ -906,12 +897,7 @@ class SQLDataSource(DataSource):
             )
             total_count = self.fetchone(total_count_query)[0]
 
-            if operation == "count":
-                return valid_count, total_count
-            elif operation == "percent":
-                return valid_count, total_count
-            else:
-                raise ValueError(f"Unknown operation: {operation}")
+            return valid_count, total_count
 
         except Exception as e:
             print(f"Error occurred: {e}")
@@ -921,14 +907,12 @@ class SQLDataSource(DataSource):
         self,
         table: str,
         field: str,
-        operation: str,
         predefined_regex: str,
         filters: str = None,
     ) -> Union[float, int]:
         """
         :param table: Table name
         :param field: Column name
-        :param operation: Metric operation ("count" or "percent")
         :param predefined_regex: The regex pattern to use (e.g., "timestamp_iso")
         :param filters: Optional filter condition
         :return: Tuple containing count of valid dates not in the future and total count
@@ -996,13 +980,7 @@ class SQLDataSource(DataSource):
             )
             total_count = self.fetchone(total_count_query)[0]
 
-            if operation == "count":
-                return valid_count, total_count
-            elif operation == "percent":
-                return valid_count, total_count
-            else:
-                raise ValueError(f"Unknown operation: {operation}")
-
+            return valid_count, total_count
         except Exception as e:
             logger.error(f"Error occurred: {e}")
             return 0, 0

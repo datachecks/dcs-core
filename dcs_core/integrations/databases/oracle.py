@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -27,13 +27,13 @@ class OracleDataSource(SQLDataSource):
 
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "usa_phone": r"^\(\d{3}\) \d{3}-\d{4}$",
             "email": r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
             "ssn": r"^[0-6]\d{2}-(0[1-9]|[1-9]\d)-([1-9]\d{3}|\d{4})$",
-            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
+            "sedol": r"^[A-Z0-9]{6}\d$",
             "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
-            "cusip": r"^[0-9A-Z]{9}$",
+            "cusip": r"^[0-9A-Z]{8}[0-9]$",
             "figi": r"^BBG[A-Z0-9]{9}$",
             "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
             "perm_id": r"^\d{4}([- ]?)\d{4}\1\d{4}\1\d{4}([- ]?)\d{3}$",
@@ -61,7 +61,6 @@ class OracleDataSource(SQLDataSource):
             raise DataChecksDataSourcesConnectionError(
                 message=f"Failed to connect to Oracle data source: [{str(e)}]"
             )
-        
 
     def query_valid_invalid_values_validity(
         self,
@@ -86,14 +85,16 @@ class OracleDataSource(SQLDataSource):
             values_str = ", ".join([f"'{value}'" for value in values])
             regex_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
         else:
-            regex_query = f"CASE WHEN REGEXP_LIKE({field}, '{regex_pattern}') THEN 1 ELSE 0 END"
-        
+            regex_query = (
+                f"CASE WHEN REGEXP_LIKE({field}, '{regex_pattern}') THEN 1 ELSE 0 END"
+            )
+
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
             FROM {qualified_table_name}
             {filters}
         """
-        
+
         result = self.fetchone(query)
         return result[0], result[1]
 
@@ -135,7 +136,6 @@ class OracleDataSource(SQLDataSource):
         """
         result = self.fetchone(query)
         return result[0], result[1]
-    
 
     def query_get_usa_state_code_validity(
         self, table: str, field: str, filters: str = None
@@ -147,25 +147,274 @@ class OracleDataSource(SQLDataSource):
         :param filters: filter condition
         :return: count of valid state codes, count of total row count
         """
-        
+
         valid_state_codes_str = ", ".join(
             f"'{code}'" for code in self.valid_state_codes
         )
-        
+
         filters = f"WHERE {filters}" if filters else ""
-        
+
         qualified_table_name = self.qualified_table_name(table)
-        
+
         regex_query = (
             f"CASE WHEN REGEXP_LIKE({field}, '^[A-Z]{{2}}$') "
             f"AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
         )
-        
+
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
             FROM {qualified_table_name} {filters}
         """
-        
+
         result = self.fetchone(query)
         return result[0], result[1]
 
+    def query_timestamp_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Tuple containing valid count and total count (or percentage)
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        if predefined_regex == "timestamp_iso":
+            filters_clause = f"WHERE {filters}" if filters else ""
+
+            query = f"""
+                WITH extracted_timestamps AS (
+                    SELECT
+                        {field},
+                        TO_CHAR({field}, 'YYYY') AS year,      
+                        TO_CHAR({field}, 'MM') AS month,        
+                        TO_CHAR({field}, 'DD') AS day,        
+                        TO_CHAR({field}, 'HH24') AS hour,      
+                        TO_CHAR({field}, 'MI') AS minute,        
+                        TO_CHAR({field}, 'SS') AS second         
+                    FROM {qualified_table_name}
+                    {filters_clause}
+                ),
+                validated_timestamps AS (
+                    SELECT
+                        {field},
+                        CASE
+                            WHEN
+                                REGEXP_LIKE(year, '^\\d{{4}}$') AND
+                                REGEXP_LIKE(month, '^(0[1-9]|1[0-2])$') AND
+                                REGEXP_LIKE(day, '^([0-2][0-9]|3[01])$') AND
+                                (
+                                    (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                                    (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                                    (month = '02' AND day BETWEEN '01' AND 
+                                        CASE 
+                                            WHEN MOD(TO_NUMBER(year), 400) = 0 OR 
+                                                (MOD(TO_NUMBER(year), 4) = 0 AND MOD(TO_NUMBER(year), 100) != 0) THEN '29'
+                                            ELSE '28'
+                                        END
+                                    )
+                                ) AND
+                                REGEXP_LIKE(hour, '^(0[0-9]|1[0-9]|2[0-3])$') AND
+                                REGEXP_LIKE(minute, '^[0-5][0-9]$') AND
+                                REGEXP_LIKE(second, '^[0-5][0-9]$')
+                            THEN 1
+                            ELSE 0
+                        END AS is_valid
+                    FROM extracted_timestamps
+                )
+                SELECT SUM(is_valid) AS valid_count, COUNT(*) AS total_count
+                FROM validated_timestamps
+            """
+            try:
+                result = self.fetchone(query)
+                valid_count = result[0]
+                total_count = result[1]
+
+                return valid_count, total_count
+            except Exception as e:
+                print(f"Error occurred: {e}")
+                return 0, 0
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+    def query_timestamp_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Count of valid timestamps not in the future and total count or percentage
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
+
+        if predefined_regex == "timestamp_iso":
+            regex_condition = f"REGEXP_LIKE({field}, '{timestamp_iso_regex}')"
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+            WITH extracted_timestamps AS (
+                SELECT
+                    TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS') AS formatted_{field},
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}', 1, 1) AS year,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}-(\d{{2}})', 1, 1, NULL, 1) AS month,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}-\d{{2}}-(\d{{2}})', 1, 1, NULL, 1) AS day,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ' (\d{{2}})', 1, 1, NULL, 1) AS hour,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ':\d{{2}}:(\d{{2}})', 1, 1, NULL, 1) AS minute,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ':(\d{{2}})$', 1, 1, NULL, 1) AS second
+                FROM {qualified_table_name}
+                {filters_clause}
+            ),
+            validated_timestamps AS (
+                SELECT
+                    formatted_{field},
+                    CASE
+                        WHEN
+                            REGEXP_LIKE(year, '^\d{{4}}$') AND
+                            REGEXP_LIKE(month, '^(0[1-9]|1[0-2])$') AND
+                            REGEXP_LIKE(day, '^([0-2][0-9]|3[01])$') AND
+                            (
+                                (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                                (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                                (month = '02' AND day BETWEEN '01' AND
+                                    CASE
+                                        WHEN MOD(TO_NUMBER(year), 400) = 0 OR
+                                            (MOD(TO_NUMBER(year), 4) = 0 AND MOD(TO_NUMBER(year), 100) != 0) THEN '29'
+                                        ELSE '28'
+                                    END
+                                )
+                            ) AND
+                            REGEXP_LIKE(hour, '^(0[0-9]|1[0-9]|2[0-3])$') AND
+                            REGEXP_LIKE(minute, '^[0-5][0-9]$') AND
+                            REGEXP_LIKE(second, '^[0-5][0-9]$')
+                        THEN 1
+                        ELSE 0
+                    END AS is_valid
+                FROM extracted_timestamps
+            ),
+            timestamps_not_in_future AS (
+                SELECT *
+                FROM validated_timestamps
+                WHERE is_valid = 1 AND TO_TIMESTAMP(formatted_{field}, 'YYYY-MM-DD HH24:MI:SS') <= CURRENT_TIMESTAMP
+            )
+            SELECT 
+                (SELECT COUNT(*) FROM timestamps_not_in_future) AS valid_count,
+                (SELECT COUNT(*) FROM {qualified_table_name}) AS total_count
+            FROM dual
+        """
+        try:
+            result = self.fetchone(query)
+            valid_count = result[0]
+            total_count = result[1]
+
+            return valid_count, total_count
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0
+
+    def query_timestamp_date_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: The regex pattern to use (e.g., "timestamp_iso")
+        :param filters: Optional filter condition
+        :return: Tuple containing count of valid dates not in the future and total count
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+            WITH extracted_timestamps AS (
+                SELECT
+                    TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS') AS formatted_{field},
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}', 1, 1) AS year,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}-(\d{{2}})', 1, 1, NULL, 1) AS month,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), '^\d{{4}}-\d{{2}}-(\d{{2}})', 1, 1, NULL, 1) AS day,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ' (\d{{2}})', 1, 1, NULL, 1) AS hour,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ':\d{{2}}:(\d{{2}})', 1, 1, NULL, 1) AS minute,
+                    REGEXP_SUBSTR(TO_CHAR({field}, 'YYYY-MM-DD HH24:MI:SS'), ':(\d{{2}})$', 1, 1, NULL, 1) AS second
+                FROM {qualified_table_name}
+                {filters_clause}
+            ),
+            validated_timestamps AS (
+                SELECT
+                    formatted_{field},
+                    CASE
+                        WHEN
+                            REGEXP_LIKE(year, '^\d{{4}}$') AND
+                            REGEXP_LIKE(month, '^(0[1-9]|1[0-2])$') AND
+                            REGEXP_LIKE(day, '^([0-2][0-9]|3[01])$') AND
+                            (
+                                (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
+                                (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
+                                (month = '02' AND day BETWEEN '01' AND
+                                    CASE
+                                        WHEN MOD(TO_NUMBER(year), 400) = 0 OR
+                                            (MOD(TO_NUMBER(year), 4) = 0 AND MOD(TO_NUMBER(year), 100) != 0) THEN '29'
+                                        ELSE '28'
+                                    END
+                                )
+                            ) AND
+                            REGEXP_LIKE(hour, '^(0[0-9]|1[0-9]|2[0-3])$') AND
+                            REGEXP_LIKE(minute, '^[0-5][0-9]$') AND
+                            REGEXP_LIKE(second, '^[0-5][0-9]$')
+                        THEN 1
+                        ELSE 0
+                    END AS is_valid
+                FROM extracted_timestamps
+            ),
+            validated_dates AS (
+                SELECT
+                    formatted_{field},
+                    is_valid
+                FROM validated_timestamps
+                WHERE is_valid = 1
+            ),
+            dates_not_in_future AS (
+                SELECT *
+                FROM validated_dates
+                WHERE is_valid = 1
+                AND REGEXP_LIKE(formatted_{field}, '^\d{{4}}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) (\d{{2}}):([0-5][0-9]):([0-5][0-9])(\.\d{{1,3}})?$') 
+                AND TO_TIMESTAMP(formatted_{field}, 'YYYY-MM-DD HH24:MI:SS') <= CURRENT_TIMESTAMP 
+            )
+            SELECT 
+                (SELECT COUNT(*) FROM dates_not_in_future) AS valid_count,
+                (SELECT COUNT(*) FROM {qualified_table_name}) AS total_count
+            FROM dual
+        """
+
+        try:
+            valid_count = self.fetchone(query)[0]
+            total_count_query = (
+                f"SELECT COUNT(*) FROM {qualified_table_name} {filters_clause}"
+            )
+            total_count = self.fetchone(total_count_query)[0]
+
+            return valid_count, total_count
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0

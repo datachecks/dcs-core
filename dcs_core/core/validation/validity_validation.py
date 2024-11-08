@@ -707,7 +707,6 @@ class CountTimeStampValidation(Validation):
             valid_count, total_row_count = self.data_source.query_timestamp_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="count",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -724,7 +723,6 @@ class PercentTimeStampValidation(Validation):
             valid_count, total_row_count = self.data_source.query_timestamp_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="percent",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -748,7 +746,6 @@ class CountNotInFutureValidation(Validation):
             ) = self.data_source.query_timestamp_not_in_future_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="count",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -768,7 +765,6 @@ class PercentNotInFutureValidation(Validation):
             ) = self.data_source.query_timestamp_not_in_future_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="percent",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -792,7 +788,6 @@ class CountDateNotInFutureValidation(Validation):
             ) = self.data_source.query_timestamp_date_not_in_future_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="count",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -812,7 +807,6 @@ class PercentDateNotInFutureValidation(Validation):
             ) = self.data_source.query_timestamp_date_not_in_future_metric(
                 table=self.dataset_name,
                 field=self.field_name,
-                operation="percent",
                 predefined_regex="timestamp_iso",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
