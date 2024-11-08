@@ -35,7 +35,7 @@ class MssqlDataSource(SQLDataSource):
             "cusip": r"^[0-9A-Z]{9}$",
             "figi": r"^BBG[A-Z0-9]{9}$",
             "isin": r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$",
-            "perm_id": r"^[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{4}[- ]?[0-9]{2,3}$",
+            "perm_id": r"^\d{4}([- ]?)\d{4}\1\d{4}\1\d{4}([- ]?)\d{3}$",
         }
 
     def connect(self) -> Any:
@@ -268,6 +268,33 @@ class MssqlDataSource(SQLDataSource):
             FROM {qualified_table_name}
             {filters}
         """
+        if predefined_regex_pattern == "perm_id":
+            query = f"""
+                SELECT
+                SUM(CASE
+                    WHEN {field} LIKE '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]'
+                    OR {field} LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                    THEN 1
+                    ELSE 0
+                END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
+            """
+        elif predefined_regex_pattern == "ssn":
+            query = f"""
+            SELECT
+                SUM(CASE
+                        WHEN {field} LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                            AND LEFT({field}, 3) NOT IN ('000', '666')
+                            AND LEFT({field}, 1) != '9'
+                            AND SUBSTRING({field}, 5, 2) != '00'
+                            AND RIGHT({field}, 4) != '0000'
+                        THEN 1
+                        ELSE 0
+                    END) AS valid_count,
+            COUNT(*) AS total_count
+            FROM {qualified_table_name}
+            """
         result = self.fetchone(query)
         return result[0], result[1]
 
