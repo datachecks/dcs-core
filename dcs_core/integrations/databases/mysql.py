@@ -27,7 +27,7 @@ class MysqlDataSource(DB2DataSource):
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             "usa_phone": r"^\\+?1?[-.[:space:]]?\\(?[0-9]{3}\\)?[-.[:space:]]?[0-9]{3}[-.[:space:]]?[0-9]{4}$",
-            "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            "email": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
             "ssn": r"^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$",
             "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
