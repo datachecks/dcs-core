@@ -295,6 +295,45 @@ class MssqlDataSource(SQLDataSource):
             COUNT(*) AS total_count
             FROM {qualified_table_name}
             """
+        elif predefined_regex_pattern == "usa_phone":
+            query = f"""
+            SELECT
+                SUM(CASE
+                        WHEN ({field} LIKE '+1 [0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1-[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1.[0-9][0-9][0-9].[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9]) [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9].[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9]) [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9])[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9])[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9]).[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9]).[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9])-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9] [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9].[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]')
+                        THEN 1
+                        ELSE 0
+                    END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
+
+        """
+        elif predefined_regex_pattern == "usa_zip_code":
+            query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN PATINDEX('%[0-9][0-9][0-9][0-9][0-9]%[-][0-9][0-9][0-9][0-9]%', CAST({field} AS VARCHAR)) > 0
+                    OR PATINDEX('%[0-9][0-9][0-9][0-9][0-9]%', CAST({field} AS VARCHAR)) > 0
+                    THEN 1 ELSE 0 END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
+        """
         result = self.fetchone(query)
         return result[0], result[1]
 

@@ -231,7 +231,6 @@ class DB2DataSource(SQLDataSource):
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
             FROM {qualified_table_name} {filters}
         """
-
         result = self.fetchone(query)
         return result[0], result[1]
 
@@ -274,10 +273,7 @@ class DB2DataSource(SQLDataSource):
         return result[0], result[1]
 
     def query_get_usa_state_code_validity(
-        self,
-        table: str,
-        field: str,
-        filters: str = None,
+        self, table: str, field: str, filters: str = None
     ) -> Tuple[int, int]:
         """
         Get the count of valid USA state codes
@@ -295,13 +291,14 @@ class DB2DataSource(SQLDataSource):
 
         qualified_table_name = self.qualified_table_name(table)
 
-        regex_query = f"CASE WHEN REGEXP_LIKE{field}, '^[A-Z]{{2}}$' AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
+        regex_query = f"""
+            CASE WHEN REGEXP_LIKE("{field}", '^[A-Z]{{2}}$') AND UPPER("{field}") IN ({valid_state_codes_str}) THEN 1 ELSE 0 END
+        """
 
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
             FROM {qualified_table_name} {filters}
         """
-
         result = self.fetchone(query)
         return result[0], result[1]
 

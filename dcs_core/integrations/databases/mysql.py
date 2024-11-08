@@ -26,7 +26,7 @@ class MysqlDataSource(DB2DataSource):
         super().__init__(data_source_name, data_connection)
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
-            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "usa_phone": r"^\\+?1?[-.[:space:]]?\\(?[0-9]{3}\\)?[-.[:space:]]?[0-9]{3}[-.[:space:]]?[0-9]{4}$",
             "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
             "ssn": r"^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$",
@@ -196,6 +196,36 @@ class MysqlDataSource(DB2DataSource):
             regex = regex_pattern
 
         regex_query = f"CASE WHEN {field} REGEXP '{regex}' THEN 1 ELSE 0 END"
+        query = f"""
+            SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
+            FROM {qualified_table_name} {filters}
+        """
+        result = self.fetchone(query)
+        return result[0], result[1]
+
+    def query_get_usa_state_code_validity(
+        self, table: str, field: str, filters: str = None
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid USA state codes
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of valid state codes, count of total row count
+        """
+
+        valid_state_codes_str = ", ".join(
+            f"'{code}'" for code in self.valid_state_codes
+        )
+
+        filters = f"WHERE {filters}" if filters else ""
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        regex_query = f"""
+            CASE WHEN REGEXP_LIKE({field}, '^[A-Z]{{2}}$') AND UPPER({field}) IN ({valid_state_codes_str}) THEN 1 ELSE 0 END
+        """
+
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
             FROM {qualified_table_name} {filters}
