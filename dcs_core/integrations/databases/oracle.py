@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
+from datetime import datetime
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -418,3 +419,28 @@ class OracleDataSource(SQLDataSource):
         except Exception as e:
             print(f"Error occurred: {e}")
             return 0, 0
+
+    def query_get_time_diff(self, table: str, field: str) -> int:
+        """
+        Get the time difference
+        :param table: name of the index
+        :param field: field name of updated time column
+        :return: time difference in seconds
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"""
+            SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
+        """
+        query = f"""
+            SELECT {field}
+            FROM (
+                SELECT {field}
+                FROM {qualified_table_name}
+                ORDER BY {field} DESC
+            )
+            WHERE ROWNUM = 1
+        """
+        result = self.fetchone(query)
+        if result:
+            return int(abs(datetime.utcnow() - result[0]).total_seconds())
+        return 0
