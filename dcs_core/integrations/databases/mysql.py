@@ -232,3 +232,12 @@ class MysqlDataSource(DB2DataSource):
         """
         result = self.fetchone(query)
         return result[0], result[1]
+
+    def query_timestamp_metric(self):
+        raise NotImplementedError("Method not implemented for MySQLDataSource")
+
+    def query_timestamp_not_in_future_metric(self):
+        raise NotImplementedError("Method not implemented for MySQLDataSource")
+
+    def query_timestamp_date_not_in_future_metric(self):
+        raise NotImplementedError("Method not implemented for MySQLDataSource")
