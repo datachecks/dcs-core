@@ -552,7 +552,7 @@ The percent null keyword validation checks the percentage of null like keyword i
 ```yaml title="dcs_config.yaml"
 validations for product_db.products:
   - percent_null_keyword:
-     on: percent_null_keyboard(keyword)
+     on: percent_null_keyword(keyword)
 ```
 
 ## Count Timestamp String
