@@ -465,7 +465,7 @@ class OracleDataSource(SQLDataSource):
         """
 
         if filters:
-            query += f" AND {filters}"
+            query += f"WHERE {filters}"
 
         result = self.fetchone(query)
 

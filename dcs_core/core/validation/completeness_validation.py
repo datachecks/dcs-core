@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 from typing import Union
+import re
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -23,6 +24,8 @@ from dcs_core.core.validation.base import Validation
 class CountNullValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
             return self.data_source.query_get_null_count(
                 table=self.dataset_name,
                 field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
@@ -41,6 +44,8 @@ class CountNullValidation(Validation):
 class PercentageNullValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
             return self.data_source.query_get_null_percentage(
                 table=self.dataset_name,
                 field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
@@ -59,6 +64,8 @@ class PercentageNullValidation(Validation):
 class CountEmptyStringValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
             return self.data_source.query_get_empty_string_count(
                 table=self.dataset_name,
                 field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
@@ -77,6 +84,8 @@ class CountEmptyStringValidation(Validation):
 class PercentageEmptyStringValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
             return self.data_source.query_get_empty_string_percentage(
                 table=self.dataset_name,
                 field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
