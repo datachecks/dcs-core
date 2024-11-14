@@ -43,6 +43,9 @@ class MysqlDataSource(DB2DataSource):
         Connect to the data source
         """
         try:
+            ssl = (
+                True if self.data_connection.get("security", False) == "ssl" else False
+            )
             url = URL.create(
                 drivername="mysql+pymysql",
                 username=self.data_connection.get("username"),
@@ -54,6 +57,7 @@ class MysqlDataSource(DB2DataSource):
             engine = create_engine(
                 url,
                 isolation_level="AUTOCOMMIT",
+                connect_args={"ssl": {"ssl": ssl} if ssl else None},
             )
             self.connection = engine.connect()
             return self.connection

@@ -17,6 +17,7 @@
     "babel-jest": "^24.9.0",
     "buffer": "^6.0.3",
     "css-loader": "^6.8.1",
+    "datachecks": "file:",
     "eslint": "^6.6.0",
     "eslint-config-react-app": "^5.2.1",
     "eslint-plugin-flowtype": "4.6.0",
