@@ -678,7 +678,6 @@ class TestSQLDatasourceQueries:
         ) = postgres_datasource.query_timestamp_metric(
             table=self.TABLE_NAME,
             field="timestamp",
-            operation="count",
             predefined_regex="timestamp_iso",
         )
         assert valid_count == 4
