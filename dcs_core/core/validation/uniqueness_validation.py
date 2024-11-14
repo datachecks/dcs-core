@@ -12,23 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
 import re
+from typing import Union
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
-from dcs_core.integrations.databases.oracle import OracleDataSource
 from dcs_core.core.validation.base import Validation
+from dcs_core.integrations.databases.oracle import OracleDataSource
 
 
 class CountDuplicateValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
             if isinstance(self.data_source, OracleDataSource) and self.where_filter:
-                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_duplicate_count(
                 table=self.dataset_name,
-                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -45,10 +49,14 @@ class CountDistinctValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
             if isinstance(self.data_source, OracleDataSource) and self.where_filter:
-                self.where_filter = re.sub(r'(\b[a-zA-Z_]+\b)(?=\s*[=<>])', r'"\1"', self.where_filter)
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_distinct_count(
                 table=self.dataset_name,
-                field=f'"{self.field_name}"' if isinstance(self.data_source, OracleDataSource) else self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):

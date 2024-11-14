@@ -12,11 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
-from datetime import datetime
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -194,12 +194,12 @@ class OracleDataSource(SQLDataSource):
                 WITH extracted_timestamps AS (
                     SELECT
                         {field},
-                        TO_CHAR({field}, 'YYYY') AS year,      
-                        TO_CHAR({field}, 'MM') AS month,        
-                        TO_CHAR({field}, 'DD') AS day,        
-                        TO_CHAR({field}, 'HH24') AS hour,      
-                        TO_CHAR({field}, 'MI') AS minute,        
-                        TO_CHAR({field}, 'SS') AS second         
+                        TO_CHAR({field}, 'YYYY') AS year,
+                        TO_CHAR({field}, 'MM') AS month,
+                        TO_CHAR({field}, 'DD') AS day,
+                        TO_CHAR({field}, 'HH24') AS hour,
+                        TO_CHAR({field}, 'MI') AS minute,
+                        TO_CHAR({field}, 'SS') AS second
                     FROM {qualified_table_name}
                     {filters_clause}
                 ),
@@ -214,9 +214,9 @@ class OracleDataSource(SQLDataSource):
                                 (
                                     (month IN ('01', '03', '05', '07', '08', '10', '12') AND day BETWEEN '01' AND '31') OR
                                     (month IN ('04', '06', '09', '11') AND day BETWEEN '01' AND '30') OR
-                                    (month = '02' AND day BETWEEN '01' AND 
-                                        CASE 
-                                            WHEN MOD(TO_NUMBER(year), 400) = 0 OR 
+                                    (month = '02' AND day BETWEEN '01' AND
+                                        CASE
+                                            WHEN MOD(TO_NUMBER(year), 400) = 0 OR
                                                 (MOD(TO_NUMBER(year), 4) = 0 AND MOD(TO_NUMBER(year), 100) != 0) THEN '29'
                                             ELSE '28'
                                         END
@@ -315,7 +315,7 @@ class OracleDataSource(SQLDataSource):
                 FROM validated_timestamps
                 WHERE is_valid = 1 AND TO_TIMESTAMP(formatted_{field}, 'YYYY-MM-DD HH24:MI:SS') <= CURRENT_TIMESTAMP
             )
-            SELECT 
+            SELECT
                 (SELECT COUNT(*) FROM timestamps_not_in_future) AS valid_count,
                 (SELECT COUNT(*) FROM {qualified_table_name}) AS total_count
             FROM dual
@@ -399,10 +399,10 @@ class OracleDataSource(SQLDataSource):
                 SELECT *
                 FROM validated_dates
                 WHERE is_valid = 1
-                AND REGEXP_LIKE(formatted_{field}, '^\d{{4}}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) (\d{{2}}):([0-5][0-9]):([0-5][0-9])(\.\d{{1,3}})?$') 
-                AND TO_TIMESTAMP(formatted_{field}, 'YYYY-MM-DD HH24:MI:SS') <= CURRENT_TIMESTAMP 
+                AND REGEXP_LIKE(formatted_{field}, '^\d{{4}}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) (\d{{2}}):([0-5][0-9]):([0-5][0-9])(\.\d{{1,3}})?$')
+                AND TO_TIMESTAMP(formatted_{field}, 'YYYY-MM-DD HH24:MI:SS') <= CURRENT_TIMESTAMP
             )
-            SELECT 
+            SELECT
                 (SELECT COUNT(*) FROM dates_not_in_future) AS valid_count,
                 (SELECT COUNT(*) FROM {qualified_table_name}) AS total_count
             FROM dual
@@ -444,7 +444,7 @@ class OracleDataSource(SQLDataSource):
         if result:
             return int(abs(datetime.utcnow() - result[0]).total_seconds())
         return 0
-    
+
     def query_get_all_space_count(
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
@@ -458,9 +458,9 @@ class OracleDataSource(SQLDataSource):
         qualified_table_name = self.qualified_table_name(table)
 
         query = f"""
-            SELECT 
+            SELECT
                 COUNT(CASE WHEN TRIM({field}) IS NULL OR TRIM({field}) = '' THEN 1 END) AS space_count,
-                COUNT(*) AS total_count 
+                COUNT(*) AS total_count
             FROM {qualified_table_name}
         """
 
