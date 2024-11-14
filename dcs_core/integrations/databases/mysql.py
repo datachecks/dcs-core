@@ -44,7 +44,9 @@ class MysqlDataSource(DB2DataSource):
         """
         try:
             ssl = (
-                True if self.data_connection.get("security", False) == "ssl" else False
+                True
+                if self.data_connection.get("security", False) in ["ssl", "SSL"]
+                else False
             )
             url = URL.create(
                 drivername="mysql+pymysql",
