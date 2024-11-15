@@ -1078,7 +1078,7 @@ def test_should_parse_percent_null_keyword():
     yaml_string = """
     validations for source.table:
         - test:
-            on: percent_null_keyboard(keyword)
+            on: percent_null_keyword(keyword)
         """
     configuration = load_configuration_from_yaml_str(yaml_string)
     assert (

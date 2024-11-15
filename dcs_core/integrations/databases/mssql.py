@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -24,6 +24,19 @@ from dcs_core.core.datasource.sql_datasource import SQLDataSource
 class MssqlDataSource(SQLDataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
+        self.regex_patterns = {
+            "uuid": r"[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%",
+            "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
+            "email": r"%[a-zA-Z0-9._%+-]@[a-zA-Z0-9.-]%.[a-zA-Z]%",
+            "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
+            "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
+            "sedol": r"[B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][0-9]",
+            "lei": r"[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][0-9][0-9]",
+            "cusip": r"[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]",
+            "figi": r"BBG[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]",
+            "isin": r"[A-Z][A-Z][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][0-9]",
+            "perm_id": r"^\d{4}([- ]?)\d{4}\1\d{4}\1\d{4}([- ]?)\d{3}$",
+        }
 
     def connect(self) -> Any:
         """
@@ -85,6 +98,140 @@ class MssqlDataSource(SQLDataSource):
 
         return f"IIF({field} LIKE '{pattern}', 1, 0)"
 
+    def query_get_variance(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the variance value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT VAR({}) FROM {}".format(field, qualified_table_name)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return round(self.fetchone(query)[0], 2)
+
+    def query_get_stddev(self, table: str, field: str, filters: str = None) -> int:
+        """
+        Get the standard deviation value
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return:
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = "SELECT STDEV({}) FROM {}".format(field, qualified_table_name)
+        if filters:
+            query += " WHERE {}".format(filters)
+
+        return round(self.fetchone(query)[0], 2)
+
+    def query_get_percentile(
+        self, table: str, field: str, percentile: float, filters: str = None
+    ) -> float:
+        """
+        Get the specified percentile value of a numeric column in a table.
+        :param table: table name
+        :param field: column name
+        :param percentile: percentile to calculate (e.g., 0.2 for 20th percentile)
+        :param filters: filter condition
+        :return: the value at the specified percentile
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"""
+            SELECT PERCENTILE_CONT({percentile}) WITHIN GROUP (ORDER BY {field})
+            OVER () AS percentile_value
+            FROM {qualified_table_name}
+        """
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)
+        return round(result[0], 2) if result and result[0] is not None else None
+
+    def query_get_null_keyword_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of NULL-like values (specific keywords) in the specified column for MSSQL.
+        :param table: table name
+        :param field: column name
+        :param operation: type of operation ('count' or 'percent')
+        :param filters: filter condition
+        :return: count (int) or percentage (float) of NULL-like keyword values
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN {field} IS NULL
+                    OR LTRIM(RTRIM(LOWER(ISNULL({field}, '')))) IN ('nothing', 'nil', 'null', 'none', 'n/a', '')
+                    THEN 1
+                    ELSE 0
+                END) AS null_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name}
+        """
+
+        if filters:
+            query += f" AND {filters}"
+
+        result = self.fetchone(query)
+
+        if not result or not result[1]:
+            return 0
+
+        null_count = int(result[0] if result[0] is not None else 0)
+        total_count = int(result[1])
+
+        if operation == "percent":
+            return (
+                round((null_count / total_count) * 100, 2) if total_count > 0 else 0.0
+            )
+
+        return null_count
+
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LEN"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LEN"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(LEN"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+
+        if metric.lower() == "avg":
+            query = (
+                f'SELECT AVG(CAST(LEN("{field}") AS FLOAT)) FROM {qualified_table_name}'
+            )
+        else:
+            query = f'SELECT {sql_function}("{field}")) FROM {qualified_table_name}'
+
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result
+
     def query_string_pattern_validity(
         self,
         table: str,
@@ -121,7 +268,72 @@ class MssqlDataSource(SQLDataSource):
             FROM {qualified_table_name}
             {filters}
         """
+        if predefined_regex_pattern == "perm_id":
+            query = f"""
+                SELECT
+                SUM(CASE
+                    WHEN {field} LIKE '[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9]'
+                    OR {field} LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                    THEN 1
+                    ELSE 0
+                END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
+            """
+        elif predefined_regex_pattern == "ssn":
+            query = f"""
+            SELECT
+                SUM(CASE
+                        WHEN {field} LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                            AND LEFT({field}, 3) NOT IN ('000', '666')
+                            AND LEFT({field}, 1) != '9'
+                            AND SUBSTRING({field}, 5, 2) != '00'
+                            AND RIGHT({field}, 4) != '0000'
+                        THEN 1
+                        ELSE 0
+                    END) AS valid_count,
+            COUNT(*) AS total_count
+            FROM {qualified_table_name}
+            """
+        elif predefined_regex_pattern == "usa_phone":
+            query = f"""
+            SELECT
+                SUM(CASE
+                        WHEN ({field} LIKE '+1 [0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1-[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1.[0-9][0-9][0-9].[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9]) [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9].[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9]-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9]) [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9])[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9])[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '+1 ([0-9][0-9][0-9]).[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9]).[0-9][0-9][0-9].[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '([0-9][0-9][0-9])-[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9] [0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]'
+                        OR {field} LIKE '[0-9][0-9][0-9].[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]')
+                        THEN 1
+                        ELSE 0
+                    END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
 
+        """
+        elif predefined_regex_pattern == "usa_zip_code":
+            query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN PATINDEX('%[0-9][0-9][0-9][0-9][0-9]%[-][0-9][0-9][0-9][0-9]%', CAST({field} AS VARCHAR)) > 0
+                    OR PATINDEX('%[0-9][0-9][0-9][0-9][0-9]%', CAST({field} AS VARCHAR)) > 0
+                    THEN 1 ELSE 0 END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name};
+        """
         result = self.fetchone(query)
         return result[0], result[1]
 

@@ -714,7 +714,7 @@ class SQLDataSource(DataSource):
         """
         qualified_table_name = self.qualified_table_name(table)
 
-        query = f""" SELECT SUM(CASE WHEN LOWER({field}) IN ('nothing', 'nil', 'null', 'none', 'n/a') THEN 1 ELSE 0 END) AS null_count,COUNT(*) AS total_count
+        query = f""" SELECT SUM(CASE WHEN LOWER({field}) IN ('nothing', 'nil', 'null', 'none', 'n/a', null) THEN 1 ELSE 0 END) AS null_count,COUNT(*) AS total_count
                    FROM {qualified_table_name}"""
 
         if filters:

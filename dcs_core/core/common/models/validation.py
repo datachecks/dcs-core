@@ -68,13 +68,13 @@ class ValidationFunction(str, Enum):
     MAX = "max"
     AVG = "avg"
     SUM = "sum"
-    MEDIAN = "median"
+    MEDIAN = "median"  # todo not implemented
     STDDEV = "stddev"
     VARIANCE = "variance"
-    COUNT_FALSE = "count_false"
-    PERCENT_FALSE = "percent_false"
-    COUNT_TRUE = "count_true"
-    PERCENT_TRUE = "percent_true"
+    COUNT_FALSE = "count_false"  # todo not implemented
+    PERCENT_FALSE = "percent_false"  # todo not implemented
+    COUNT_TRUE = "count_true"  # todo not implemented
+    PERCENT_TRUE = "percent_true"  # todo not implemented
     PERCENTILE_20 = "percentile_20"
     PERCENTILE_40 = "percentile_40"
     PERCENTILE_60 = "percentile_60"
@@ -96,17 +96,17 @@ class ValidationFunction(str, Enum):
 
     # Completeness validations 8
     COUNT_NULL = "count_null"
-    COUNT_NOT_NULL = "count_not_null"
+    COUNT_NOT_NULL = "count_not_null"  # todo not implemented
     PERCENT_NULL = "percent_null"
-    PERCENT_NOT_NULL = "percent_not_null"
+    PERCENT_NOT_NULL = "percent_not_null"  # todo not implemented
     COUNT_EMPTY_STRING = "count_empty_string"
     PERCENT_EMPTY_STRING = "percent_empty_string"
-    COUNT_NAN = "count_nan"
-    PERCENT_NAN = "percent_nan"
+    COUNT_NAN = "count_nan"  # todo not implemented
+    PERCENT_NAN = "percent_nan"  # todo not implemented
     COUNT_ALL_SPACE = "count_all_space"
     PERCENT_ALL_SPACE = "percent_all_space"
     COUNT_NULL_KEYWORD = "count_null_keyword"
-    PERCENT_NULL_KEYWORD = "percent_null_keyboard"
+    PERCENT_NULL_KEYWORD = "percent_null_keyword"
 
     # Custom SQL
     CUSTOM_SQL = "custom_sql"
