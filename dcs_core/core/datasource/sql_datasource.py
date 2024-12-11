@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Union
 
 from loguru import logger
-from sqlalchemy import inspect, text
+from sqlalchemy import MetaData, Table, func, inspect, select, text
 from sqlalchemy.engine import Connection
 
 from dcs_core.core.datasource.base import DataSource
@@ -32,6 +32,7 @@ class SQLDataSource(DataSource):
 
         self.connection: Union[Connection, None] = None
         self.database: str = data_connection.get("database")
+        self.metadata = MetaData()
         self.use_sa_text_query = True
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
@@ -127,6 +128,21 @@ class SQLDataSource(DataSource):
         """
         return f"{table_name}"
 
+    def get_table(self, table_name: str) -> Table:
+        """
+        Returns Table Object for a specific table name
+        :param table_name: name of the table
+        :return: Table object
+        """
+
+        table = Table(
+            self.qualified_table_name(table_name),
+            self.metadata,
+            autoload_with=self.connection
+        )
+
+        return table
+
     def query_get_column_metadata(self, table_name: str) -> Dict[str, str]:
         """
         Get the column metadata
@@ -148,18 +164,6 @@ class SQLDataSource(DataSource):
         """
         return inspect(self.connection.engine).get_table_names()
 
-    def query_get_row_count(self, table: str, filters: str = None) -> int:
-        """
-        Get the row count
-        :param table: name of the table
-        :param filters: optional filter
-        """
-        qualified_table_name = self.qualified_table_name(table)
-        query = f"SELECT COUNT(*) FROM {qualified_table_name}"
-        if filters:
-            query += f" WHERE {filters}"
-        return self.fetchone(query)[0]
-
     def query_get_custom_sql(self, query: str) -> Union[int, float, None]:
         """
         Get the first row of the custom sql query
@@ -171,6 +175,21 @@ class SQLDataSource(DataSource):
         else:
             return None
 
+    def query_get_row_count(self, table: str, filters: str = None) -> int:
+        """
+        Get the row count
+        :param table: name of the table
+        :param filters: optional filter
+        """
+        qualified_table_name = self.get_table(table)
+
+        query = select(func.count()).select_from(qualified_table_name)
+
+        if filters:
+            query = query.where(text(filters))
+        var = self.connection.execute(query).one()[0]
+        return var
+
     def query_get_max(self, table: str, field: str, filters: str = None) -> int:
         """
         Get the max value
@@ -179,13 +198,16 @@ class SQLDataSource(DataSource):
         :param filters: filter condition
         :return:
         """
-        qualified_table_name = self.qualified_table_name(table)
 
-        query = "SELECT MAX({}) FROM {}".format(field, qualified_table_name)
+        qualified_table_name = self.get_table(table)
 
+        column = getattr(qualified_table_name.c, field)
+
+        query = select(func.max(column))
         if filters:
-            query += " WHERE {}".format(filters)
-        var = self.fetchone(query)[0]
+            query = query.where(text(filters))
+
+        var = self.connection.execute(query).one()[0]
         return var
 
     def query_get_min(self, table: str, field: str, filters: str = None) -> int:
@@ -242,7 +264,8 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = "SELECT VAR_SAMP({}) FROM {}".format(field, qualified_table_name)
+        query = "SELECT VAR_SAMP({}) FROM {}".format(
+            field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -257,7 +280,8 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = "SELECT STDDEV_SAMP({}) FROM {}".format(field, qualified_table_name)
+        query = "SELECT STDDEV_SAMP({}) FROM {}".format(
+            field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -332,7 +356,8 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, qualified_table_name)
+        query = "SELECT COUNT(DISTINCT {}) FROM {}".format(
+            field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
 
@@ -474,9 +499,11 @@ class SQLDataSource(DataSource):
             )
 
         if predefined_regex_pattern:
-            regex_query = f"case when {field} ~ '{self.regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
+            regex_query = f"case when {field} ~ '{
+                self.regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
         else:
-            regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
+            regex_query = f"case when {field} ~ '{
+                regex_pattern}' then 1 else 0 end"
 
         query = f"""
             select sum({regex_query}) as valid_count, count(*) as total_count
@@ -506,9 +533,11 @@ class SQLDataSource(DataSource):
         qualified_table_name = self.qualified_table_name(table)
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
-            regex_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
+            regex_query = f"CASE WHEN {
+                field} IN ({values_str}) THEN 1 ELSE 0 END"
         else:
-            regex_query = f"CASE WHEN {field} ~ '{regex_pattern}' THEN 1 ELSE 0 END"
+            regex_query = f"CASE WHEN {field} ~ '{
+                regex_pattern}' THEN 1 ELSE 0 END"
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) as total_count
             FROM {qualified_table_name}
@@ -539,7 +568,8 @@ class SQLDataSource(DataSource):
             sql_function = "AVG(LENGTH"
         else:
             raise ValueError(
-                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+                f"Invalid metric '{
+                    metric}'. Choose from 'max', 'min', or 'avg'."
             )
 
         query = f"SELECT {sql_function}({field})) FROM {qualified_table_name}"
@@ -569,7 +599,8 @@ class SQLDataSource(DataSource):
 
         qualified_table_name = self.qualified_table_name(table)
 
-        regex_query = f"CASE WHEN {field} ~ '^[A-Z]{{2}}$' AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
+        regex_query = f"CASE WHEN {
+            field} ~ '^[A-Z]{{2}}$' AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
 
         query = f"""
             SELECT SUM({regex_query}) AS valid_count, COUNT(*) AS total_count
@@ -584,7 +615,8 @@ class SQLDataSource(DataSource):
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
 
-        valid_query = f"SELECT COUNT({field}) FROM {qualified_table_name} WHERE {field} IS NOT NULL AND {field} "
+        valid_query = f"SELECT COUNT({field}) FROM {qualified_table_name} WHERE {
+            field} IS NOT NULL AND {field} "
 
         if field.lower().startswith("lat"):
             valid_query += "BETWEEN -90 AND 90"
@@ -603,7 +635,8 @@ class SQLDataSource(DataSource):
 
             total_count = self.fetchone(total_query)[0]
 
-            result = (valid_count / total_count) * 100 if total_count > 0 else 0
+            result = (valid_count / total_count) * \
+                100 if total_count > 0 else 0
             return round(result, 2)
 
         return valid_count
@@ -620,7 +653,8 @@ class SQLDataSource(DataSource):
         :return: the value at the specified percentile
         """
         qualified_table_name = self.qualified_table_name(table)
-        query = f"SELECT PERCENTILE_DISC({percentile}) WITHIN GROUP (ORDER BY {field}) FROM {qualified_table_name}"
+        query = f"SELECT PERCENTILE_DISC({percentile}) WITHIN GROUP (ORDER BY {
+            field}) FROM {qualified_table_name}"
         if filters:
             query += f" WHERE {filters}"
         return round(self.fetchone(query)[0], 2)
@@ -630,7 +664,8 @@ class SQLDataSource(DataSource):
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
 
-        zero_query = f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} = 0"
+        zero_query = f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {
+            field} = 0"
 
         if filters:
             zero_query += f" AND {filters}"
@@ -670,7 +705,8 @@ class SQLDataSource(DataSource):
             total_count_query += f" WHERE {filters}"
 
         if operation == "percent":
-            query = f"SELECT (CAST(({negative_query}) AS float) / CAST(({total_count_query}) AS float)) * 100"
+            query = f"SELECT (CAST(({
+                negative_query}) AS float) / CAST(({total_count_query}) AS float)) * 100"
         else:
             query = negative_query
 
@@ -751,7 +787,8 @@ class SQLDataSource(DataSource):
         if predefined_regex == "timestamp_iso":
             regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
         else:
-            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+            raise ValueError(f"Unknown predefined regex pattern: {
+                             predefined_regex}")
 
         filters_clause = f"WHERE {filters}" if filters else ""
 
@@ -846,7 +883,8 @@ class SQLDataSource(DataSource):
         if predefined_regex == "timestamp_iso":
             regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
         else:
-            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+            raise ValueError(f"Unknown predefined regex pattern: {
+                             predefined_regex}")
 
         filters_clause = f"WHERE {filters}" if filters else ""
 
@@ -941,7 +979,8 @@ class SQLDataSource(DataSource):
         if predefined_regex == "timestamp_iso":
             regex_condition = f"{field} ~ '{timestamp_iso_regex}'"
         else:
-            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+            raise ValueError(f"Unknown predefined regex pattern: {
+                             predefined_regex}")
 
         filters_clause = f"WHERE {filters}" if filters else ""
 
