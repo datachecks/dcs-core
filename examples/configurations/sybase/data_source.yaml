@@ -1,0 +1,11 @@
+# Data sources to query
+data_sources:
+  - name: sysbase_db
+    type: sybase
+    connection:
+      host: !ENV ${SYBASE_HOST}
+      port: !ENV ${SYBASE_PORT}
+      username: !ENV ${SYBASE_USER}
+      password: !ENV ${SYBASE_PASS}
+      database: testdb
+      schema: dbo

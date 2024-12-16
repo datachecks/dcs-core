@@ -1,0 +1,4 @@
+validations for sysbase_db.dcs_iris:
+  - row count:
+      on: count_rows
+      where: '"id" > 100'

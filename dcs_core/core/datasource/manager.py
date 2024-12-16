@@ -42,6 +42,7 @@ class DataSourceManager:
         "mssql": "MssqlDataSource",
         "oracle": "OracleDataSource",
         "db2": "DB2DataSource",
+        "sybase": "SybaseDataSource",
     }
 
     def __init__(self, config: Configuration):
