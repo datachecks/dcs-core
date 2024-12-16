@@ -2379,7 +2379,7 @@ signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
 name = "odbcinst"
 version = "1.0.1"
 description = "return output from unixODBC `odbcinst` command"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "odbcinst-1.0.1-py3-none-any.whl", hash = "sha256:a92157168560ecc85f9d734b707784ec567b652241d28b5913ed6328264834e2"},
@@ -3002,7 +3002,7 @@ rsa = ["cryptography"]
 name = "pyodbc"
 version = "5.2.0"
 description = "DB API module for ODBC"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "pyodbc-5.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:eb0850e3e3782f57457feed297e220bb20c3e8fd7550d7a6b6bb96112bd9b6fe"},
@@ -3959,7 +3959,7 @@ tests = ["packaging", "pytz"]
 name = "sqlalchemy-sybase"
 version = "2.0.0"
 description = "SAP ASE (Sybase) for SQLAlchemy"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "sqlalchemy-sybase-2.0.0.tar.gz", hash = "sha256:fb328b9542d24f2b9b8a68da3d3637eb43450c8ab37a4acf397124c93095409e"},
@@ -4316,7 +4316,7 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 type = ["pytest-mypy"]
 
 [extras]
-all = ["databricks-sql-connector", "elasticsearch", "ibm-db", "ibm-db-sa", "opensearch-py", "oracledb", "psycopg2-binary", "pymysql", "pyodbc", "pyspark", "snowflake-sqlalchemy", "sqlalchemy-bigquery"]
+all = ["databricks-sql-connector", "elasticsearch", "ibm-db", "ibm-db-sa", "opensearch-py", "oracledb", "psycopg2-binary", "pymysql", "pyodbc", "pyspark", "snowflake-sqlalchemy", "sqlalchemy-bigquery", "sqlalchemy-sybase"]
 bigquery = ["sqlalchemy-bigquery"]
 databricks = ["databricks-sql-connector"]
 db2 = ["ibm-db", "ibm-db-sa"]
@@ -4328,8 +4328,9 @@ oracle = ["oracledb"]
 postgres = ["psycopg2-binary"]
 snowflake = ["snowflake-sqlalchemy"]
 spark = ["pyspark"]
+sybase = ["sqlalchemy-sybase"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "657ce925f535978a0ae311e7a94ea189815dcb78360866f1192f3eb663b30ea3"
+content-hash = "20b6cdd10a005e6fda29b112dda119ebdb7776b6c3367cef4393936e941c980c"
