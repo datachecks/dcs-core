@@ -26,30 +26,28 @@ class SybaseDataSource(SQLDataSource):
         super().__init__(data_source_name, data_connection)
 
     def connect(self) -> Any:
-        """
-        Connect to the Sybase data source
-        """
         try:
-            driver = self.data_connection.get("driver") or "Adaptive Server Enterprise"
-            if not driver.startswith("{") and not driver.endswith("}"):
-                driver = "{" + driver + "}"
+            driver = self.data_connection.get("driver") or "FreeTDS"
+            username = self.data_connection.get("username")
+            password = self.data_connection.get("password")
+            host = self.data_connection.get("host")
+            port = self.data_connection.get("port", 5000)
+            database = self.data_connection.get("database")
+            schema = self.data_connection.get("schema", "dbo") or "dbo"
 
-            schema = self.data_connection.get("schema") or "dbo"
+            connection_string = (
+                f"sybase+pyodbc://{username}:{password}@{host}:{port}/{database}"
+                f"?driver={driver}"
+            )
+            connection_string_with_schema = (
+                f"{connection_string}&options=-csearch_path={schema}"
+            )
             engine = create_engine(
-                f"sybase+pyodbc://:@",
-                connect_args={
-                    "DRIVER": driver,
-                    "UID": self.data_connection.get("username"),
-                    "PWD": self.data_connection.get("password"),
-                    "SERVER": self.data_connection.get("host"),
-                    "PORT": self.data_connection.get("port"),
-                    "DATABASE": self.data_connection.get("database"),
-                    "options": f"-csearch_path={schema}",
-                },
-                isolation_level="AUTOCOMMIT",
+                connection_string_with_schema, isolation_level="AUTOCOMMIT"
             )
             self.connection = engine.connect()
             return self.connection
+
         except Exception as e:
             raise DataChecksDataSourcesConnectionError(
                 message=f"Failed to connect to Sybase data source: [{str(e)}]"
