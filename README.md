@@ -103,6 +103,7 @@ Datachecks supports sql and search data sources. Below are the list of supported
 | [MS SQL Server](https://docs.datachecks.io/dcs-oss/integrations/transactional/mssql)  | Transactional Database | :thumbsup: |
 | [Oracle](https://docs.datachecks.io/dcs-oss/integrations/transactional/oracle)        | Transactional Database | :thumbsup: |
 | [DB2](https://docs.datachecks.io/dcs-oss/integrations/transactional/db2)              | Transactional Database | :thumbsup: |
+| [SAP Sybase](https://docs.datachecks.io/dcs-oss/integrations/warehouse/sybase)    | Transactional Database         | :thumbsup: |
 | [OpenSearch](https://docs.datachecks.io/dcs-oss/integrations/search/opensearch)       | Search Engine          | :thumbsup: |
 | [Elasticsearch](https://docs.datachecks.io/dcs-oss/integrations/search/elasticsearch) | Search Engine          | :thumbsup: |
 | [GCP BigQuery](https://docs.datachecks.io/dcs-oss/integrations/warehouse/bigquery)    | Data Warehouse         | :thumbsup: |

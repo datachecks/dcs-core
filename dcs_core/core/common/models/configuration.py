@@ -42,6 +42,7 @@ class DataSourceType(str, Enum):
     SPARK_DF = "spark_df"
     ORACLE = "oracle"
     DB2 = "db2"
+    SYBASE = "sybase"
 
 
 class DataSourceLanguageSupport(str, Enum):

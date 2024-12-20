@@ -33,6 +33,4 @@ def ibm_db2_dll_files_loader():
             dll_directory = os.path.join(ibm_db_home, "bin")
             os.add_dll_directory(dll_directory)
         else:
-            print(
-                "IBM_DB_HOME environment variable is not set. Please set it to proceed."
-            )
+            print("IBM_DB_HOME environment variable is not set. Please set to use DB2.")
