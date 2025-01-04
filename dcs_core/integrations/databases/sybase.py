@@ -24,6 +24,19 @@ from dcs_core.core.datasource.sql_datasource import SQLDataSource
 class SybaseDataSource(SQLDataSource):
     def __init__(self, data_source_name: str, data_connection: Dict):
         super().__init__(data_source_name, data_connection)
+        self.regex_patterns = {
+            "uuid": r"%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%-%[0-9a-fA-F]%",
+            "usa_phone": r"%[0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9][0-9]%",
+            "email": r"%[a-zA-Z0-9._%+-]@[a-zA-Z0-9.-]%.[a-zA-Z]%",
+            "usa_zip_code": r"[0-9][0-9][0-9][0-9][0-9]%",
+            "ssn": r"%[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]%",
+            "sedol": r"[B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][B-DF-HJ-NP-TV-XZ0-9][0-9]",
+            "lei": r"[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][0-9][0-9]",
+            "cusip": r"[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]",
+            "figi": r"BBG[A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]",
+            "isin": r"[A-Z][A-Z][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][0-9]",
+            "perm_id": r"%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9]%",
+        }
 
     def connect(self) -> Any:
         try:
@@ -230,39 +243,79 @@ class SybaseDataSource(SQLDataSource):
         result = self.fetchone(query)[0]
         return round(result, 2) if metric.lower() == "avg" else result
 
-    # def query_string_pattern_validity(
-    #     self,
-    #     table: str,
-    #     field: str,
-    #     regex_pattern: str = None,
-    #     predefined_regex_pattern: str = None,
-    #     filters: str = None,
-    # ) -> Tuple[int, int]:
-    #     """
-    #     Get the count of valid values based on the regex pattern
-    #     :param table: table name
-    #     :param field: column name
-    #     :param regex_pattern: regex pattern
-    #     :param predefined_regex_pattern: predefined regex pattern
-    #     :param filters: filter condition
-    #     :return: count of valid values, count of total row count
-    #     """
-    #     filters = f"WHERE {filters}" if filters else ""
-    #     qualified_table_name = self.qualified_table_name(table)
+    def query_string_pattern_validity(
+        self,
+        table: str,
+        field: str,
+        regex_pattern: str = None,
+        predefined_regex_pattern: str = None,
+        filters: str = None,
+    ) -> Tuple[int, int]:
+        """
+        Get the count of valid values based on the regex pattern
+        :param table: table name
+        :param field: column name
+        :param regex_pattern: regex pattern
+        :param predefined_regex_pattern: predefined regex pattern
+        :param filters: filter condition
+        :return: count of valid values, count of total row count
+        """
+        filters = f"WHERE {filters}" if filters else ""
+        qualified_table_name = self.qualified_table_name(table)
 
-    #     if not regex_pattern and not predefined_regex_pattern:
-    #         raise ValueError(
-    #             "Either regex_pattern or predefined_regex_pattern should be provided"
-    #         )
+        if not regex_pattern and not predefined_regex_pattern:
+            raise ValueError(
+                "Either regex_pattern or predefined_regex_pattern should be provided"
+            )
 
-    #     if predefined_regex_pattern:
-    #         regex_query = f"case when {field} ~ '{self.regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
-    #     else:
-    #         regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
-
-    #     query = f"""
-    #         select sum({regex_query}) as valid_count, count(*) as total_count
-    #         from {qualified_table_name} {filters}
-    #     """
-    #     result = self.fetchone(query)
-    #     return result[0], result[1]
+        if predefined_regex_pattern:
+            length_query = None
+            pt = self.regex_patterns[predefined_regex_pattern]
+            if predefined_regex_pattern == "uuid":
+                length_query = f"LEN({field}) = 36"
+            elif predefined_regex_pattern == "perm_id":
+                length_query = f"LEN({field}) BETWEEN 19 AND 23 "
+            elif predefined_regex_pattern == "lei":
+                length_query = f"LEN({field}) = 20"
+            elif predefined_regex_pattern == "cusip":
+                length_query = f"LEN({field}) = 9"
+            elif predefined_regex_pattern == "figi":
+                length_query = f"LEN({field}) = 12"
+            elif predefined_regex_pattern == "isin":
+                length_query = f"LEN({field}) = 12"
+            elif predefined_regex_pattern == "sedol":
+                length_query = f"LEN({field}) = 7"
+            elif predefined_regex_pattern == "ssn":
+                length_query = f"LEN({field}) = 11"
+            elif predefined_regex_pattern == "usa_zip_code":
+                query = f"""
+                    SELECT
+                        SUM(CASE
+                            WHEN PATINDEX('%[0-9][0-9][0-9][0-9][0-9]%', CAST({field} AS VARCHAR)) > 0
+                            AND (LEN(CAST({field} AS VARCHAR)) = 5 OR LEN(CAST({field} AS VARCHAR)) = 9)
+                            THEN 1
+                            ELSE 0
+                        END) AS valid_count,
+                        COUNT(*) AS total_count
+                    FROM {qualified_table_name} {filters};
+                    """
+                result = self.fetchone(query)
+                return result[0], result[1]
+            if not length_query:
+                regex_query = f"PATINDEX('{pt}', {field}) > 0"
+            else:
+                regex_query = f"PATINDEX('{pt}', {field}) > 0 AND {length_query}"
+        else:
+            regex_query = self.convert_regex_to_sybase_pattern(regex_pattern)
+        query = f"""
+            SELECT
+                SUM(CASE
+                        WHEN {regex_query}
+                        THEN 1
+                        ELSE 0
+                    END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name} {filters}
+        """
+        result = self.fetchone(query)
+        return result[0], result[1]
