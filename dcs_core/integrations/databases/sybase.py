@@ -12,7 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import random
 import re
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
@@ -348,3 +350,214 @@ class SybaseDataSource(SQLDataSource):
                 updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
             return int((datetime.utcnow() - updated_time).total_seconds())
         return 0
+
+    def query_timestamp_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Tuple containing valid count and total count (or percentage)
+        """
+
+        qualified_table_name = self.qualified_table_name(table)
+
+        temp_table_suffix = f"{int(time.time())}_{random.randint(1000, 9999)}"
+        extracted_table = f"#extracted_timestamps_{temp_table_suffix}"
+        validated_table = f"#validated_timestamps_{temp_table_suffix}"
+
+        if predefined_regex == "timestamp_iso":
+            filters_clause = f"WHERE {filters}" if filters else ""
+
+            query = f"""
+                -- Extract timestamp components
+                SELECT
+                    {field},
+                    LEFT(CONVERT(VARCHAR, {field}, 120), 4) AS year,       -- Extract year
+                    SUBSTRING(CONVERT(VARCHAR, {field}, 120), 6, 2) AS month,  -- Extract month
+                    SUBSTRING(CONVERT(VARCHAR, {field}, 120), 9, 2) AS day,    -- Extract day
+                    SUBSTRING(CONVERT(VARCHAR, {field}, 120), 12, 2) AS hour,  -- Extract hour
+                    SUBSTRING(CONVERT(VARCHAR, {field}, 120), 15, 2) AS minute, -- Extract minute
+                    SUBSTRING(CONVERT(VARCHAR, {field}, 120), 18, 2) AS second  -- Extract second
+                INTO {extracted_table}
+                FROM {qualified_table_name}
+                {filters_clause};
+
+                -- Validate timestamps and calculate the is_valid flag
+                SELECT
+                    {field},
+                    CASE
+                        WHEN
+                            -- Validate year, month, and day formats
+                            year LIKE '[0-9][0-9][0-9][0-9]' AND
+                            month LIKE '[0-1][0-9]' AND month BETWEEN '01' AND '12' AND
+                            day LIKE '[0-3][0-9]' AND day BETWEEN '01' AND
+                                CASE
+                                    -- Check for days in each month
+                                    WHEN month IN ('01', '03', '05', '07', '08', '10', '12') THEN '31'
+                                    WHEN month IN ('04', '06', '09', '11') THEN '30'
+                                    WHEN month = '02' THEN
+                                        CASE
+                                            -- Check for leap years
+                                            WHEN (CAST(year AS INT) % 400 = 0 OR (CAST(year AS INT) % 100 != 0 AND CAST(year AS INT) % 4 = 0)) THEN '29'
+                                            ELSE '28'
+                                        END
+                                    ELSE '00' -- Invalid month
+                                END AND
+                            -- Validate time components
+                            hour LIKE '[0-2][0-9]' AND hour BETWEEN '00' AND '23' AND
+                            minute LIKE '[0-5][0-9]' AND
+                            second LIKE '[0-5][0-9]'
+                        THEN 1
+                        ELSE 0
+                    END AS is_valid
+                INTO {validated_table}
+                FROM {extracted_table};
+
+                -- Get the counts
+                SELECT
+                    SUM(is_valid) AS valid_count,
+                    COUNT(*) AS total_count
+                FROM {validated_table};
+            """
+            try:
+                result = self.fetchone(query)
+                valid_count = result[0]
+                total_count = result[1]
+
+                return valid_count, total_count
+            except Exception as e:
+                print(f"Error occurred: {e}")
+                return 0, 0
+        else:
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+    def query_timestamp_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: regex pattern
+        :param filters: filter condition
+        :return: Count of valid timestamps not in the future and total count or percentage
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if predefined_regex != "timestamp_iso":
+            raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
+
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN
+                        -- Validate year, month, day
+                        DATEPART(yy, {field}) BETWEEN 1 AND 9999 AND
+                        DATEPART(mm, {field}) BETWEEN 1 AND 12 AND
+                        DATEPART(dd, {field}) BETWEEN 1 AND
+                            CASE
+                                WHEN DATEPART(mm, {field}) IN (1, 3, 5, 7, 8, 10, 12) THEN 31
+                                WHEN DATEPART(mm, {field}) IN (4, 6, 9, 11) THEN 30
+                                WHEN DATEPART(mm, {field}) = 2 THEN
+                                    CASE
+                                        WHEN DATEPART(yy, {field}) % 400 = 0 OR
+                                            (DATEPART(yy, {field}) % 4 = 0 AND DATEPART(yy, {field}) % 100 != 0) THEN 29
+                                        ELSE 28
+                                    END
+                                ELSE 0
+                            END AND
+                        -- Validate hour, minute, second
+                        DATEPART(hh, {field}) BETWEEN 0 AND 23 AND
+                        DATEPART(mi, {field}) BETWEEN 0 AND 59 AND
+                        DATEPART(ss, {field}) BETWEEN 0 AND 59 AND
+                        -- Ensure timestamp is not in the future
+                        {field} <= GETDATE()
+                    THEN 1
+                    ELSE 0
+                END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name}
+            {filters_clause}
+        """
+
+        try:
+            result = self.fetchone(query)
+            valid_count = result[0]
+            total_count = result[1]
+
+            return valid_count, total_count
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0
+
+    def query_timestamp_date_not_in_future_metric(
+        self,
+        table: str,
+        field: str,
+        predefined_regex: str,
+        filters: str = None,
+    ) -> Union[float, int]:
+        """
+        :param table: Table name
+        :param field: Column name
+        :param predefined_regex: The regex pattern to use (e.g., "timestamp_iso")
+        :param filters: Optional filter condition
+        :return: Tuple containing count of valid dates not in the future and total count
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        filters_clause = f"WHERE {filters}" if filters else ""
+
+        query = f"""
+            SELECT
+                SUM(CASE
+                    WHEN
+                        -- Validate year, month, and day
+                        DATEPART(yy, {field}) BETWEEN 1 AND 9999 AND
+                        DATEPART(mm, {field}) BETWEEN 1 AND 12 AND
+                        DATEPART(dd, {field}) BETWEEN 1 AND
+                            CASE
+                                WHEN DATEPART(mm, {field}) IN (1, 3, 5, 7, 8, 10, 12) THEN 31
+                                WHEN DATEPART(mm, {field}) IN (4, 6, 9, 11) THEN 30
+                                WHEN DATEPART(mm, {field}) = 2 THEN
+                                    CASE
+                                        WHEN DATEPART(yy, {field}) % 400 = 0 OR
+                                            (DATEPART(yy, {field}) % 4 = 0 AND DATEPART(yy, {field}) % 100 != 0) THEN 29
+                                        ELSE 28
+                                    END
+                                ELSE 0
+                            END AND
+                        -- Validate hour, minute, and second
+                        DATEPART(hh, {field}) BETWEEN 0 AND 23 AND
+                        DATEPART(mi, {field}) BETWEEN 0 AND 59 AND
+                        DATEPART(ss, {field}) BETWEEN 0 AND 59 AND
+                        -- Ensure the timestamp is not in the future
+                        {field} <= GETDATE()
+                    THEN 1
+                    ELSE 0
+                END) AS valid_count,
+                COUNT(*) AS total_count
+            FROM {qualified_table_name}
+            {filters_clause}
+        """
+
+        try:
+            result = self.fetchone(query)
+            valid_count = result[0]
+            total_count = result[1]
+
+            return valid_count, total_count
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            return 0, 0
