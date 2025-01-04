@@ -47,7 +47,14 @@ class SybaseDataSource(SQLDataSource):
             port = self.data_connection.get("port", 5000)
             database = self.data_connection.get("database")
             schema = self.data_connection.get("schema", "dbo") or "dbo"
-            if driver.startswith("Adaptive") or driver.startswith("{Adaptive"):
+            cp_driver = (
+                driver.replace("{", "")
+                .replace("}", "")
+                .replace(" ", "")
+                .strip()
+                .lower()
+            )
+            if cp_driver.startswith("adaptive"):
                 engine = create_engine(
                     f"sybase+pyodbc://:@",
                     connect_args={
