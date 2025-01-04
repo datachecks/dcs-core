@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 
@@ -34,17 +34,32 @@ class SybaseDataSource(SQLDataSource):
             port = self.data_connection.get("port", 5000)
             database = self.data_connection.get("database")
             schema = self.data_connection.get("schema", "dbo") or "dbo"
+            if driver.startswith("Adaptive") or driver.startswith("{Adaptive"):
+                engine = create_engine(
+                    f"sybase+pyodbc://:@",
+                    connect_args={
+                        "DRIVER": driver,
+                        "UID": username,
+                        "PWD": password,
+                        "SERVER": host,
+                        "PORT": port,
+                        "DATABASE": database,
+                        "options": f"-csearch_path={schema}",
+                    },
+                    isolation_level="AUTOCOMMIT",
+                )
+            else:
+                connection_string = (
+                    f"sybase+pyodbc://{username}:{password}@{host}:{port}/{database}"
+                    f"?driver={driver}"
+                )
+                connection_string_with_schema = (
+                    f"{connection_string}&options=-csearch_path={schema}"
+                )
+                engine = create_engine(
+                    connection_string_with_schema, isolation_level="AUTOCOMMIT"
+                )
 
-            connection_string = (
-                f"sybase+pyodbc://{username}:{password}@{host}:{port}/{database}"
-                f"?driver={driver}"
-            )
-            connection_string_with_schema = (
-                f"{connection_string}&options=-csearch_path={schema}"
-            )
-            engine = create_engine(
-                connection_string_with_schema, isolation_level="AUTOCOMMIT"
-            )
             self.connection = engine.connect()
             return self.connection
 
@@ -109,3 +124,145 @@ class SybaseDataSource(SQLDataSource):
         """
         result = self.fetchone(query)
         return result[0], result[1]
+
+    def query_get_percentile(
+        self, table: str, field: str, percentile: float, filters: str = None
+    ) -> float:
+        raise NotImplementedError("Method not implemented for Sybase data source")
+
+    def query_get_all_space_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of rows where the specified column contains only spaces.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of rows with only spaces
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        query = f"""
+            SELECT COUNT(*) AS space_count
+            FROM {qualified_table_name}
+            WHERE {field} LIKE '% %' OR {field} LIKE '%' + CHAR(160) + '%'
+        """
+
+        if filters:
+            query += f" AND {filters}"
+
+        total_query = f"SELECT COUNT(*) AS total_count FROM {qualified_table_name}"
+        if filters:
+            total_query += f" WHERE {filters}"
+
+        space_count = self.fetchone(query)[0]
+        total_count = self.fetchone(total_query)[0]
+
+        if operation == "percent":
+            return round((space_count / total_count) * 100, 2) if total_count > 0 else 0
+
+        return space_count if space_count is not None else 0
+
+    def query_get_null_keyword_count(
+        self, table: str, field: str, operation: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the count of NULL-like values (specific keywords) in the specified column.
+        :param table: table name
+        :param field: column name
+        :param filters: filter condition
+        :return: count of NULL-like keyword values
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        # Query that checks for both NULL and specific NULL-like values
+        query = f"""
+                SELECT SUM(CASE
+                            WHEN {field} IS NULL OR LOWER({field}) IN ('nothing', 'nil', 'null', 'none', 'n/a')
+                            THEN 1
+                            ELSE 0
+                        END) AS null_count, COUNT(*) AS total_count
+                FROM {qualified_table_name}
+            """
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)
+
+        if result:
+            if operation == "percent":
+                return round((result[0] / result[1]) * 100, 2) if result[1] > 0 else 0
+            return result[0]
+
+        return 0
+
+    def query_get_string_length_metric(
+        self, table: str, field: str, metric: str, filters: str = None
+    ) -> Union[int, float]:
+        """
+        Get the string length metric (max, min, avg) in a column of a table.
+
+        :param table: table name
+        :param field: column name
+        :param metric: the metric to calculate ('max', 'min', 'avg')
+        :param filters: filter condition
+        :return: the calculated metric as int for 'max' and 'min', float for 'avg'
+        """
+        qualified_table_name = self.qualified_table_name(table)
+
+        if metric.lower() == "max":
+            sql_function = "MAX(LEN"
+        elif metric.lower() == "min":
+            sql_function = "MIN(LEN"
+        elif metric.lower() == "avg":
+            sql_function = "AVG(CAST(LEN(" + field + ") AS FLOAT))"
+        else:
+            raise ValueError(
+                f"Invalid metric '{metric}'. Choose from 'max', 'min', or 'avg'."
+            )
+        if metric.lower() == "avg":
+            query = f"SELECT {sql_function} FROM {qualified_table_name}"
+        else:
+            query = f"SELECT {sql_function}({field})) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+
+        result = self.fetchone(query)[0]
+        return round(result, 2) if metric.lower() == "avg" else result
+
+    # def query_string_pattern_validity(
+    #     self,
+    #     table: str,
+    #     field: str,
+    #     regex_pattern: str = None,
+    #     predefined_regex_pattern: str = None,
+    #     filters: str = None,
+    # ) -> Tuple[int, int]:
+    #     """
+    #     Get the count of valid values based on the regex pattern
+    #     :param table: table name
+    #     :param field: column name
+    #     :param regex_pattern: regex pattern
+    #     :param predefined_regex_pattern: predefined regex pattern
+    #     :param filters: filter condition
+    #     :return: count of valid values, count of total row count
+    #     """
+    #     filters = f"WHERE {filters}" if filters else ""
+    #     qualified_table_name = self.qualified_table_name(table)
+
+    #     if not regex_pattern and not predefined_regex_pattern:
+    #         raise ValueError(
+    #             "Either regex_pattern or predefined_regex_pattern should be provided"
+    #         )
+
+    #     if predefined_regex_pattern:
+    #         regex_query = f"case when {field} ~ '{self.regex_patterns[predefined_regex_pattern]}' then 1 else 0 end"
+    #     else:
+    #         regex_query = f"case when {field} ~ '{regex_pattern}' then 1 else 0 end"
+
+    #     query = f"""
+    #         select sum({regex_query}) as valid_count, count(*) as total_count
+    #         from {qualified_table_name} {filters}
+    #     """
+    #     result = self.fetchone(query)
+    #     return result[0], result[1]

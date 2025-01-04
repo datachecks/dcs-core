@@ -78,6 +78,7 @@ class DataSourceConfigParser(ConfigParser):
             service_name=config["connection"].get("service_name"),
             security=config["connection"].get("security"),
             protocol=config["connection"].get("protocol"),
+            driver=config["connection"].get("driver"),
         )
         return connection_config
 
