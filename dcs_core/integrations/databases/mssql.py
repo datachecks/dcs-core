@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
@@ -418,3 +419,22 @@ class MssqlDataSource(SQLDataSource):
 
     def query_timestamp_date_not_in_future_metric(self):
         raise NotImplementedError("Method not implemented for MssqlDataSource")
+
+    def query_get_time_diff(self, table: str, field: str) -> int:
+        """
+        Get the time difference
+        :param table: name of the index
+        :param field: field name of updated time column
+        :return: time difference in seconds
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"""
+            SELECT TOP 1 {field} FROM {qualified_table_name} ORDER BY {field} DESC;
+        """
+        result = self.fetchone(query)
+        if result:
+            updated_time = result[0]
+            if isinstance(updated_time, str):
+                updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
+            return int((datetime.utcnow() - updated_time).total_seconds())
+        return 0
