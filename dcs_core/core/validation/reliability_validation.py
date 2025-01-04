@@ -11,11 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import re
 from typing import Union
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 from dcs_core.core.validation.base import DeltaValidation, Validation
+from dcs_core.integrations.databases.oracle import OracleDataSource
 
 
 class CountDocumentsValidation(Validation):
@@ -41,6 +43,11 @@ class CountRowValidation(Validation):
 
     def _generate_metric_value(self):
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
+
             return self.data_source.query_get_row_count(
                 table=self.dataset_name,
                 filters=self.where_filter if self.where_filter else None,

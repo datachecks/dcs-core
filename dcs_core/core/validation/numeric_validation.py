@@ -12,19 +12,27 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import re
 from typing import Union
 
 from dcs_core.core.datasource.search_datasource import SearchIndexDataSource
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 from dcs_core.core.validation.base import Validation
+from dcs_core.integrations.databases.oracle import OracleDataSource
 
 
 class MinValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_min(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -40,9 +48,15 @@ class MinValidation(Validation):
 class MaxValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_max(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -58,9 +72,15 @@ class MaxValidation(Validation):
 class AvgValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_avg(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -76,9 +96,15 @@ class AvgValidation(Validation):
 class SumValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_sum(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -94,9 +120,15 @@ class SumValidation(Validation):
 class VarianceValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_variance(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -112,9 +144,15 @@ class VarianceValidation(Validation):
 class StdDevValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> Union[float, int]:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_stddev(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
         elif isinstance(self.data_source, SearchIndexDataSource):
@@ -130,9 +168,15 @@ class StdDevValidation(Validation):
 class Percentile20Validation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_percentile(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 percentile=0.2,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -143,9 +187,15 @@ class Percentile20Validation(Validation):
 class Percentile40Validation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_percentile(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 percentile=0.4,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -156,9 +206,15 @@ class Percentile40Validation(Validation):
 class Percentile60Validation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_percentile(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 percentile=0.6,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -169,9 +225,15 @@ class Percentile60Validation(Validation):
 class Percentile80Validation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_percentile(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 percentile=0.8,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -182,9 +244,15 @@ class Percentile80Validation(Validation):
 class Percentile90Validation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_get_percentile(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 percentile=0.9,
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -195,9 +263,15 @@ class Percentile90Validation(Validation):
 class CountZeroValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> int:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_zero_metric(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 operation="count",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -208,9 +282,15 @@ class CountZeroValidation(Validation):
 class PercentZeroValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_zero_metric(
                 table=self.dataset_name,
-                field=self.field_name,
+                field=f'"{self.field_name}"'
+                if isinstance(self.data_source, OracleDataSource)
+                else self.field_name,
                 operation="percent",
                 filters=self.where_filter if self.where_filter is not None else None,
             )
@@ -221,6 +301,10 @@ class PercentZeroValidation(Validation):
 class CountNegativeValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> int:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_negative_metric(
                 table=self.dataset_name,
                 field=self.field_name,
@@ -234,6 +318,10 @@ class CountNegativeValidation(Validation):
 class PercentNegativeValidation(Validation):
     def _generate_metric_value(self, **kwargs) -> float:
         if isinstance(self.data_source, SQLDataSource):
+            if isinstance(self.data_source, OracleDataSource) and self.where_filter:
+                self.where_filter = re.sub(
+                    r"(\b[a-zA-Z_]+\b)(?=\s*[=<>])", r'"\1"', self.where_filter
+                )
             return self.data_source.query_negative_metric(
                 table=self.dataset_name,
                 field=self.field_name,
