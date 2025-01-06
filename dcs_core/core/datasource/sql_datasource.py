@@ -39,7 +39,7 @@ class SQLDataSource(DataSource):
             "email": r"^(?!.*\.\.)(?!.*@.*@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
             "usa_zip_code": r"^[0-9]{5}(?:-[0-9]{4})?$",
             "ssn": r"^(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}$",
-            "sedol": r"[B-Db-dF-Hf-hJ-Nj-nP-Tp-tV-Xv-xYyZz\d]{6}\d",
+            "sedol": r"^[B-DF-HJ-NP-TV-XZ0-9]{6}[0-9]$",
             "lei": r"^[A-Z0-9]{18}[0-9]{2}$",
             "cusip": r"^[0-9A-Z]{9}$",
             "figi": r"^BBG[A-Z0-9]{9}$",

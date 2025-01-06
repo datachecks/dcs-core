@@ -15,6 +15,7 @@
 from dcs_core.integrations.utils.utils import ibm_db2_dll_files_loader
 
 ibm_db2_dll_files_loader()
+from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 from loguru import logger
@@ -624,3 +625,25 @@ class DB2DataSource(SQLDataSource):
 
     def query_timestamp_date_not_in_future_metric(self):
         raise NotImplementedError("Method not implemented for DB2DataSource")
+
+    def query_get_time_diff(self, table: str, field: str) -> int:
+        """
+        Get the time difference
+        :param table: name of the index
+        :param field: field name of updated time column
+        :return: time difference in seconds
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"""
+            SELECT {field}
+            FROM {qualified_table_name}
+            ORDER BY {field} DESC
+            FETCH FIRST 1 ROWS ONLY;
+        """
+        result = self.fetchone(query)
+        if result:
+            updated_time = result[0]
+            if isinstance(updated_time, str):
+                updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
+            return int((datetime.utcnow() - updated_time).total_seconds())
+        return 0
