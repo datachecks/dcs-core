@@ -108,6 +108,10 @@ class SQLDataSource(DataSource):
 
     def close(self):
         self.connection.close()
+        try:
+            self.connection.engine.dispose()
+        except Exception as e:
+            logger.error(f"Failed to close the connection: {str(e)}")
 
     def fetchall(self, query):
         if self.use_sa_text_query:

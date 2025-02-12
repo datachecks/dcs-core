@@ -47,7 +47,8 @@ class SybaseDataSource(SQLDataSource):
             driver = self.data_connection.get("driver") or "FreeTDS"
             username = self.data_connection.get("username")
             password = self.data_connection.get("password")
-            host = self.data_connection.get("host")
+            host = self.data_connection.get("host") or ""
+            server = self.data_connection.get("server") or ""
             port = self.data_connection.get("port", 5000)
             database = self.data_connection.get("database")
             schema = self.data_connection.get("schema", "dbo") or "dbo"
@@ -58,14 +59,15 @@ class SybaseDataSource(SQLDataSource):
                 .strip()
                 .lower()
             )
-            if cp_driver.startswith("adaptive"):
+            if cp_driver != "freetds":
                 engine = create_engine(
                     f"sybase+pyodbc://:@",
                     connect_args={
                         "DRIVER": driver,
                         "UID": username,
                         "PWD": password,
-                        "SERVER": host,
+                        "SERVER": server,
+                        "HOST": host,
                         "PORT": port,
                         "DATABASE": database,
                         "options": f"-csearch_path={schema}",
@@ -73,6 +75,7 @@ class SybaseDataSource(SQLDataSource):
                     isolation_level="AUTOCOMMIT",
                 )
             else:
+                host = host if host else server
                 connection_string = (
                     f"sybase+pyodbc://{username}:{password}@{host}:{port}/{database}"
                     f"?driver={driver}"
