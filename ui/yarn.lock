@@ -1824,7 +1824,7 @@ damerau-levenshtein@^1.0.4:
     babel-jest "^24.9.0"
     buffer "^6.0.3"
     css-loader "^6.8.1"
-    datachecks "file:../../../../../AppData/Local/Yarn/Cache/v6/npm-datachecks-0.0.1-c5bd659a-7ae9-48d3-a022-49af657308fd-1734345099299/node_modules/datachecks"
+    datachecks "file:."
     eslint "^6.6.0"
     eslint-config-react-app "^5.2.1"
     eslint-plugin-flowtype "4.6.0"
@@ -4389,9 +4389,9 @@ semver@^7.3.2, semver@^7.3.4, semver@^7.3.8:
     lru-cache "^6.0.0"
 
 serialize-javascript@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.npmjs.org/serialize-javascript/-/serialize-javascript-6.0.1.tgz"
-  integrity sha512-owoXEFjWRllis8/M1Q+Cw5k8ZH40e3zhp/ovX+Xr/vi1qj6QesbyXXViFbpNvWvPNAD62SutwEXavefrLJWj7w==
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-6.0.2.tgz#defa1e055c83bf6d59ea805d8da862254eb6a6c2"
+  integrity sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==
   dependencies:
     randombytes "^2.1.0"
 
