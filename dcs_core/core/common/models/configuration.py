@@ -83,6 +83,7 @@ class DataSourceConnectionConfiguration:
 
     security: Optional[str] = None  # IBM DB2 specific configuration
     protocol: Optional[str] = None  # IBM DB2 specific configuration
+    server: Optional[str] = None
 
 
 @dataclass
