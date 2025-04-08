@@ -33,6 +33,7 @@ class SQLDataSource(DataSource):
         self.connection: Union[Connection, None] = None
         self.database: str = data_connection.get("database")
         self.use_sa_text_query = True
+        self.schema_name = data_connection.get("schema", None)
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
@@ -129,6 +130,8 @@ class SQLDataSource(DataSource):
         :param table_name: name of the table
         :return: qualified table name
         """
+        if self.schema_name:
+            return f"{self.schema_name}.{table_name}"
         return f"{table_name}"
 
     def query_get_column_metadata(self, table_name: str) -> Dict[str, str]:

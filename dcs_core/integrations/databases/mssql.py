@@ -15,8 +15,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
+import pyodbc
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -43,36 +42,68 @@ class MssqlDataSource(SQLDataSource):
         """
         Connect to the data source
         """
-        try:
-            driver = (
-                self.data_connection.get("driver") or "ODBC Driver 18 for SQL Server"
-            )
-            url = URL.create(
-                drivername="mssql+pyodbc",
-                username=self.data_connection.get("username"),
-                password=self.data_connection.get("password"),
-                host=self.data_connection.get("host"),
-                port=self.data_connection.get("port", 1433),
-                database=self.data_connection.get("database"),
-                query={"driver": driver, "TrustServerCertificate": "YES"},
-            )
-            schema = self.data_connection.get("schema") or "dbo"
-            # For osx have to install
-            # brew install unixodbc
-            # brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
-            # brew update
-            # brew install msodbcsql mssql-tools
-            engine = create_engine(
-                url,
-                connect_args={"options": f"-csearch_path={schema}"},
-                isolation_level="AUTOCOMMIT",
-            )
-            self.connection = engine.connect()
-            return self.connection
-        except Exception as e:
-            raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to Mssql data source: [{str(e)}]"
-            )
+        driver = self.data_connection.get("driver") or "ODBC Driver 18 for SQL Server"
+        host = self.data_connection.get("host")
+        port = self.data_connection.get("port")
+        database = self.data_connection.get("database")
+        username = self.data_connection.get("username")
+        password = self.data_connection.get("password")
+        server = self.data_connection.get("server")
+
+        connection_params = self._build_connection_params(
+            driver=driver, database=database, username=username, password=password
+        )
+
+        return self._establish_connection(connection_params, host, server, port)
+
+    def _prepare_driver_string(self, driver: str) -> str:
+        """Ensure driver string is properly formatted with braces."""
+        return f"{{{driver}}}" if not driver.startswith("{") else driver
+
+    def _build_connection_params(
+        self, driver: str, database: str, username: str, password: str
+    ) -> dict:
+        return {
+            "DRIVER": self._prepare_driver_string(driver),
+            "DATABASE": database,
+            "UID": username,
+            "PWD": password,
+            "TrustServerCertificate": "yes",
+        }
+
+    def _establish_connection(
+        self, conn_dict: dict, host: str, server: str, port: str
+    ) -> Any:
+        connection_attempts = [
+            (host, True),  # host with port
+            (host, False),  # host without port
+            (server, True),  # server with port
+            (server, False),  # server without port
+        ]
+
+        for _, (server_value, use_port) in enumerate(connection_attempts, 1):
+            if not server_value:
+                continue
+
+            try:
+                conn_dict["SERVER"] = (
+                    f"{server_value},{port}" if use_port and port else server_value
+                )
+                self.connection = pyodbc.connect(**conn_dict)
+                print(f"Connected to MSSQL database using {conn_dict['SERVER']}")
+                return self.connection
+            except Exception:
+                continue
+
+        raise DataChecksDataSourcesConnectionError(
+            message="Failed to connect to Mssql data source: [All connection attempts failed]"
+        )
+
+    def fetchall(self, query):
+        return self.connection.cursor().execute(query).fetchall()
+
+    def fetchone(self, query):
+        return self.connection.cursor().execute(query).fetchone()
 
     def regex_to_sql_condition(self, regex_pattern: str, field: str) -> str:
         """

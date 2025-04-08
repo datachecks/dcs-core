@@ -55,3 +55,21 @@ class Field:
 
     belongs_to: Union[Table, Index]
     name: str
+
+
+@dataclass
+class RawColumnInfo:
+    column_name: str
+    data_type: str
+    datetime_precision: Optional[int] = None
+    numeric_precision: Optional[int] = None
+    numeric_scale: Optional[int] = None
+    collation_name: Optional[str] = None
+    character_maximum_length: Optional[int] = None
+
+
+@dataclass
+class SybaseDriverTypes:
+    is_ase: bool = False
+    is_iq: bool = False
+    is_freetds: bool = False
