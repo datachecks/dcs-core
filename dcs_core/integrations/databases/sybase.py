@@ -289,7 +289,7 @@ class SybaseDataSource(SQLDataSource):
         database = self.database
 
         if self.sybase_driver_type.is_iq:
-            query = f"SELECT table_name FROM {database}.SYS.SYSTABLE WHERE creator = USER_ID('{schema}')"
+            query = f"SELECT table_name FROM {database}.SYS.SYSTABLE WHERE creator = USER_ID('{schema}') AND table_type = 'BASE'"
         elif self.sybase_driver_type.is_ase:
             query = f"SELECT name AS table_name FROM {database}..sysobjects WHERE type = 'U' AND uid = USER_ID('{schema}')"
         elif self.sybase_driver_type.is_freetds:
