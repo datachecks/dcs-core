@@ -48,7 +48,6 @@ class SybaseDataSource(SQLDataSource):
         self.sybase_driver_type = SybaseDriverTypes()
 
     def connect(self) -> Any:
-        """Establish database connection with enhanced ASE support."""
         driver = self.data_connection.get("driver") or "FreeTDS"
         host = self.data_connection.get("host") or ""
         server = self.data_connection.get("server") or ""
@@ -56,10 +55,31 @@ class SybaseDataSource(SQLDataSource):
         database = self.data_connection.get("database")
         username = self.data_connection.get("username")
         password = self.data_connection.get("password")
-
         self._detect_driver_type(driver)
 
-        # Base connection parameters
+        if self.sybase_driver_type.is_freetds:
+            conn_dict = {
+                "driver": "FreeTDS",
+                "database": database,
+                "user": username,
+                "password": password,
+                "port": port,
+            }
+
+            conn_dict["host"] = host or server
+
+            try:
+                logger.debug(f"Attempting FreeTDS connection with config: {conn_dict}")
+                self.connection = pyodbc.connect(**conn_dict)
+                logger.info(
+                    f"Successfully connected to Sybase using FreeTDS: {conn_dict}"
+                )
+                return self.connection
+            except Exception as e:
+                error_msg = f"Failed to connect to Sybase with FreeTDS: {str(e)}"
+                logger.error(error_msg)
+                raise DataChecksDataSourcesConnectionError(message=error_msg)
+
         base_params = {
             "DRIVER": self._prepare_driver_string(driver),
             "DATABASE": database,
@@ -67,9 +87,8 @@ class SybaseDataSource(SQLDataSource):
             "PWD": password,
         }
 
-        # Connection attempts specific to ASE
         connection_attempts = []
-        if "adaptive" in self._normalize_driver(driver):
+        if self.sybase_driver_type.is_ase:
             connection_attempts = [
                 {
                     "key": "SERVER",
@@ -115,7 +134,7 @@ class SybaseDataSource(SQLDataSource):
                 current_config.update(port_config)
 
                 # Add ASE-specific parameters if driver is ASE
-                if "adaptive" in self._normalize_driver(driver):
+                if self.sybase_driver_type.is_ase:
                     ase_configs = [
                         {},  # Basic config
                         {"NetworkAddress": f"{host},{port}"},  # Alternative format
@@ -188,6 +207,24 @@ class SybaseDataSource(SQLDataSource):
     def fetchone(self, query):
         return self.connection.cursor().execute(query).fetchone()
 
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f"[{self.schema_name}].[{table_name}]"
+        return f"[{table_name}]"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"[{column}]"
+
     def query_get_row_count(self, table: str, filters: str = None) -> int:
         """
         Get the row count
@@ -198,8 +235,6 @@ class SybaseDataSource(SQLDataSource):
         query = f"SELECT COUNT(*) FROM {qualified_table_name}"
         if filters:
             query += f" WHERE {filters}"
-        res = self.query_get_column_metadata_v2(table=table)
-        self.query_get_table_metadata_v2()
         return self.fetchone(query)[0]
 
     def query_get_column_metadata_v2(
@@ -212,6 +247,7 @@ class SybaseDataSource(SQLDataSource):
         """
         schema = schema or self.schema_name
         database = self.database
+        rows = None
         if self.sybase_driver_type.is_iq:
             query = (
                 f"SELECT c.column_name, d.domain_name AS data_type, "
@@ -241,22 +277,38 @@ class SybaseDataSource(SQLDataSource):
                 f"AND u.name = '{schema}'"
             )
         elif self.sybase_driver_type.is_freetds:
-            query = (
-                f"SELECT c.name AS column_name, t.name AS data_type, "
-                f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
-                f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
-                f"NULL AS collation_name, c.length AS character_maximum_length "
-                f"FROM {database}..sysobjects o "
-                f"JOIN {database}..syscolumns c ON o.id = c.id "
-                f"JOIN {database}..systypes t ON c.usertype = t.usertype "
-                f"JOIN {database}..sysusers u ON o.uid = u.uid "
-                f"WHERE o.name = '{table}' "
-                f"AND u.name = '{schema}'"
-            )
+            try:
+                ase_query = (
+                    f"SELECT c.name AS column_name, t.name AS data_type, "
+                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
+                    f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"NULL AS collation_name, c.length AS character_maximum_length "
+                    f"FROM {database}..sysobjects o "
+                    f"JOIN {database}..syscolumns c ON o.id = c.id "
+                    f"JOIN {database}..systypes t ON c.usertype = t.usertype "
+                    f"JOIN {database}..sysusers u ON o.uid = u.uid "
+                    f"WHERE o.name = '{table}' "
+                    f"AND u.name = '{schema}'"
+                )
+                rows = self.fetchall(ase_query)
+
+            except Exception as _:
+                iq_query = (
+                    f"SELECT c.name AS column_name, t.name AS data_type, "
+                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
+                    f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"NULL AS collation_name, c.length AS character_maximum_length "
+                    f"FROM {database}.dbo.sysobjects o "
+                    f"JOIN {database}.dbo.syscolumns c ON o.id = c.id "
+                    f"JOIN {database}.dbo.systypes t ON c.usertype = t.usertype "
+                    f"JOIN {database}.dbo.sysusers u ON o.uid = u.uid "
+                    f"WHERE o.name = '{table}' AND u.name = '{schema}'"
+                )
+                rows = self.fetchall(iq_query)
         else:
             raise ValueError("Unknown Sybase driver type")
-
-        rows = self.fetchall(query)
+        if not rows:
+            rows = self.fetchall(query)
         if not rows:
             raise RuntimeError(
                 f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
@@ -299,7 +351,6 @@ class SybaseDataSource(SQLDataSource):
 
         rows = self.fetchall(query)
         res = [row[0] for row in rows] if rows else []
-        print(f"Tables in {schema}: {res}")
         return res
 
     def safe_get(self, lst, idx, default=None):
@@ -344,7 +395,7 @@ class SybaseDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
-
+        field = self.quote_column(field)
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
             validation_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
@@ -378,6 +429,7 @@ class SybaseDataSource(SQLDataSource):
         :return: count of rows with only spaces
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT COUNT(*) AS space_count
@@ -411,6 +463,7 @@ class SybaseDataSource(SQLDataSource):
         :return: count of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         # Query that checks for both NULL and specific NULL-like values
         query = f"""
@@ -446,6 +499,7 @@ class SybaseDataSource(SQLDataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LEN"
@@ -486,6 +540,7 @@ class SybaseDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -552,6 +607,7 @@ class SybaseDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT TOP 1 {field}
             FROM {qualified_table_name}
@@ -581,6 +637,7 @@ class SybaseDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         temp_table_suffix = f"{int(time.time())}_{random.randint(1000, 9999)}"
         extracted_table = f"#extracted_timestamps_{temp_table_suffix}"
@@ -667,6 +724,7 @@ class SybaseDataSource(SQLDataSource):
         :return: Count of valid timestamps not in the future and total count or percentage
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if predefined_regex != "timestamp_iso":
             raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
@@ -731,6 +789,7 @@ class SybaseDataSource(SQLDataSource):
         :return: Tuple containing count of valid dates not in the future and total count
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         filters_clause = f"WHERE {filters}" if filters else ""
 
         query = f"""

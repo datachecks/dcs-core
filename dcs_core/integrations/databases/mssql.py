@@ -19,6 +19,7 @@ import pyodbc
 from loguru import logger
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.core.common.models.data_source_resource import RawColumnInfo
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
@@ -106,6 +107,72 @@ class MssqlDataSource(SQLDataSource):
     def fetchone(self, query):
         return self.connection.cursor().execute(query).fetchone()
 
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f"[{self.schema_name}].[{table_name}]"
+        return f"[{table_name}]"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"[{column}]"
+
+    def query_get_table_metadata_v2(
+        self,
+        schema: str | None = None,
+    ) -> List[str]:
+        """
+        Get the list of tables in the database.
+        :param schema: optional schema name
+        :return: list of table names
+        """
+        schema = schema or self.schema_name
+        query = f"SELEC T o.name AS table_name FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type = 'U' AND s.name = '{schema}' ORDER BY o.name"
+
+        rows = self.fetchall(query)
+        res = [row[0] for row in rows] if rows else []
+        return res
+
+    def query_get_column_metadata_v2(
+        self, table: str, schema: str | None = None
+    ) -> RawColumnInfo:
+        """
+        Get the schema of a table.
+        :param table: table name
+        :return: list of dictionaries containing column name and data type
+        """
+        schema = schema or self.schema_name
+        database = self.database
+        query = f"SELECT column_name, data_type, datetime_precision, numeric_precision, numeric_scale, collation_name, character_maximum_length FROM {database}.information_schema.columns WHERE table_name = '{table}' AND table_schema = '{schema}'"
+
+        rows = self.fetchall(query)
+        if not rows:
+            raise RuntimeError(
+                f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
+            )
+
+        column_info = {
+            r[0]: RawColumnInfo(
+                column_name=self.safe_get(r, 0),
+                data_type=self.safe_get(r, 1),
+                datetime_precision=self.safe_get(r, 2),
+                numeric_precision=self.safe_get(r, 3),
+                numeric_scale=self.safe_get(r, 4),
+                collation_name=self.safe_get(r, 5),
+                character_maximum_length=self.safe_get(r, 6),
+            )
+            for r in rows
+        }
+        return column_info
+
     def regex_to_sql_condition(self, regex_pattern: str, field: str) -> str:
         """
         Convert regex patterns to SQL Server conditions
@@ -140,6 +207,7 @@ class MssqlDataSource(SQLDataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT VAR({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -155,6 +223,7 @@ class MssqlDataSource(SQLDataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT STDEV({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -173,6 +242,7 @@ class MssqlDataSource(SQLDataSource):
         :return: the value at the specified percentile
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT PERCENTILE_CONT({percentile}) WITHIN GROUP (ORDER BY {field})
             OVER () AS percentile_value
@@ -196,6 +266,7 @@ class MssqlDataSource(SQLDataSource):
         :return: count (int) or percentage (float) of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT
@@ -240,6 +311,7 @@ class MssqlDataSource(SQLDataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LEN"
@@ -284,6 +356,7 @@ class MssqlDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
                 "Either regex_pattern or predefined_regex_pattern should be provided"
@@ -389,6 +462,7 @@ class MssqlDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
@@ -424,6 +498,7 @@ class MssqlDataSource(SQLDataSource):
 
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = f"""
                 CASE
@@ -460,6 +535,7 @@ class MssqlDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT TOP 1 {field} FROM {qualified_table_name} ORDER BY {field} DESC;
         """
