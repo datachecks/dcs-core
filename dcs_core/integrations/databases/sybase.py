@@ -48,26 +48,113 @@ class SybaseDataSource(SQLDataSource):
         self.sybase_driver_type = SybaseDriverTypes()
 
     def connect(self) -> Any:
-        """Establish database connection and return it."""
-        try:
-            driver = self.data_connection.get("driver") or "FreeTDS"
-            host = self.data_connection.get("host") or ""
-            server = self.data_connection.get("server") or ""
-            port = self.data_connection.get("port", 5000)
-            database = self.data_connection.get("database")
-            username = self.data_connection.get("username")
-            password = self.data_connection.get("password")
+        """Establish database connection with enhanced ASE support."""
+        driver = self.data_connection.get("driver") or "FreeTDS"
+        host = self.data_connection.get("host") or ""
+        server = self.data_connection.get("server") or ""
+        port = self.data_connection.get("port", 5000)
+        database = self.data_connection.get("database")
+        username = self.data_connection.get("username")
+        password = self.data_connection.get("password")
 
-            self._detect_driver_type(driver)
-            conn_dict = self._build_base_connection_params(
-                driver, database, username, password
-            )
-            return self._establish_connection(conn_dict, host, server, port)
+        self._detect_driver_type(driver)
 
-        except Exception as e:
-            raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to Sybase data source: [{str(e)}]"
-            )
+        # Base connection parameters
+        base_params = {
+            "DRIVER": self._prepare_driver_string(driver),
+            "DATABASE": database,
+            "UID": username,
+            "PWD": password,
+        }
+
+        # Connection attempts specific to ASE
+        connection_attempts = []
+        if "adaptive" in self._normalize_driver(driver):
+            connection_attempts = [
+                {
+                    "key": "SERVER",
+                    "value": host,
+                    "port": port,
+                },  # ASE typically uses SERVER
+                {"key": "SERVERNAME", "value": host, "port": port},
+                {
+                    "key": "HOST",
+                    "value": f"{host}:{port}",
+                    "port": None,
+                },  # Host:Port format
+            ]
+        else:
+            connection_attempts = [
+                {"key": "HOST", "value": f"{host}:{port}", "port": None},
+                {"key": "HOST", "value": host, "port": port},
+                {"key": "SERVER", "value": server, "port": port},
+                {"key": "SERVERNAME", "value": server, "port": port},
+            ]
+
+        errors = []
+
+        for attempt in connection_attempts:
+            if not attempt["value"]:
+                continue
+
+            conn_dict = base_params.copy()
+            conn_dict[attempt["key"]] = attempt["value"]
+
+            # Handle port configuration
+            if attempt["port"] is not None:
+                port_configs = [
+                    {"PORT": attempt["port"]},
+                    {"Server port": attempt["port"]},
+                    {},  # Try without explicit port
+                ]
+            else:
+                port_configs = [{}]  # Port is already in the host string
+
+            for port_config in port_configs:
+                current_config = conn_dict.copy()
+                current_config.update(port_config)
+
+                # Add ASE-specific parameters if driver is ASE
+                if "adaptive" in self._normalize_driver(driver):
+                    ase_configs = [
+                        {},  # Basic config
+                        {"NetworkAddress": f"{host},{port}"},  # Alternative format
+                        {"ServerName": host},  # Another common ASE parameter
+                    ]
+                else:
+                    ase_configs = [{}]
+
+                for ase_config in ase_configs:
+                    final_config = current_config.copy()
+                    final_config.update(ase_config)
+
+                    try:
+                        logger.debug(
+                            f"Attempting connection with config: {final_config}"
+                        )
+                        self.connection = pyodbc.connect(**final_config)
+                        logger.info(
+                            f"Successfully connected to Sybase using: "
+                            f"driver={driver}, "
+                            f"{attempt['key']}={attempt['value']}, "
+                            f"port_config={port_config}, "
+                            f"ase_config={ase_config}"
+                        )
+                        return self.connection
+                    except Exception as e:
+                        error_msg = (
+                            f"Failed with {attempt['key']}={attempt['value']}, "
+                            f"port_config={port_config}, "
+                            f"ase_config={ase_config}: {str(e)}"
+                        )
+                        logger.debug(error_msg)
+                        errors.append(error_msg)
+                        continue
+
+        raise DataChecksDataSourcesConnectionError(
+            message=f"Failed to connect to Sybase data source with driver {driver}: "
+            f"[{'; '.join(errors)}]"
+        )
 
     def _build_base_connection_params(
         self, driver: str, database: str, username: str, password: str
@@ -79,50 +166,6 @@ class SybaseDataSource(SQLDataSource):
             "UID": username,
             "PWD": password,
         }
-
-    def _establish_connection(
-        self, conn_dict: Dict[str, Any], host: str, server: str, port: str
-    ) -> Any:
-        """Attempt to establish Sybase connection using different configurations."""
-        connection_attempts = [
-            (host, True),  # host with port
-            (host, False),  # host without port
-            (server, True),  # server with port
-            (server, False),  # server without port
-        ]
-
-        if self.sybase_driver_type.is_iq:
-            key_name = "HOST" if host else "SERVER"
-        elif self.sybase_driver_type.is_ase:
-            key_name = "SERVER"
-            conn_dict["PORT"] = port
-        else:  # FreeTDS
-            key_name = "host"
-            conn_dict["port"] = port
-
-        for _, (server_value, use_port) in enumerate(connection_attempts, 1):
-            if not server_value:
-                continue
-
-            try:
-                if self.sybase_driver_type.is_iq:
-                    conn_dict[key_name] = (
-                        f"{server_value}:{port}" if use_port and port else server_value
-                    )
-                elif self.sybase_driver_type.is_ase:
-                    conn_dict[key_name] = server_value
-                else:  # FreeTDS
-                    conn_dict[key_name] = server_value
-
-                self.connection = pyodbc.connect(**conn_dict)
-                print(f"Connected to Sybase database using {conn_dict.get(key_name)}")
-                return self.connection
-            except Exception:
-                continue
-
-        raise DataChecksDataSourcesConnectionError(
-            message="Failed to connect to Sybase data source: [All connection attempts failed]"
-        )
 
     def _normalize_driver(self, driver: str) -> str:
         """Normalize driver string by removing braces, spaces, and converting to lowercase."""

@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 import pyodbc
+from loguru import logger
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -90,7 +91,7 @@ class MssqlDataSource(SQLDataSource):
                     f"{server_value},{port}" if use_port and port else server_value
                 )
                 self.connection = pyodbc.connect(**conn_dict)
-                print(f"Connected to MSSQL database using {conn_dict['SERVER']}")
+                logger.info(f"Connected to MSSQL database using {conn_dict['SERVER']}")
                 return self.connection
             except Exception:
                 continue
