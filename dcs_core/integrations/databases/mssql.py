@@ -125,7 +125,7 @@ class MssqlDataSource(SQLDataSource):
         """
         return f"[{column}]"
 
-    def query_get_table_metadata_v2(
+    def query_get_table_names(
         self,
         schema: str | None = None,
     ) -> List[str]:
@@ -141,7 +141,7 @@ class MssqlDataSource(SQLDataSource):
         res = [row[0] for row in rows] if rows else []
         return res
 
-    def query_get_column_metadata_v2(
+    def query_get_table_columns(
         self, table: str, schema: str | None = None
     ) -> RawColumnInfo:
         """
