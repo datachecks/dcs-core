@@ -353,9 +353,6 @@ class SybaseDataSource(SQLDataSource):
         res = [row[0] for row in rows] if rows else []
         return res
 
-    def safe_get(self, lst, idx, default=None):
-        return lst[idx] if 0 <= idx < len(lst) else default
-
     def convert_regex_to_sybase_pattern(self, regex_pattern: str) -> str:
         """
         Convert a regex pattern into a Sybase-compatible LIKE pattern.

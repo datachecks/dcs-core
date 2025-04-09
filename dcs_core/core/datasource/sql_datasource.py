@@ -124,6 +124,9 @@ class SQLDataSource(DataSource):
             return self.connection.execute(text(query)).fetchone()
         return self.connection.execute(query).fetchone()
 
+    def safe_get(self, lst, idx, default=None):
+        return lst[idx] if 0 <= idx < len(lst) else default
+
     def qualified_table_name(self, table_name: str) -> str:
         """
         Get the qualified table name

@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
@@ -62,6 +61,24 @@ class OracleDataSource(SQLDataSource):
             raise DataChecksDataSourcesConnectionError(
                 message=f"Failed to connect to Oracle data source: [{str(e)}]"
             )
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f'"{self.schema_name}"."{table_name}"'
+        return f'"{table_name}"'
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f'"{column}"'
 
     def query_valid_invalid_values_validity(
         self,
@@ -118,6 +135,7 @@ class OracleDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -156,6 +174,7 @@ class OracleDataSource(SQLDataSource):
         filters = f"WHERE {filters}" if filters else ""
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = (
             f"CASE WHEN REGEXP_LIKE({field}, '^[A-Z]{{2}}$') "
@@ -186,6 +205,7 @@ class OracleDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if predefined_regex == "timestamp_iso":
             filters_clause = f"WHERE {filters}" if filters else ""
@@ -260,6 +280,7 @@ class OracleDataSource(SQLDataSource):
         :return: Count of valid timestamps not in the future and total count or percentage
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -346,6 +367,7 @@ class OracleDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         filters_clause = f"WHERE {filters}" if filters else ""
 
         query = f"""
@@ -428,6 +450,7 @@ class OracleDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
         """
@@ -456,6 +479,7 @@ class OracleDataSource(SQLDataSource):
         :return: count of rows with only spaces
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT
