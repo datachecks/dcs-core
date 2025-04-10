@@ -854,7 +854,7 @@ class SQLDataSource(DataSource):
             return valid_count, total_count
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_not_in_future_metric(
@@ -943,7 +943,7 @@ class SQLDataSource(DataSource):
             return valid_count, total_count
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_date_not_in_future_metric(

@@ -15,6 +15,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
+from loguru import logger
 from sqlalchemy import create_engine
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
@@ -311,7 +312,7 @@ class OracleDataSource(SQLDataSource):
 
                 return valid_count, total_count
             except Exception as e:
-                print(f"Error occurred: {e}")
+                logger.error(f"Error occurred: {e}")
                 return 0, 0
         else:
             raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
@@ -399,7 +400,7 @@ class OracleDataSource(SQLDataSource):
 
             return valid_count, total_count
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_date_not_in_future_metric(
@@ -490,7 +491,7 @@ class OracleDataSource(SQLDataSource):
 
             return valid_count, total_count
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_get_time_diff(self, table: str, field: str) -> int:
