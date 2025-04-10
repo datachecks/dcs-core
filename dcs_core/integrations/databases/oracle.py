@@ -15,10 +15,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
+from loguru import logger
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.core.common.models.data_source_resource import RawColumnInfo
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
@@ -62,6 +63,74 @@ class OracleDataSource(SQLDataSource):
             raise DataChecksDataSourcesConnectionError(
                 message=f"Failed to connect to Oracle data source: [{str(e)}]"
             )
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f'"{self.schema_name}"."{table_name}"'
+        return f'"{table_name}"'
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f'"{column}"'
+
+    def query_get_table_names(
+        self,
+        schema: str | None = None,
+    ) -> List[str]:
+        """
+        Get the list of tables in the database.
+        :param schema: optional schema name
+        :return: list of table names
+        """
+        schema = schema or self.schema_name
+        query = f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}'"
+        result = self.fetchall(query)
+        return [row[0] for row in result]
+
+    def query_get_table_columns(
+        self,
+        table: str,
+        schema: str | None = None,
+    ) -> RawColumnInfo:
+        """
+        Get the schema of a table.
+        :param table: table name
+        :return: RawColumnInfo object containing column information
+        """
+        schema = schema or self.schema_name
+        query = (
+            f"SELECT column_name, data_type, 6 as datetime_precision, data_precision as numeric_precision, "
+            f"data_scale as numeric_scale, NULL as collation_name, char_length as character_maximum_length "
+            f"FROM ALL_TAB_COLUMNS WHERE table_name = '{table}' AND owner = '{schema}'"
+        )
+        rows = self.fetchall(query)
+        if not rows:
+            raise RuntimeError(
+                f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
+            )
+
+        column_info = {
+            r[0]: RawColumnInfo(
+                column_name=self.safe_get(r, 0),
+                data_type=self.safe_get(r, 1),
+                datetime_precision=self.safe_get(r, 2),
+                numeric_precision=self.safe_get(r, 3),
+                numeric_scale=self.safe_get(r, 4),
+                collation_name=self.safe_get(r, 5),
+                character_maximum_length=self.safe_get(r, 6),
+            )
+            for r in rows
+        }
+        return column_info
 
     def query_valid_invalid_values_validity(
         self,
@@ -118,6 +187,7 @@ class OracleDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -156,6 +226,7 @@ class OracleDataSource(SQLDataSource):
         filters = f"WHERE {filters}" if filters else ""
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = (
             f"CASE WHEN REGEXP_LIKE({field}, '^[A-Z]{{2}}$') "
@@ -186,6 +257,7 @@ class OracleDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if predefined_regex == "timestamp_iso":
             filters_clause = f"WHERE {filters}" if filters else ""
@@ -240,7 +312,7 @@ class OracleDataSource(SQLDataSource):
 
                 return valid_count, total_count
             except Exception as e:
-                print(f"Error occurred: {e}")
+                logger.error(f"Error occurred: {e}")
                 return 0, 0
         else:
             raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
@@ -260,6 +332,7 @@ class OracleDataSource(SQLDataSource):
         :return: Count of valid timestamps not in the future and total count or percentage
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -327,7 +400,7 @@ class OracleDataSource(SQLDataSource):
 
             return valid_count, total_count
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_date_not_in_future_metric(
@@ -346,6 +419,7 @@ class OracleDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         filters_clause = f"WHERE {filters}" if filters else ""
 
         query = f"""
@@ -417,7 +491,7 @@ class OracleDataSource(SQLDataSource):
 
             return valid_count, total_count
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_get_time_diff(self, table: str, field: str) -> int:
@@ -428,6 +502,7 @@ class OracleDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
         """
@@ -456,6 +531,7 @@ class OracleDataSource(SQLDataSource):
         :return: count of rows with only spaces
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT

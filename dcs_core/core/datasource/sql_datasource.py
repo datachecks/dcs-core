@@ -33,6 +33,7 @@ class SQLDataSource(DataSource):
         self.connection: Union[Connection, None] = None
         self.database: str = data_connection.get("database")
         self.use_sa_text_query = True
+        self.schema_name = data_connection.get("schema", None)
         self.regex_patterns = {
             "uuid": r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             "usa_phone": r"^(\+1[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}$",
@@ -123,13 +124,26 @@ class SQLDataSource(DataSource):
             return self.connection.execute(text(query)).fetchone()
         return self.connection.execute(query).fetchone()
 
+    def safe_get(self, lst, idx, default=None):
+        return lst[idx] if 0 <= idx < len(lst) else default
+
     def qualified_table_name(self, table_name: str) -> str:
         """
         Get the qualified table name
         :param table_name: name of the table
         :return: qualified table name
         """
-        return f"{table_name}"
+        if self.schema_name:
+            return f"[{self.schema_name}].[{table_name}]"
+        return f"[{table_name}]"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"[{column}]"
 
     def query_get_column_metadata(self, table_name: str) -> Dict[str, str]:
         """
@@ -184,6 +198,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = "SELECT MAX({}) FROM {}".format(field, qualified_table_name)
 
@@ -201,6 +216,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT MIN({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -216,6 +232,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT AVG({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -231,6 +248,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT SUM({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -246,6 +264,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT VAR_SAMP({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -261,6 +280,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT STDDEV_SAMP({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -276,6 +296,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT COUNT(*) FROM {} WHERE {} IS NULL".format(
             qualified_table_name, field
         )
@@ -294,6 +315,7 @@ class SQLDataSource(DataSource):
         :return: count of empty strings
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT COUNT(*) FROM {} WHERE {} = ''".format(
             qualified_table_name, field
         )
@@ -313,6 +335,7 @@ class SQLDataSource(DataSource):
         :return: empty string percentage
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT SUM(CASE WHEN {} = '' THEN 1 ELSE 0 END) AS empty_string_count, COUNT(*) AS total_count FROM {}".format(
             field, qualified_table_name
         )
@@ -336,6 +359,7 @@ class SQLDataSource(DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -353,6 +377,7 @@ class SQLDataSource(DataSource):
          :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT SUM(CASE WHEN {} IS NULL THEN 1 ELSE 0 END) AS null_count, COUNT(*) AS total_count FROM {}".format(
             field, qualified_table_name
         )
@@ -373,6 +398,7 @@ class SQLDataSource(DataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT {field} from {qualified_table_name} ORDER BY {field} DESC LIMIT 1;
         """
@@ -440,6 +466,7 @@ class SQLDataSource(DataSource):
     ) -> int:
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT
             count(*) as duplicate_count
@@ -471,6 +498,7 @@ class SQLDataSource(DataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -508,6 +536,7 @@ class SQLDataSource(DataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
             regex_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
@@ -534,6 +563,7 @@ class SQLDataSource(DataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LENGTH"
@@ -572,6 +602,7 @@ class SQLDataSource(DataSource):
         filters = f"WHERE {filters}" if filters else ""
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = f"CASE WHEN {field} ~ '^[A-Z]{{2}}$' AND {field} IN ({valid_state_codes_str}) THEN 1 ELSE 0 END"
 
@@ -587,6 +618,7 @@ class SQLDataSource(DataSource):
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         valid_query = f"SELECT COUNT({field}) FROM {qualified_table_name} WHERE {field} IS NOT NULL AND {field} "
 
@@ -624,6 +656,7 @@ class SQLDataSource(DataSource):
         :return: the value at the specified percentile
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"SELECT PERCENTILE_DISC({percentile}) WITHIN GROUP (ORDER BY {field}) FROM {qualified_table_name}"
         if filters:
             query += f" WHERE {filters}"
@@ -633,6 +666,7 @@ class SQLDataSource(DataSource):
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         zero_query = f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} = 0"
 
@@ -660,6 +694,7 @@ class SQLDataSource(DataSource):
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         negative_query = (
             f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} < 0"
@@ -692,6 +727,7 @@ class SQLDataSource(DataSource):
         :return: count of rows with only spaces
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""SELECT COUNT(CASE WHEN TRIM({field}) = '' THEN 1 END) AS space_count,COUNT(*) AS total_count FROM {qualified_table_name}
         """
@@ -717,6 +753,7 @@ class SQLDataSource(DataSource):
         :return: count of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f""" SELECT SUM(CASE WHEN LOWER({field}) IN ('nothing', 'nil', 'null', 'none', 'n/a', null) THEN 1 ELSE 0 END) AS null_count,COUNT(*) AS total_count
                    FROM {qualified_table_name}"""
@@ -747,6 +784,7 @@ class SQLDataSource(DataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -816,7 +854,7 @@ class SQLDataSource(DataSource):
             return valid_count, total_count
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_not_in_future_metric(
@@ -835,6 +873,7 @@ class SQLDataSource(DataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -904,7 +943,7 @@ class SQLDataSource(DataSource):
             return valid_count, total_count
 
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e}")
             return 0, 0
 
     def query_timestamp_date_not_in_future_metric(
@@ -923,6 +962,7 @@ class SQLDataSource(DataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 

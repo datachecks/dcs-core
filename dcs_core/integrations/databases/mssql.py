@@ -15,10 +15,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
+import pyodbc
+from loguru import logger
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.core.common.models.data_source_resource import RawColumnInfo
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
@@ -43,36 +44,134 @@ class MssqlDataSource(SQLDataSource):
         """
         Connect to the data source
         """
-        try:
-            driver = (
-                self.data_connection.get("driver") or "ODBC Driver 18 for SQL Server"
+        driver = self.data_connection.get("driver") or "ODBC Driver 18 for SQL Server"
+        host = self.data_connection.get("host")
+        port = self.data_connection.get("port")
+        database = self.data_connection.get("database")
+        username = self.data_connection.get("username")
+        password = self.data_connection.get("password")
+        server = self.data_connection.get("server")
+
+        connection_params = self._build_connection_params(
+            driver=driver, database=database, username=username, password=password
+        )
+
+        return self._establish_connection(connection_params, host, server, port)
+
+    def _prepare_driver_string(self, driver: str) -> str:
+        """Ensure driver string is properly formatted with braces."""
+        return f"{{{driver}}}" if not driver.startswith("{") else driver
+
+    def _build_connection_params(
+        self, driver: str, database: str, username: str, password: str
+    ) -> dict:
+        return {
+            "DRIVER": self._prepare_driver_string(driver),
+            "DATABASE": database,
+            "UID": username,
+            "PWD": password,
+            "TrustServerCertificate": "yes",
+        }
+
+    def _establish_connection(
+        self, conn_dict: dict, host: str, server: str, port: str
+    ) -> Any:
+        connection_attempts = [
+            (host, True),  # host with port
+            (host, False),  # host without port
+            (server, True),  # server with port
+            (server, False),  # server without port
+        ]
+
+        for _, (server_value, use_port) in enumerate(connection_attempts, 1):
+            if not server_value:
+                continue
+
+            try:
+                conn_dict["SERVER"] = (
+                    f"{server_value},{port}" if use_port and port else server_value
+                )
+                self.connection = pyodbc.connect(**conn_dict)
+                logger.info(f"Connected to MSSQL database using {conn_dict['SERVER']}")
+                return self.connection
+            except Exception:
+                continue
+
+        raise DataChecksDataSourcesConnectionError(
+            message="Failed to connect to Mssql data source: [All connection attempts failed]"
+        )
+
+    def fetchall(self, query):
+        return self.connection.cursor().execute(query).fetchall()
+
+    def fetchone(self, query):
+        return self.connection.cursor().execute(query).fetchone()
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f"[{self.schema_name}].[{table_name}]"
+        return f"[{table_name}]"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"[{column}]"
+
+    def query_get_table_names(
+        self,
+        schema: str | None = None,
+    ) -> List[str]:
+        """
+        Get the list of tables in the database.
+        :param schema: optional schema name
+        :return: list of table names
+        """
+        schema = schema or self.schema_name
+        query = f"SELECT o.name AS table_name FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type = 'U' AND s.name = '{schema}' ORDER BY o.name"
+
+        rows = self.fetchall(query)
+        res = [row[0] for row in rows] if rows else []
+        return res
+
+    def query_get_table_columns(
+        self, table: str, schema: str | None = None
+    ) -> RawColumnInfo:
+        """
+        Get the schema of a table.
+        :param table: table name
+        :return: RawColumnInfo object containing column information
+        """
+        schema = schema or self.schema_name
+        database = self.database
+        query = f"SELECT column_name, data_type, datetime_precision, numeric_precision, numeric_scale, collation_name, character_maximum_length FROM {database}.information_schema.columns WHERE table_name = '{table}' AND table_schema = '{schema}'"
+
+        rows = self.fetchall(query)
+        if not rows:
+            raise RuntimeError(
+                f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
             )
-            url = URL.create(
-                drivername="mssql+pyodbc",
-                username=self.data_connection.get("username"),
-                password=self.data_connection.get("password"),
-                host=self.data_connection.get("host"),
-                port=self.data_connection.get("port", 1433),
-                database=self.data_connection.get("database"),
-                query={"driver": driver, "TrustServerCertificate": "YES"},
+
+        column_info = {
+            r[0]: RawColumnInfo(
+                column_name=self.safe_get(r, 0),
+                data_type=self.safe_get(r, 1),
+                datetime_precision=self.safe_get(r, 2),
+                numeric_precision=self.safe_get(r, 3),
+                numeric_scale=self.safe_get(r, 4),
+                collation_name=self.safe_get(r, 5),
+                character_maximum_length=self.safe_get(r, 6),
             )
-            schema = self.data_connection.get("schema") or "dbo"
-            # For osx have to install
-            # brew install unixodbc
-            # brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
-            # brew update
-            # brew install msodbcsql mssql-tools
-            engine = create_engine(
-                url,
-                connect_args={"options": f"-csearch_path={schema}"},
-                isolation_level="AUTOCOMMIT",
-            )
-            self.connection = engine.connect()
-            return self.connection
-        except Exception as e:
-            raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to Mssql data source: [{str(e)}]"
-            )
+            for r in rows
+        }
+        return column_info
 
     def regex_to_sql_condition(self, regex_pattern: str, field: str) -> str:
         """
@@ -108,6 +207,7 @@ class MssqlDataSource(SQLDataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT VAR({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -123,6 +223,7 @@ class MssqlDataSource(SQLDataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT STDEV({}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -141,6 +242,7 @@ class MssqlDataSource(SQLDataSource):
         :return: the value at the specified percentile
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT PERCENTILE_CONT({percentile}) WITHIN GROUP (ORDER BY {field})
             OVER () AS percentile_value
@@ -164,6 +266,7 @@ class MssqlDataSource(SQLDataSource):
         :return: count (int) or percentage (float) of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT
@@ -208,6 +311,7 @@ class MssqlDataSource(SQLDataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LEN"
@@ -252,6 +356,7 @@ class MssqlDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
                 "Either regex_pattern or predefined_regex_pattern should be provided"
@@ -357,6 +462,7 @@ class MssqlDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
@@ -392,6 +498,7 @@ class MssqlDataSource(SQLDataSource):
 
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = f"""
                 CASE
@@ -428,6 +535,7 @@ class MssqlDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT TOP 1 {field} FROM {qualified_table_name} ORDER BY {field} DESC;
         """

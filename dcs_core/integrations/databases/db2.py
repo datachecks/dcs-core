@@ -68,6 +68,24 @@ class DB2DataSource(SQLDataSource):
 
         return url
 
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f'"{self.schema_name}"."{table_name}"'
+        return f'"{table_name}"'
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f'"{column}"'
+
     def query_get_distinct_count(
         self, table: str, field: str, filters: str = None
     ) -> int:
@@ -79,6 +97,7 @@ class DB2DataSource(SQLDataSource):
         :return: distinct count as an integer
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"SELECT COUNT(DISTINCT CAST({field} AS VARCHAR(255))) FROM {qualified_table_name}"
 
         if filters:
@@ -99,6 +118,7 @@ class DB2DataSource(SQLDataSource):
         :return: percentage of negative values if operation is "percent", otherwise count of negatives
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         negative_query = (
             f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} < 0"
@@ -133,6 +153,7 @@ class DB2DataSource(SQLDataSource):
         :return: count or percentage of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT
@@ -172,6 +193,7 @@ class DB2DataSource(SQLDataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LENGTH"
@@ -214,6 +236,7 @@ class DB2DataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -254,6 +277,7 @@ class DB2DataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
             validity_condition = (
@@ -291,7 +315,7 @@ class DB2DataSource(SQLDataSource):
         filters = f"WHERE {filters}" if filters else ""
 
         qualified_table_name = self.qualified_table_name(table)
-
+        field = self.quote_column(field)
         regex_query = f"""
             CASE WHEN REGEXP_LIKE("{field}", '^[A-Z]{{2}}$') AND UPPER("{field}") IN ({valid_state_codes_str}) THEN 1 ELSE 0 END
         """
@@ -321,6 +345,7 @@ class DB2DataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -416,6 +441,7 @@ class DB2DataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -514,6 +540,7 @@ class DB2DataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         timestamp_iso_regex = r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.\d{1,3})?(Z|[+-](0[0-9]|1[0-4]):[0-5][0-9])?$"
 
@@ -592,6 +619,7 @@ class DB2DataSource(SQLDataSource):
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         valid_query = f'SELECT COUNT("{field}") FROM {qualified_table_name} WHERE "{field}" IS NOT NULL AND "{field}"'
 
@@ -634,6 +662,7 @@ class DB2DataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT {field}
             FROM {qualified_table_name}

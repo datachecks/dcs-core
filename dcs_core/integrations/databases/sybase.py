@@ -18,10 +18,14 @@ import time
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
+import pyodbc
 from loguru import logger
-from sqlalchemy import create_engine
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.core.common.models.data_source_resource import (
+    RawColumnInfo,
+    SybaseDriverTypes,
+)
 from dcs_core.core.datasource.sql_datasource import SQLDataSource
 
 
@@ -41,59 +45,313 @@ class SybaseDataSource(SQLDataSource):
             "isin": r"[A-Z][A-Z][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][0-9]",
             "perm_id": r"%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9][0-9][- ]%[0-9][0-9][0-9]%",
         }
+        self.sybase_driver_type = SybaseDriverTypes()
 
     def connect(self) -> Any:
-        try:
-            driver = self.data_connection.get("driver") or "FreeTDS"
-            username = self.data_connection.get("username")
-            password = self.data_connection.get("password")
-            host = self.data_connection.get("host") or ""
-            server = self.data_connection.get("server") or ""
-            port = self.data_connection.get("port", 5000)
-            database = self.data_connection.get("database")
-            schema = self.data_connection.get("schema", "dbo") or "dbo"
-            cp_driver = (
-                driver.replace("{", "")
-                .replace("}", "")
-                .replace(" ", "")
-                .strip()
-                .lower()
-            )
-            if cp_driver != "freetds":
-                engine = create_engine(
-                    f"sybase+pyodbc://:@",
-                    connect_args={
-                        "DRIVER": driver,
-                        "UID": username,
-                        "PWD": password,
-                        "SERVER": server,
-                        "HOST": host,
-                        "PORT": port,
-                        "DATABASE": database,
-                        "options": f"-csearch_path={schema}",
-                    },
-                    isolation_level="AUTOCOMMIT",
+        driver = self.data_connection.get("driver") or "FreeTDS"
+        host = self.data_connection.get("host") or ""
+        server = self.data_connection.get("server") or ""
+        port = self.data_connection.get("port", 5000)
+        database = self.data_connection.get("database")
+        username = self.data_connection.get("username")
+        password = self.data_connection.get("password")
+        self._detect_driver_type(driver)
+
+        if self.sybase_driver_type.is_freetds:
+            conn_dict = {
+                "driver": "FreeTDS",
+                "database": database,
+                "user": username,
+                "password": password,
+                "port": port,
+            }
+
+            conn_dict["host"] = host or server
+
+            try:
+                logger.debug(f"Attempting FreeTDS connection with config: {conn_dict}")
+                self.connection = pyodbc.connect(**conn_dict)
+                logger.info(
+                    f"Successfully connected to Sybase using FreeTDS: {conn_dict}"
                 )
+                return self.connection
+            except Exception as e:
+                error_msg = f"Failed to connect to Sybase with FreeTDS: {str(e)}"
+                logger.error(error_msg)
+                raise DataChecksDataSourcesConnectionError(message=error_msg)
+
+        base_params = {
+            "DRIVER": self._prepare_driver_string(driver),
+            "DATABASE": database,
+            "UID": username,
+            "PWD": password,
+        }
+
+        connection_attempts = []
+        if self.sybase_driver_type.is_ase:
+            connection_attempts = [
+                {
+                    "key": "SERVER",
+                    "value": host,
+                    "port": port,
+                },  # ASE typically uses SERVER
+                {"key": "SERVERNAME", "value": host, "port": port},
+                {
+                    "key": "HOST",
+                    "value": f"{host}:{port}",
+                    "port": None,
+                },  # Host:Port format
+            ]
+        else:
+            connection_attempts = [
+                {"key": "HOST", "value": f"{host}:{port}", "port": None},
+                {"key": "HOST", "value": host, "port": port},
+                {"key": "SERVER", "value": server, "port": port},
+                {"key": "SERVERNAME", "value": server, "port": port},
+            ]
+
+        errors = []
+
+        for attempt in connection_attempts:
+            if not attempt["value"]:
+                continue
+
+            conn_dict = base_params.copy()
+            conn_dict[attempt["key"]] = attempt["value"]
+
+            # Handle port configuration
+            if attempt["port"] is not None:
+                port_configs = [
+                    {"PORT": attempt["port"]},
+                    {"Server port": attempt["port"]},
+                    {},  # Try without explicit port
+                ]
             else:
-                host = host if host else server
-                connection_string = (
-                    f"sybase+pyodbc://{username}:{password}@{host}:{port}/{database}"
-                    f"?driver={driver}"
-                )
-                connection_string_with_schema = (
-                    f"{connection_string}&options=-csearch_path={schema}"
-                )
-                engine = create_engine(
-                    connection_string_with_schema, isolation_level="AUTOCOMMIT"
-                )
+                port_configs = [{}]  # Port is already in the host string
 
-            self.connection = engine.connect()
-            return self.connection
+            for port_config in port_configs:
+                current_config = conn_dict.copy()
+                current_config.update(port_config)
 
-        except Exception as e:
-            raise DataChecksDataSourcesConnectionError(
-                message=f"Failed to connect to Sybase data source: [{str(e)}]"
+                # Add ASE-specific parameters if driver is ASE
+                if self.sybase_driver_type.is_ase:
+                    ase_configs = [
+                        {},  # Basic config
+                        {"NetworkAddress": f"{host},{port}"},  # Alternative format
+                        {"ServerName": host},  # Another common ASE parameter
+                    ]
+                else:
+                    ase_configs = [{}]
+
+                for ase_config in ase_configs:
+                    final_config = current_config.copy()
+                    final_config.update(ase_config)
+
+                    try:
+                        logger.debug(
+                            f"Attempting connection with config: {final_config}"
+                        )
+                        self.connection = pyodbc.connect(**final_config)
+                        logger.info(
+                            f"Successfully connected to Sybase using: "
+                            f"driver={driver}, "
+                            f"{attempt['key']}={attempt['value']}, "
+                            f"port_config={port_config}, "
+                            f"ase_config={ase_config}"
+                        )
+                        return self.connection
+                    except Exception as e:
+                        error_msg = (
+                            f"Failed with {attempt['key']}={attempt['value']}, "
+                            f"port_config={port_config}, "
+                            f"ase_config={ase_config}: {str(e)}"
+                        )
+                        logger.debug(error_msg)
+                        errors.append(error_msg)
+                        continue
+
+        raise DataChecksDataSourcesConnectionError(
+            message=f"Failed to connect to Sybase data source with driver {driver}: "
+            f"[{'; '.join(errors)}]"
+        )
+
+    def _build_base_connection_params(
+        self, driver: str, database: str, username: str, password: str
+    ) -> Dict[str, Any]:
+        """Build base connection parameters dictionary."""
+        return {
+            "DRIVER": self._prepare_driver_string(driver),
+            "DATABASE": database,
+            "UID": username,
+            "PWD": password,
+        }
+
+    def _normalize_driver(self, driver: str) -> str:
+        """Normalize driver string by removing braces, spaces, and converting to lowercase."""
+        return driver.replace("{", "").replace("}", "").replace(" ", "").strip().lower()
+
+    def _detect_driver_type(self, driver: str) -> None:
+        """Detect and set the appropriate driver type."""
+        normalized_driver = self._normalize_driver(driver)
+        self.sybase_driver_type.is_ase = "adaptive" in normalized_driver
+        self.sybase_driver_type.is_iq = "iq" in normalized_driver
+        self.sybase_driver_type.is_freetds = "freetds" in normalized_driver
+
+    def _prepare_driver_string(self, driver: str) -> str:
+        """Ensure driver string is properly formatted with braces."""
+        return f"{{{driver}}}" if not driver.startswith("{") else driver
+
+    def fetchall(self, query):
+        return self.connection.cursor().execute(query).fetchall()
+
+    def fetchone(self, query):
+        return self.connection.cursor().execute(query).fetchone()
+
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f"[{self.schema_name}].[{table_name}]"
+        return f"[{table_name}]"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"[{column}]"
+
+    def query_get_row_count(self, table: str, filters: str = None) -> int:
+        """
+        Get the row count
+        :param table: name of the table
+        :param filters: optional filter
+        """
+        qualified_table_name = self.qualified_table_name(table)
+        query = f"SELECT COUNT(*) FROM {qualified_table_name}"
+        if filters:
+            query += f" WHERE {filters}"
+        return self.fetchone(query)[0]
+
+    def query_get_table_columns(
+        self, table: str, schema: str | None = None
+    ) -> RawColumnInfo:
+        """
+        Get the schema of a table.
+        :param table: table name
+        :return: RawColumnInfo object containing column information
+        """
+        schema = schema or self.schema_name
+        database = self.database
+        rows = None
+        if self.sybase_driver_type.is_iq:
+            query = (
+                f"SELECT c.column_name, d.domain_name AS data_type, "
+                f"CASE WHEN d.domain_name IN ('DECIMAL', 'NUMERIC') THEN c.scale ELSE NULL END AS numeric_scale, "
+                f"CASE WHEN d.domain_name IN ('DECIMAL', 'NUMERIC') THEN c.width ELSE NULL END AS numeric_precision, "
+                f"CASE WHEN d.domain_name IN ('DATE', 'TIME', 'TIMESTAMP') THEN c.scale ELSE NULL END AS datetime_precision, "
+                f"NULL AS collation_name, c.width AS character_maximum_length "
+                f"FROM {database}.SYS.SYSTABLE t "
+                f"JOIN {database}.SYS.SYSCOLUMN c ON t.table_id = c.table_id "
+                f"JOIN {database}.SYS.SYSDOMAIN d ON c.domain_id = d.domain_id "
+                f"JOIN {database}.SYS.SYSUSER u ON t.creator = u.user_id "
+                f"WHERE t.table_name = '{table}' "
+                f"AND u.user_name = '{schema}'"
             )
+
+        elif self.sybase_driver_type.is_ase:
+            query = (
+                f"SELECT c.name AS column_name, t.name AS data_type, "
+                f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
+                f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                f"NULL AS collation_name, c.length AS character_maximum_length "
+                f"FROM {database}..sysobjects o "
+                f"JOIN {database}..syscolumns c ON o.id = c.id "
+                f"JOIN {database}..systypes t ON c.usertype = t.usertype "
+                f"JOIN {database}..sysusers u ON o.uid = u.uid "
+                f"WHERE o.name = '{table}' "
+                f"AND u.name = '{schema}'"
+            )
+        elif self.sybase_driver_type.is_freetds:
+            try:
+                ase_query = (
+                    f"SELECT c.name AS column_name, t.name AS data_type, "
+                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
+                    f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"NULL AS collation_name, c.length AS character_maximum_length "
+                    f"FROM {database}..sysobjects o "
+                    f"JOIN {database}..syscolumns c ON o.id = c.id "
+                    f"JOIN {database}..systypes t ON c.usertype = t.usertype "
+                    f"JOIN {database}..sysusers u ON o.uid = u.uid "
+                    f"WHERE o.name = '{table}' "
+                    f"AND u.name = '{schema}'"
+                )
+                rows = self.fetchall(ase_query)
+
+            except Exception as _:
+                iq_query = (
+                    f"SELECT c.name AS column_name, t.name AS data_type, "
+                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
+                    f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"NULL AS collation_name, c.length AS character_maximum_length "
+                    f"FROM {database}.dbo.sysobjects o "
+                    f"JOIN {database}.dbo.syscolumns c ON o.id = c.id "
+                    f"JOIN {database}.dbo.systypes t ON c.usertype = t.usertype "
+                    f"JOIN {database}.dbo.sysusers u ON o.uid = u.uid "
+                    f"WHERE o.name = '{table}' AND u.name = '{schema}'"
+                )
+                rows = self.fetchall(iq_query)
+        else:
+            raise ValueError("Unknown Sybase driver type")
+        if not rows:
+            rows = self.fetchall(query)
+        if not rows:
+            raise RuntimeError(
+                f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
+            )
+
+        column_info = {
+            r[0]: RawColumnInfo(
+                column_name=self.safe_get(r, 0),
+                data_type=self.safe_get(r, 1),
+                datetime_precision=self.safe_get(r, 2),
+                numeric_precision=self.safe_get(r, 3),
+                numeric_scale=self.safe_get(r, 4),
+                collation_name=self.safe_get(r, 5),
+                character_maximum_length=self.safe_get(r, 6),
+            )
+            for r in rows
+        }
+        return column_info
+
+    def query_get_table_names(
+        self,
+        schema: str | None = None,
+    ) -> List[str]:
+        """
+        Get the list of tables in the database.
+        :param schema: optional schema name
+        :return: list of table names
+        """
+        schema = schema or self.schema_name
+        database = self.database
+
+        if self.sybase_driver_type.is_iq:
+            query = f"SELECT table_name FROM {database}.SYS.SYSTABLE WHERE creator = USER_ID('{schema}') AND table_type = 'BASE'"
+        elif self.sybase_driver_type.is_ase:
+            query = f"SELECT name AS table_name FROM {database}..sysobjects WHERE type = 'U' AND uid = USER_ID('{schema}')"
+        elif self.sybase_driver_type.is_freetds:
+            query = f"SELECT name AS table_name FROM {database}.dbo.sysobjects WHERE type = 'U' AND uid = USER_ID('{schema}')"
+        else:
+            raise ValueError("Unknown Sybase driver type")
+
+        rows = self.fetchall(query)
+        res = [row[0] for row in rows] if rows else []
+        return res
 
     def convert_regex_to_sybase_pattern(self, regex_pattern: str) -> str:
         """
@@ -134,7 +392,7 @@ class SybaseDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
-
+        field = self.quote_column(field)
         if values:
             values_str = ", ".join([f"'{value}'" for value in values])
             validation_query = f"CASE WHEN {field} IN ({values_str}) THEN 1 ELSE 0 END"
@@ -168,6 +426,7 @@ class SybaseDataSource(SQLDataSource):
         :return: count of rows with only spaces
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         query = f"""
             SELECT COUNT(*) AS space_count
@@ -201,6 +460,7 @@ class SybaseDataSource(SQLDataSource):
         :return: count of NULL-like keyword values
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         # Query that checks for both NULL and specific NULL-like values
         query = f"""
@@ -236,6 +496,7 @@ class SybaseDataSource(SQLDataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LEN"
@@ -276,6 +537,7 @@ class SybaseDataSource(SQLDataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -342,6 +604,7 @@ class SybaseDataSource(SQLDataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT TOP 1 {field}
             FROM {qualified_table_name}
@@ -371,6 +634,7 @@ class SybaseDataSource(SQLDataSource):
         """
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         temp_table_suffix = f"{int(time.time())}_{random.randint(1000, 9999)}"
         extracted_table = f"#extracted_timestamps_{temp_table_suffix}"
@@ -457,6 +721,7 @@ class SybaseDataSource(SQLDataSource):
         :return: Count of valid timestamps not in the future and total count or percentage
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if predefined_regex != "timestamp_iso":
             raise ValueError(f"Unknown predefined regex pattern: {predefined_regex}")
@@ -521,6 +786,7 @@ class SybaseDataSource(SQLDataSource):
         :return: Tuple containing count of valid dates not in the future and total count
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         filters_clause = f"WHERE {filters}" if filters else ""
 
         query = f"""

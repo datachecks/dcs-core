@@ -13,12 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
+from dcs_core.core.common.models.data_source_resource import RawColumnInfo
 from dcs_core.integrations.databases.db2 import DB2DataSource
 
 
@@ -69,6 +70,72 @@ class MysqlDataSource(DB2DataSource):
                 message=f"Failed to connect to Mysql data source: [{str(e)}]"
             )
 
+    def qualified_table_name(self, table_name: str) -> str:
+        """
+        Get the qualified table name
+        :param table_name: name of the table
+        :return: qualified table name
+        """
+        if self.schema_name:
+            return f"`{self.schema_name}`.`{table_name}`"
+        return f"`{table_name}`"
+
+    def quote_column(self, column: str) -> str:
+        """
+        Quote the column name
+        :param column: name of the column
+        :return: quoted column name
+        """
+        return f"`{column}`"
+
+    def query_get_table_names(
+        self,
+        schema: str | None = None,
+    ) -> List[str]:
+        """
+        Get the list of tables in the database.
+        :param schema: optional schema name
+        :return: list of table names
+        """
+        database = self.database
+        query = f"SELECT TABLES.TABLE_NAME FROM information_schema.tables WHERE TABLES.TABLE_SCHEMA = '{database}' and TABLES.TABLE_TYPE = 'BASE TABLE'"
+        result = self.fetchall(query)
+        return [row[0] for row in result]
+
+    def query_get_table_columns(
+        self, table: str, schema: str | None = None
+    ) -> RawColumnInfo:
+        """
+        Get the schema of a table.
+        :param table: table name
+        :return: RawColumnInfo object containing column information
+        """
+        schema = self.database
+        query = (
+            "SELECT column_name, data_type, datetime_precision, numeric_precision, numeric_scale, NULL as collation_name, character_maximum_length "
+            "FROM information_schema.columns "
+            f"WHERE table_name = '{table}' AND table_schema = '{schema}'"
+        )
+        rows = self.fetchall(query)
+        if not rows:
+            raise RuntimeError(
+                f"{table}: Table, {schema}: Schema, does not exist, or has no columns"
+            )
+
+        column_info = {
+            r[0]: RawColumnInfo(
+                column_name=self.safe_get(r, 0),
+                data_type=self.safe_get(r, 1),
+                datetime_precision=self.safe_get(r, 2),
+                numeric_precision=self.safe_get(r, 3),
+                numeric_scale=self.safe_get(r, 4),
+                collation_name=self.safe_get(r, 5),
+                character_maximum_length=self.safe_get(r, 6),
+            )
+            for r in rows
+        }
+        return column_info
+
     def query_get_distinct_count(
         self, table: str, field: str, filters: str = None
     ) -> int:
@@ -80,6 +147,7 @@ class MysqlDataSource(DB2DataSource):
         :return:
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = "SELECT COUNT(DISTINCT {}) FROM {}".format(field, qualified_table_name)
         if filters:
             query += " WHERE {}".format(filters)
@@ -98,6 +166,7 @@ class MysqlDataSource(DB2DataSource):
         :return: the value at the specified percentile
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         rank = int(percentile * 100)
 
         query = f"""
@@ -118,6 +187,7 @@ class MysqlDataSource(DB2DataSource):
         self, table: str, field: str, operation: str, filters: str = None
     ) -> Union[int, float]:
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         negative_query = (
             f"SELECT COUNT(*) FROM {qualified_table_name} WHERE {field} < 0"
@@ -152,6 +222,7 @@ class MysqlDataSource(DB2DataSource):
         :return: the calculated metric as int for 'max' and 'min', float for 'avg'
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if metric.lower() == "max":
             sql_function = "MAX(LENGTH"
@@ -191,6 +262,7 @@ class MysqlDataSource(DB2DataSource):
         """
         filters = f"WHERE {filters}" if filters else ""
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         if not regex_pattern and not predefined_regex_pattern:
             raise ValueError(
@@ -228,6 +300,7 @@ class MysqlDataSource(DB2DataSource):
         filters = f"WHERE {filters}" if filters else ""
 
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
 
         regex_query = f"""
             CASE WHEN REGEXP_LIKE({field}, '^[A-Z]{{2}}$') AND UPPER({field}) IN ({valid_state_codes_str}) THEN 1 ELSE 0 END
@@ -257,6 +330,7 @@ class MysqlDataSource(DB2DataSource):
         :return: time difference in seconds
         """
         qualified_table_name = self.qualified_table_name(table)
+        field = self.quote_column(field)
         query = f"""
             SELECT {field}
             FROM {qualified_table_name}
