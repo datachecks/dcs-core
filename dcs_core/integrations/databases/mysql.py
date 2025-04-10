@@ -108,7 +108,7 @@ class MysqlDataSource(DB2DataSource):
         """
         Get the schema of a table.
         :param table: table name
-        :return: list of dictionaries containing column name and data type
+        :return: RawColumnInfo object containing column information
         """
         schema = self.database
         query = (

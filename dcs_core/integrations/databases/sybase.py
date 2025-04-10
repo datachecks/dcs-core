@@ -243,7 +243,7 @@ class SybaseDataSource(SQLDataSource):
         """
         Get the schema of a table.
         :param table: table name
-        :return: list of dictionaries containing column name and data type
+        :return: RawColumnInfo object containing column information
         """
         schema = schema or self.schema_name
         database = self.database
