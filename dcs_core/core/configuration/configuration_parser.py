@@ -69,6 +69,7 @@ class DataSourceConfigParser(ConfigParser):
             project=config["connection"].get("project"),
             dataset=config["connection"].get("dataset"),
             credentials_base64=config["connection"].get("credentials_base64"),
+            keyfile=config["connection"].get("keyfile"),
             token=config["connection"].get("token"),
             catalog=config["connection"].get("catalog"),
             http_path=config["connection"].get("http_path"),

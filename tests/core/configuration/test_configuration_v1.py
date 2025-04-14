@@ -55,6 +55,7 @@ def test_should_read_datasource_config_for_bigquery():
           project: "test-project"
           dataset: "test_dataset"
           credentials_base64: "asda...="
+          keyfile: "path/to/keyfile.json"
     """
     configuration = load_configuration_from_yaml_str(yaml_string)
     assert configuration.data_sources["test"].type == DataSourceType.BIGQUERY

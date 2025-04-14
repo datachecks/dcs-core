@@ -66,6 +66,7 @@ class DataSourceConnectionConfiguration:
     project: Optional[str] = None  # BigQuery specific configuration
     dataset: Optional[str] = None  # BigQuery specific configuration
     credentials_base64: Optional[str] = None  # BigQuery specific configuration
+    keyfile: Optional[str] = None  # BigQuery specific configuration
 
     token: Optional[str] = None  # Databricks specific configuration
     catalog: Optional[str] = None  # Databricks specific configuration

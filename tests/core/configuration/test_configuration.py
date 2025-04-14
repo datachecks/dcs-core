@@ -66,6 +66,7 @@ def test_should_read_datasource_config_for_bigquery():
           project: "test-project"
           dataset: "test_dataset"
           credentials_base64: "asda...="
+          keyfile: "path/to/keyfile.json"
     metrics:
       - name: test_metric
         metric_type: row_count
