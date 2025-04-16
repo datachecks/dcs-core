@@ -57,6 +57,7 @@ class OracleDataSource(SQLDataSource):
                     "service_name": self.data_connection.get("service_name"),
                 },
             )
+            self.schema_name = self.data_connection.get("username")
             self.connection = engine.connect()
             return self.connection
         except Exception as e:
