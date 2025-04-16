@@ -135,9 +135,9 @@ class BigQueryDataSource(SQLDataSource):
         schema = schema or self.schema_name
         query = (
             "SELECT column_name, data_type, "
-            "6 AS datetime_precision, "
-            "38 AS numeric_precision, "
-            "9 AS numeric_scale, "
+            "NULL AS datetime_precision, "
+            "NULL AS numeric_precision, "
+            "NULL AS numeric_scale, "
             "NULL AS collation_name, "
             "NULL AS character_maximum_length "
             f"FROM `{self.project_id}.{schema}.INFORMATION_SCHEMA.COLUMNS` "
