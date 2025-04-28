@@ -137,6 +137,14 @@ class SQLDataSource(DataSource):
             return f"[{self.schema_name}].[{table_name}]"
         return f"[{table_name}]"
 
+    def quote_database(self, database: str) -> str:
+        """
+        Quote the database name
+        :param database: name of the database
+        :return: quoted database name
+        """
+        return f'"{database}"'
+
     def quote_column(self, column: str) -> str:
         """
         Quote the column name

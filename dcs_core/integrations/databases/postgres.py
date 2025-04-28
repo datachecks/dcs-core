@@ -82,9 +82,9 @@ class PostgresDataSource(SQLDataSource):
         """
 
         schema = schema or self.schema_name
-        database = self.database
+        database = self.quote_database(self.database)
         query = (
-            f'SELECT table_name FROM "{database}".information_schema.tables '
+            f'SELECT table_name FROM {database}.information_schema.tables '
             f"WHERE table_schema = '{schema}' AND table_type = 'BASE TABLE'"
         )
         result = self.fetchall(query)
@@ -103,7 +103,8 @@ class PostgresDataSource(SQLDataSource):
         schema = schema or self.schema_name
         info_schema_path = ["information_schema", "columns"]
         if self.database:
-            info_schema_path.insert(0, self.database)
+            database = self.quote_database(self.database)
+            info_schema_path.insert(0, database)
         query = (
             f"SELECT column_name, data_type, datetime_precision, "
             f"CASE WHEN data_type = 'numeric' "

@@ -150,7 +150,7 @@ class MssqlDataSource(SQLDataSource):
         :return: RawColumnInfo object containing column information
         """
         schema = schema or self.schema_name
-        database = self.database
+        database = self.quote_database(self.database)
         query = f"SELECT column_name, data_type, datetime_precision, numeric_precision, numeric_scale, collation_name, character_maximum_length FROM {database}.information_schema.columns WHERE table_name = '{table}' AND table_schema = '{schema}'"
 
         rows = self.fetchall(query)
