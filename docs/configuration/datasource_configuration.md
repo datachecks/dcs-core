@@ -1,6 +1,6 @@
 # **Data Source Configuration**
 
-Datachecks will read datasource configuration under the key `datasources` in the configuration file. User can define multiple datasource in the configuration file under `datasources` key.
+Datachecks will read datasource configuration under the key `data_sources` in the configuration file. User can define multiple datasource in the configuration file under `data_sources` key.
 
 For example:
 

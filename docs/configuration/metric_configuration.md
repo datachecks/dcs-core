@@ -1,6 +1,6 @@
 # **Metric Configuration**
 
-Datachecks will read metrics configuration under the key `metrics` in the configuration file. User can define multiple metrics in the configuration file under `metrics` key.
+Datachecks will read metrics configuration under the key `metrics` (The format is: validations for source.product) in the configuration file. User can define multiple metrics in the configuration file under `metrics` key.
 
 For example:
 
@@ -17,7 +17,7 @@ validations for mysql_db.table_name:
 |:--------------|:-----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `<key filed>` | :material-check: | The name of the validation. The name should be unique.                                                                                                                                                                                                                                                |
 | `on`          | :material-check: | The type of the validation function. Possible values are `freshness`, `row_count` etc. Type of validation mentioned in every metric documentation                                                                                                                                                     |
-| `where`       | :material-close: | The where filter to be applied on the filed. In `where` field we can pass `SQL Query`(In ase of SQl DB) or `Search Query`(In ase of search engine). </br></br>For example: </br> `where: city = 'bangalore' AND age >= 30`                                                                            |
+| `where`       | :material-close: | The where filter to be applied on the filed. In `where` field we can pass `SQL Query`(In case of SQl DB) or `Search Query`(In case of search engine). </br></br>For example: </br> `where: city = 'bangalore' AND age >= 30`                                                                            |
 | `threshold`   | :material-close: | The validation will be applied on the validation value. A validation error will be invoked if the metric value violate threshold value. </br> Possible values for threshold are `>`, `>=`, `=` , `<`, `<=`. We can combine multiple operators  </br> For example: </br> `threshold: ">= 10 & <= 100"` |
 
 
