@@ -91,6 +91,7 @@ class MysqlDataSource(DB2DataSource):
     def query_get_table_names(
         self,
         schema: str | None = None,
+        with_view: bool = False,
     ) -> List[str]:
         """
         Get the list of tables in the database.
@@ -98,7 +99,12 @@ class MysqlDataSource(DB2DataSource):
         :return: list of table names
         """
         database = self.database
-        query = f"SELECT TABLES.TABLE_NAME FROM information_schema.tables WHERE TABLES.TABLE_SCHEMA = '{database}' and TABLES.TABLE_TYPE = 'BASE TABLE'"
+        if with_view:
+            table_type_condition = "TABLES.TABLE_TYPE IN ('BASE TABLE', 'VIEW')"
+        else:
+            table_type_condition = "TABLES.TABLE_TYPE = 'BASE TABLE'"
+
+        query = f"SELECT TABLES.TABLE_NAME FROM information_schema.tables WHERE TABLES.TABLE_SCHEMA = '{database}' and {table_type_condition}"
         result = self.fetchall(query)
         return [row[0] for row in result]
 

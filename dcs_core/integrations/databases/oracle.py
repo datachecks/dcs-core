@@ -86,6 +86,7 @@ class OracleDataSource(SQLDataSource):
     def query_get_table_names(
         self,
         schema: str | None = None,
+        with_view: bool = False,
     ) -> List[str]:
         """
         Get the list of tables in the database.
@@ -93,7 +94,14 @@ class OracleDataSource(SQLDataSource):
         :return: list of table names
         """
         schema = schema or self.schema_name
-        query = f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}'"
+        if with_view:
+            query = (
+                f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}' "
+                f"UNION "
+                f"SELECT VIEW_NAME AS TABLE_NAME FROM ALL_VIEWS WHERE OWNER = '{schema}'"
+            )
+        else:
+            query = f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}'"
         result = self.fetchall(query)
         return [row[0] for row in result]
 

@@ -74,6 +74,7 @@ class PostgresDataSource(SQLDataSource):
     def query_get_table_names(
         self,
         schema: str | None = None,
+        with_view: bool = False,
     ) -> List[str]:
         """
         Get the list of tables in the database.
@@ -83,9 +84,15 @@ class PostgresDataSource(SQLDataSource):
 
         schema = schema or self.schema_name
         database = self.quote_database(self.database)
+
+        if with_view:
+            table_type_condition = "table_type IN ('BASE TABLE', 'VIEW')"
+        else:
+            table_type_condition = "table_type = 'BASE TABLE'"
+
         query = (
-            f'SELECT table_name FROM {database}.information_schema.tables '
-            f"WHERE table_schema = '{schema}' AND table_type = 'BASE TABLE'"
+            f"SELECT table_name FROM {database}.information_schema.tables "
+            f"WHERE table_schema = '{schema}' AND {table_type_condition}"
         )
         result = self.fetchall(query)
         return [row[0] for row in result]

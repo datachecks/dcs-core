@@ -126,8 +126,7 @@ class MssqlDataSource(SQLDataSource):
         return f"[{column}]"
 
     def query_get_table_names(
-        self,
-        schema: str | None = None,
+        self, schema: str | None = None, with_view: bool = False
     ) -> List[str]:
         """
         Get the list of tables in the database.
@@ -135,7 +134,13 @@ class MssqlDataSource(SQLDataSource):
         :return: list of table names
         """
         schema = schema or self.schema_name
-        query = f"SELECT o.name AS table_name FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type = 'U' AND s.name = '{schema}' ORDER BY o.name"
+
+        if with_view:
+            object_types = "IN ('U', 'V')"
+        else:
+            object_types = "= 'U'"
+
+        query = f"SELECT o.name AS table_name FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type {object_types} AND s.name = '{schema}' ORDER BY o.name"
 
         rows = self.fetchall(query)
         res = [row[0] for row in rows] if rows else []
