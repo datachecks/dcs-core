@@ -57,7 +57,9 @@ class OracleDataSource(SQLDataSource):
                     "service_name": self.data_connection.get("service_name"),
                 },
             )
-            self.schema_name = self.data_connection.get("username")
+            self.schema_name = self.data_connection.get(
+                "schema"
+            ) or self.data_connection.get("username")
             self.connection = engine.connect()
             return self.connection
         except Exception as e:
@@ -87,23 +89,43 @@ class OracleDataSource(SQLDataSource):
         self,
         schema: str | None = None,
         with_view: bool = False,
-    ) -> List[str]:
+    ) -> dict:
         """
         Get the list of tables in the database.
         :param schema: optional schema name
-        :return: list of table names
+        :param with_view: whether to include views
+        :return: dictionary with table names and optionally view names
         """
         schema = schema or self.schema_name
+
         if with_view:
             query = (
-                f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}' "
+                f"SELECT TABLE_NAME, 'TABLE' AS OBJECT_TYPE FROM ALL_ALL_TABLES WHERE OWNER = '{schema}' "
                 f"UNION "
-                f"SELECT VIEW_NAME AS TABLE_NAME FROM ALL_VIEWS WHERE OWNER = '{schema}'"
+                f"SELECT VIEW_NAME AS TABLE_NAME, 'VIEW' AS OBJECT_TYPE FROM ALL_VIEWS WHERE OWNER = '{schema}'"
             )
         else:
-            query = f"SELECT TABLE_NAME FROM ALL_ALL_TABLES WHERE OWNER = '{schema}'"
-        result = self.fetchall(query)
-        return [row[0] for row in result]
+            query = f"SELECT TABLE_NAME, 'TABLE' AS OBJECT_TYPE FROM ALL_ALL_TABLES WHERE OWNER = '{schema}'"
+
+        rows = self.fetchall(query)
+
+        if with_view:
+            result = {"table": [], "view": []}
+            if rows:
+                for row in rows:
+                    object_name = row[0]
+                    object_type = row[1].strip() if row[1] else row[1]
+
+                    if object_type == "TABLE":
+                        result["table"].append(object_name)
+                    elif object_type == "VIEW":
+                        result["view"].append(object_name)
+        else:
+            result = {"table": []}
+            if rows:
+                result["table"] = [row[0] for row in rows]
+
+        return result
 
     def query_get_table_columns(
         self,

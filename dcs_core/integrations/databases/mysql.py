@@ -92,11 +92,12 @@ class MysqlDataSource(DB2DataSource):
         self,
         schema: str | None = None,
         with_view: bool = False,
-    ) -> List[str]:
+    ) -> dict:
         """
         Get the list of tables in the database.
         :param schema: optional schema name
-        :return: list of table names
+        :param with_view: whether to include views
+        :return: dictionary with table names and optionally view names
         """
         database = self.database
         if with_view:
@@ -104,9 +105,26 @@ class MysqlDataSource(DB2DataSource):
         else:
             table_type_condition = "TABLES.TABLE_TYPE = 'BASE TABLE'"
 
-        query = f"SELECT TABLES.TABLE_NAME FROM information_schema.tables WHERE TABLES.TABLE_SCHEMA = '{database}' and {table_type_condition}"
-        result = self.fetchall(query)
-        return [row[0] for row in result]
+        query = f"SELECT TABLES.TABLE_NAME, TABLES.TABLE_TYPE FROM information_schema.tables WHERE TABLES.TABLE_SCHEMA = '{database}' and {table_type_condition}"
+        rows = self.fetchall(query)
+
+        if with_view:
+            result = {"table": [], "view": []}
+            if rows:
+                for row in rows:
+                    table_name = row[0]
+                    table_type = row[1].strip() if row[1] else row[1]
+
+                    if table_type == "BASE TABLE":
+                        result["table"].append(table_name)
+                    elif table_type == "VIEW":
+                        result["view"].append(table_name)
+        else:
+            result = {"table": []}
+            if rows:
+                result["table"] = [row[0] for row in rows]
+
+        return result
 
     def query_get_table_columns(
         self, table: str, schema: str | None = None

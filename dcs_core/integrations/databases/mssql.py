@@ -127,11 +127,12 @@ class MssqlDataSource(SQLDataSource):
 
     def query_get_table_names(
         self, schema: str | None = None, with_view: bool = False
-    ) -> List[str]:
+    ) -> dict:
         """
         Get the list of tables in the database.
         :param schema: optional schema name
-        :return: list of table names
+        :param with_view: whether to include views
+        :return: dictionary with table names and optionally view names
         """
         schema = schema or self.schema_name
 
@@ -140,11 +141,27 @@ class MssqlDataSource(SQLDataSource):
         else:
             object_types = "= 'U'"
 
-        query = f"SELECT o.name AS table_name FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type {object_types} AND s.name = '{schema}' ORDER BY o.name"
+        query = f"SELECT o.name AS table_name, o.type FROM sys.objects o JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE o.type {object_types} AND s.name = '{schema}' ORDER BY o.name"
 
         rows = self.fetchall(query)
-        res = [row[0] for row in rows] if rows else []
-        return res
+
+        if with_view:
+            result = {"table": [], "view": []}
+            if rows:
+                for row in rows:
+                    object_name = row[0]
+                    object_type = row[1].strip() if row[1] else row[1]
+
+                    if object_type == "U":
+                        result["table"].append(object_name)
+                    elif object_type == "V":
+                        result["view"].append(object_name)
+        else:
+            result = {"table": []}
+            if rows:
+                result["table"] = [row[0] for row in rows]
+
+        return result
 
     def query_get_table_columns(
         self, table: str, schema: str | None = None

@@ -332,11 +332,12 @@ class SybaseDataSource(SQLDataSource):
         self,
         schema: str | None = None,
         with_view: bool = False,
-    ) -> List[str]:
+    ) -> dict:
         """
         Get the list of tables in the database.
         :param schema: optional schema name
-        :return: list of table names
+        :param with_view: whether to include views
+        :return: dictionary with table names and optionally view names
         """
         schema = schema or self.schema_name
         database = self.database
@@ -349,17 +350,39 @@ class SybaseDataSource(SQLDataSource):
             table_type_condition = (
                 "table_type IN ('BASE', 'VIEW')" if with_view else "table_type = 'BASE'"
             )
-            query = f"SELECT table_name FROM {database}.SYS.SYSTABLE WHERE creator = USER_ID('{schema}') AND {table_type_condition}"
+            query = f"SELECT table_name, table_type FROM {database}.SYS.SYSTABLE WHERE creator = USER_ID('{schema}') AND {table_type_condition}"
         elif self.sybase_driver_type.is_ase:
-            query = f"SELECT name AS table_name FROM {database}..sysobjects WHERE type {type_condition} AND uid = USER_ID('{schema}')"
+            query = f"SELECT name AS table_name, type FROM {database}..sysobjects WHERE type {type_condition} AND uid = USER_ID('{schema}')"
         elif self.sybase_driver_type.is_freetds:
-            query = f"SELECT name AS table_name FROM {database}.dbo.sysobjects WHERE type {type_condition} AND uid = USER_ID('{schema}')"
+            query = f"SELECT name AS table_name, type FROM {database}.dbo.sysobjects WHERE type {type_condition} AND uid = USER_ID('{schema}')"
         else:
             raise ValueError("Unknown Sybase driver type")
 
         rows = self.fetchall(query)
-        res = [row[0] for row in rows] if rows else []
-        return res
+
+        if with_view:
+            result = {"table": [], "view": []}
+            if rows:
+                for row in rows:
+                    table_name = row[0]
+                    table_type = row[1].strip() if row[1] else row[1]
+
+                    if self.sybase_driver_type.is_iq:
+                        if table_type == "BASE":
+                            result["table"].append(table_name)
+                        elif table_type == "VIEW":
+                            result["view"].append(table_name)
+                    else:  # ASE or FreeTDS
+                        if table_type == "U":
+                            result["table"].append(table_name)
+                        elif table_type == "V":
+                            result["view"].append(table_name)
+        else:
+            result = {"table": []}
+            if rows:
+                result["table"] = [row[0] for row in rows]
+
+        return result
 
     def convert_regex_to_sybase_pattern(self, regex_pattern: str) -> str:
         """
