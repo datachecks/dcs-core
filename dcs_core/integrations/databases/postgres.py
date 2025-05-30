@@ -74,21 +74,46 @@ class PostgresDataSource(SQLDataSource):
     def query_get_table_names(
         self,
         schema: str | None = None,
-    ) -> List[str]:
+        with_view: bool = False,
+    ) -> dict:
         """
         Get the list of tables in the database.
         :param schema: optional schema name
-        :return: list of table names
+        :param with_view: whether to include views
+        :return: dictionary with table names and optionally view names
         """
 
         schema = schema or self.schema_name
         database = self.quote_database(self.database)
+
+        if with_view:
+            table_type_condition = "table_type IN ('BASE TABLE', 'VIEW')"
+        else:
+            table_type_condition = "table_type = 'BASE TABLE'"
+
         query = (
-            f'SELECT table_name FROM {database}.information_schema.tables '
-            f"WHERE table_schema = '{schema}' AND table_type = 'BASE TABLE'"
+            f"SELECT table_name, table_type FROM {database}.information_schema.tables "
+            f"WHERE table_schema = '{schema}' AND {table_type_condition}"
         )
-        result = self.fetchall(query)
-        return [row[0] for row in result]
+        rows = self.fetchall(query)
+
+        if with_view:
+            result = {"table": [], "view": []}
+            if rows:
+                for row in rows:
+                    table_name = row[0]
+                    table_type = row[1].strip() if row[1] else row[1]
+
+                    if table_type == "BASE TABLE":
+                        result["table"].append(table_name)
+                    elif table_type == "VIEW":
+                        result["view"].append(table_name)
+        else:
+            result = {"table": []}
+            if rows:
+                result["table"] = [row[0] for row in rows]
+
+        return result
 
     def query_get_table_columns(
         self,
