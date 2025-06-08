@@ -251,9 +251,9 @@ class SybaseDataSource(SQLDataSource):
         if self.sybase_driver_type.is_iq:
             query = (
                 f"SELECT c.column_name, d.domain_name AS data_type, "
-                f"CASE WHEN d.domain_name IN ('DECIMAL', 'NUMERIC') THEN c.scale ELSE NULL END AS numeric_scale, "
-                f"CASE WHEN d.domain_name IN ('DECIMAL', 'NUMERIC') THEN c.width ELSE NULL END AS numeric_precision, "
                 f"CASE WHEN d.domain_name IN ('DATE', 'TIME', 'TIMESTAMP') THEN c.scale ELSE NULL END AS datetime_precision, "
+                f"CASE WHEN t.name IN ('float') THEN 15 WHEN t.name IN ('real') THEN 7 ELSE c.prec END AS numeric_precision, "
+                f"CASE WHEN t.name IN ('float', 'real') THEN NULL ELSE c.scale END AS numeric_scale, "
                 f"NULL AS collation_name, c.width AS character_maximum_length "
                 f"FROM {database}.SYS.SYSTABLE t "
                 f"JOIN {database}.SYS.SYSCOLUMN c ON t.table_id = c.table_id "
@@ -266,8 +266,9 @@ class SybaseDataSource(SQLDataSource):
         elif self.sybase_driver_type.is_ase:
             query = (
                 f"SELECT c.name AS column_name, t.name AS data_type, "
-                f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
                 f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                f"CASE WHEN t.name IN ('float') THEN 15 WHEN t.name IN ('real') THEN 7 ELSE c.prec END AS numeric_precision, "
+                f"CASE WHEN t.name IN ('float', 'real') THEN NULL ELSE c.scale END AS numeric_scale, "
                 f"NULL AS collation_name, c.length AS character_maximum_length "
                 f"FROM {database}..sysobjects o "
                 f"JOIN {database}..syscolumns c ON o.id = c.id "
@@ -280,8 +281,9 @@ class SybaseDataSource(SQLDataSource):
             try:
                 ase_query = (
                     f"SELECT c.name AS column_name, t.name AS data_type, "
-                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
                     f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"CASE WHEN t.name IN ('float') THEN 15 WHEN t.name IN ('real') THEN 7 ELSE c.prec END AS numeric_precision, "
+                    f"CASE WHEN t.name IN ('float', 'real') THEN NULL ELSE c.scale END AS numeric_scale, "
                     f"NULL AS collation_name, c.length AS character_maximum_length "
                     f"FROM {database}..sysobjects o "
                     f"JOIN {database}..syscolumns c ON o.id = c.id "
@@ -295,8 +297,9 @@ class SybaseDataSource(SQLDataSource):
             except Exception as _:
                 iq_query = (
                     f"SELECT c.name AS column_name, t.name AS data_type, "
-                    f"c.prec AS numeric_precision, c.scale AS numeric_scale, "
                     f"CASE WHEN c.type IN (61, 111) THEN c.prec ELSE NULL END AS datetime_precision, "
+                    f"CASE WHEN t.name IN ('float') THEN 15 WHEN t.name IN ('real') THEN 7 ELSE c.prec END AS numeric_precision, "
+                    f"CASE WHEN t.name IN ('float', 'real') THEN NULL ELSE c.scale END AS numeric_scale, "
                     f"NULL AS collation_name, c.length AS character_maximum_length "
                     f"FROM {database}.dbo.sysobjects o "
                     f"JOIN {database}.dbo.syscolumns c ON o.id = c.id "
