@@ -175,7 +175,7 @@ class MssqlDataSource(SQLDataSource):
         database = self.quote_database(self.database)
         query = (
             "SELECT column_name, data_type, ISNULL(datetime_precision, 0) AS datetime_precision, ISNULL(numeric_precision, 0) AS numeric_precision, ISNULL(numeric_scale, 0) AS numeric_scale, collation_name, ISNULL(character_maximum_length, 0) AS character_maximum_length "
-            f"FROM {database}.information_schema.columns"
+            f"FROM {database}.information_schema.columns "
             f"WHERE table_name = '{table}' AND table_schema = '{schema}'"
         )
         rows = self.fetchall(query)
