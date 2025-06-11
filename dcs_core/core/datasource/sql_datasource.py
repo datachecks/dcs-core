@@ -174,6 +174,19 @@ class SQLDataSource(DataSource):
         """
         return inspect(self.connection.engine).get_table_names()
 
+    def query_get_database_version(self) -> str:
+        """
+        Get the database version
+        :return: version number
+        """
+        query = "SELECT @@version"
+        result = self.fetchone(query)[0]
+
+        if result:
+            return result
+
+        return "Unknown version"
+
     def query_get_row_count(self, table: str, filters: str = None) -> int:
         """
         Get the row count
