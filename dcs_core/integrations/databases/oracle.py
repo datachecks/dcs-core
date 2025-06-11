@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from loguru import logger
 from sqlalchemy import create_engine
@@ -84,6 +84,17 @@ class OracleDataSource(SQLDataSource):
         :return: quoted column name
         """
         return f'"{column}"'
+
+    def query_get_database_version(
+        self, database_version_query: Optional[str] = None
+    ) -> str:
+        """
+        Get the database version
+        :return: version string
+        """
+        query = database_version_query or "SELECT BANNER FROM v$version"
+        result = self.fetchone(query)[0]
+        return result if result else None
 
     def query_get_table_names(
         self,

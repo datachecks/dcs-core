@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from loguru import logger
 from sqlalchemy import inspect, text
@@ -152,6 +152,17 @@ class SQLDataSource(DataSource):
         :return: quoted column name
         """
         return f"[{column}]"
+
+    def query_get_database_version(
+        self, database_version_query: Optional[str] = None
+    ) -> str:
+        """
+        Get the database version
+        :return: version string
+        """
+        query = database_version_query or "SELECT @@version"
+        result = self.fetchone(query)[0]
+        return result if result else None
 
     def query_get_column_metadata(self, table_name: str) -> Dict[str, str]:
         """
