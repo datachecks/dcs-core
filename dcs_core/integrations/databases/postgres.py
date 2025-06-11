@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
@@ -70,6 +70,17 @@ class PostgresDataSource(SQLDataSource):
         :return: quoted column name
         """
         return f'"{column}"'
+
+    def query_get_database_version(
+        self, database_version_query: Optional[str] = None
+    ) -> str:
+        """
+        Get the database version
+        :return: version string
+        """
+        query = database_version_query or "SELECT version()"
+        result = self.fetchone(query)[0]
+        return result if result else None
 
     def query_get_table_names(
         self,
