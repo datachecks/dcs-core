@@ -16,7 +16,7 @@ import random
 import re
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pyodbc
 from loguru import logger
@@ -386,6 +386,32 @@ class SybaseDataSource(SQLDataSource):
                 result["table"] = [row[0] for row in rows]
 
         return result
+
+    def fetch_rows(
+        self,
+        query: str,
+        limit: int = 1,
+        with_column_names: bool = False,
+        complete_query: Optional[str] = None,
+    ) -> Tuple[List, Optional[List[str]]]:
+        """
+        Fetch rows from the database using pyodbc.
+
+        :param query: SQL query to execute.
+        :param limit: Number of rows to fetch.
+        :param with_column_names: Whether to include column names in the result.
+        :return: Tuple of (rows, column_names or None)
+        """
+        query = complete_query or f"SELECT TOP {limit} * FROM ({query}) AS subquery"
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchmany(limit)
+
+        if with_column_names:
+            column_names = [column[0] for column in cursor.description]
+            return rows, column_names
+        else:
+            return rows, None
 
     def convert_regex_to_sybase_pattern(self, regex_pattern: str) -> str:
         """
