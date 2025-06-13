@@ -12,9 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
@@ -174,3 +174,29 @@ class PostgresDataSource(SQLDataSource):
             for r in rows
         }
         return column_info
+
+    def fetch_rows(
+        self,
+        query: str,
+        limit: int = 1,
+        with_column_names: bool = False,
+        complete_query: Optional[str] = None,
+    ) -> Tuple[List, Optional[List[str]]]:
+        """
+        Fetch rows from the database.
+
+        :param query: SQL query to execute.
+        :param limit: Number of rows to fetch.
+        :param with_column_names: Whether to include column names in the result.
+        :return: Tuple of (rows, column_names or None)
+        """
+        query = complete_query or f"SELECT * FROM ({query}) AS subquery LIMIT {limit}"
+
+        result = self.connection.execute(text(query))
+        rows = result.fetchmany(limit)
+
+        if with_column_names:
+            column_names = result.keys()
+            return rows, list(column_names)
+        else:
+            return rows, None
