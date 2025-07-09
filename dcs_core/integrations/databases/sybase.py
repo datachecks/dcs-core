@@ -330,6 +330,131 @@ class SybaseDataSource(SQLDataSource):
             for r in rows
         }
         return column_info
+    
+    def query_get_table_indexes(
+        self, table: str, schema: str | None = None
+    ) -> dict[str, dict]:
+        """
+        Get index information for a table in Sybase (IQ/ASE).
+        :param table: Table name
+        :param schema: Optional schema name
+        :return: Dictionary with index details
+        """
+        schema = schema or self.schema_name
+        database = self.database
+        rows = None
+
+        if self.sybase_driver_type.is_iq:
+            query = (
+                f"SELECT\n"
+                f"    t.table_name,\n"
+                f"    i.index_name,\n"
+                f"    c.column_name,\n"
+                f"    ic.sequence as column_order,\n"
+                f"    CASE WHEN i.index_type = 'UNIQUE' THEN 1 ELSE 0 END as is_unique,\n"
+                f"    CASE WHEN i.index_type = 'PRIMARY KEY' THEN 1 ELSE 0 END as is_primary_key\n"
+                f"FROM\n"
+                f"    {database}.sys.systable t\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysindex i ON t.table_id = i.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysixcol ic ON i.index_id = ic.index_id AND i.table_id = ic.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.syscolumn c ON ic.column_id = c.column_id AND ic.table_id = c.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysuser u ON t.creator = u.user_id\n"
+                f"WHERE\n"
+                f"    t.table_type = 'BASE'\n"
+                f"    AND t.table_name = '{table}'\n"
+                f"    AND u.user_name = '{schema}'\n"
+                f"    AND i.index_name IS NOT NULL\n"
+                f"ORDER BY\n"
+                f"    i.index_name, ic.sequence"
+            )
+        elif self.sybase_driver_type.is_freetds:
+            query = (
+                f"SELECT\n"
+                f"    t.table_name,\n"
+                f"    i.index_name,\n"
+                f"    c.column_name,\n"
+                f"    ic.sequence AS column_order\n"
+                f"FROM\n"
+                f"    {database}.sys.systable t\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysindex i ON t.table_id = i.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysixcol ic ON i.index_id = ic.index_id AND i.table_id = ic.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.syscolumn c ON ic.column_id = c.column_id AND ic.table_id = c.table_id\n"
+                f"JOIN\n"
+                f"    {database}.sys.sysuser u ON t.creator = u.user_id\n"
+                f"WHERE\n"
+                f"    t.table_type = 'BASE'\n"
+                f"    AND t.table_name = '{table}'\n"
+                f"    AND u.user_name = '{schema}'\n"
+                f"    AND i.index_name IS NOT NULL\n"
+                f"ORDER BY\n"
+                f"    i.index_name, ic.sequence"
+            )
+
+
+
+
+
+
+            # raise NotImplementedError("Index query is currently implemented only for Sybase IQ")
+
+        rows = self.fetchall(query)
+
+
+
+        pk_sql = f"sp_iqpkeys '{table}', NULL, '{schema}'"
+        pk_rows = self.fetchall(pk_sql)
+        print(pk_rows)
+
+        if not rows:
+            raise RuntimeError(
+                f"No index information found for table '{table}' in schema '{schema}'."
+            )
+
+        indexes = {}
+        for row in rows:
+            index_name = row[1]
+            column_info = {
+                "column_name": self.safe_get(row, 2),
+                "column_order": self.safe_get(row, 3),
+            }
+            if index_name not in indexes:
+                indexes[index_name] = {
+                    "columns": [],
+                }
+            indexes[index_name]["columns"].append(column_info)
+        
+
+        pk_columns = []
+        if pk_rows:
+            raw_columns = pk_rows[0][2]  
+            pk_columns = [col.strip() for col in raw_columns.split(",")]
+        print(pk_columns)
+
+        pk_columns_set = set(pk_columns)
+
+        # Add PK flags to each index
+        for index_name, idx in indexes.items():
+            index_columns = [col["column_name"].strip() for col in idx["columns"]]
+            index_columns_set = set(index_columns)
+            
+            is_primary_key = (
+                pk_columns_set == index_columns_set and
+                len(index_columns) == len(pk_columns)
+            )
+            
+            idx["is_primary_key"] = is_primary_key
+                
+        # print(print(json.dumps(indexes, indent=2)))
+        return indexes
+
+
 
     def query_get_table_names(
         self,
