@@ -1,0 +1,14 @@
+name: publish to pypi
+
+run-name: publish to pypi
+
+on:
+  workflow_dispatch:
+
+jobs:
+  wait-for-approval:
+    uses: datachecks/github-action-workflows/.github/workflows/manual_approver.yaml@main
+
+  publish-to-pypi:
+    needs: wait-for-approval
+    uses: datachecks/github-action-workflows/.github/workflows/poetry_publish.yaml@main
