@@ -64,6 +64,7 @@ class SybaseDataSource(SQLDataSource):
                 "user": username,
                 "password": password,
                 "port": port,
+                "tds_version": "auto",
             }
 
             conn_dict["host"] = host or server
@@ -330,6 +331,206 @@ class SybaseDataSource(SQLDataSource):
             for r in rows
         }
         return column_info
+
+    def query_get_table_indexes(
+        self, table: str, schema: str | None = None
+    ) -> dict[str, dict]:
+        """
+        Get index information for a table in Sybase (IQ/ASE/FreeTDS).
+        :param table: Table name
+        :param schema: Optional schema name
+        :return: Dictionary with index details
+        """
+        schema = schema or self.schema_name
+        database = self.database
+        rows = None
+
+        if self.sybase_driver_type.is_iq:
+            query = (
+                "SELECT\n"
+                "    t.table_name,\n"
+                "    i.index_name,\n"
+                "    i.index_type,\n"
+                "    c.column_name,\n"
+                "    ic.sequence AS column_order\n"
+                "FROM\n"
+                f"    {database}.sys.systable t\n"
+                "JOIN\n"
+                f"    {database}.sys.sysindex i ON t.table_id = i.table_id\n"
+                "JOIN\n"
+                f"    {database}.sys.sysixcol ic ON i.index_id = ic.index_id AND i.table_id = ic.table_id\n"
+                "JOIN\n"
+                f"    {database}.sys.syscolumn c ON ic.column_id = c.column_id AND ic.table_id = c.table_id\n"
+                "JOIN\n"
+                f"    {database}.sys.sysuser u ON t.creator = u.user_id\n"
+                "WHERE\n"
+                "    t.table_type = 'BASE'\n"
+                f"    AND t.table_name = '{table}'\n"
+                f"    AND u.user_name = '{schema}'\n"
+                "    AND i.index_name IS NOT NULL\n"
+                "ORDER BY\n"
+                "    i.index_name, ic.sequence"
+            )
+            rows = self.fetchall(query)
+        elif self.sybase_driver_type.is_ase:
+            query = (
+                "SELECT\n"
+                "    t.name AS table_name,\n"
+                "    i.name AS index_name,\n"
+                "    CASE \n"
+                "        WHEN i.indid = 1 THEN 'CLUSTERED'\n"
+                "        WHEN i.indid > 1 AND i.status & 2048 = 2048 THEN 'UNIQUE'\n"
+                "        ELSE 'NONCLUSTERED'\n"
+                "    END AS index_type,\n"
+                "    c.name AS column_name,\n"
+                "    ic.keyno AS column_order\n"
+                "FROM\n"
+                "    sysobjects t\n"
+                "JOIN\n"
+                "    sysindexes i ON t.id = i.id\n"
+                "JOIN\n"
+                "    sysindexkeys ic ON i.id = ic.id AND i.indid = ic.indid\n"
+                "JOIN\n"
+                "    syscolumns c ON ic.id = c.id AND ic.colid = c.colid\n"
+                "JOIN\n"
+                "    sysusers u ON t.uid = u.uid\n"
+                "WHERE\n"
+                "    t.type = 'U'\n"
+                f"    AND t.name = '{table}'\n"
+                f"    AND u.name = '{schema}'\n"
+                "    AND i.name IS NOT NULL\n"
+                "ORDER BY\n"
+                "    i.name, ic.keyno"
+            )
+            rows = self.fetchall(query)
+
+        elif self.sybase_driver_type.is_freetds:
+            try:
+                # Try ASE-compatible query
+                ase_query = (
+                    f"SELECT\n"
+                    f"    o.name AS table_name,\n"
+                    f"    i.name AS index_name,\n"
+                    f"    CASE\n"
+                    f"        WHEN i.indid = 1 THEN 'CLUSTERED'\n"
+                    f"        ELSE 'NONCLUSTERED'\n"
+                    f"    END AS index_type,\n"
+                    f"    index_col(o.name, i.indid, c.colid, o.uid) AS column_name,\n"
+                    f"    c.colid AS column_order\n"
+                    f"FROM\n"
+                    f"    sysobjects o\n"
+                    f"JOIN\n"
+                    f"    sysindexes i ON o.id = i.id\n"
+                    f"JOIN\n"
+                    f"    syscolumns c ON c.id = o.id\n"
+                    f"WHERE\n"
+                    f"    o.type = 'U'\n"
+                    f"    AND o.name = '{table}'\n"
+                    f"    AND user_name(o.uid) = '{schema}'\n"
+                    f"    AND i.name IS NOT NULL\n"
+                    f"    AND index_col(o.name, i.indid, c.colid, o.uid) IS NOT NULL\n"
+                    f"ORDER BY\n"
+                    f"    i.name, c.colid\n"
+                )
+                rows = self.fetchall(ase_query)
+            except Exception as e:
+                # Fallback to IQ-style query
+                iq_query = (
+                    "SELECT\n"
+                    "    t.table_name,\n"
+                    "    i.index_name,\n"
+                    "    i.index_type,\n"
+                    "    c.column_name,\n"
+                    "    ic.sequence AS column_order\n"
+                    "FROM\n"
+                    f"    {database}.sys.systable t\n"
+                    "JOIN\n"
+                    f"    {database}.sys.sysindex i ON t.table_id = i.table_id\n"
+                    "JOIN\n"
+                    f"    {database}.sys.sysixcol ic ON i.index_id = ic.index_id AND i.table_id = ic.table_id\n"
+                    "JOIN\n"
+                    f"    {database}.sys.syscolumn c ON ic.column_id = c.column_id AND ic.table_id = c.table_id\n"
+                    "JOIN\n"
+                    f"    {database}.sys.sysuser u ON t.creator = u.user_id\n"
+                    "WHERE\n"
+                    "    t.table_type = 'BASE'\n"
+                    f"    AND t.table_name = '{table}'\n"
+                    f"    AND u.user_name = '{schema}'\n"
+                    "    AND i.index_name IS NOT NULL\n"
+                    "ORDER BY\n"
+                    "    i.index_name, ic.sequence"
+                )
+                rows = self.fetchall(iq_query)
+
+        else:
+            raise ValueError("Unknown Sybase driver type")
+
+        if not rows:
+            raise RuntimeError(
+                f"No index information found for table '{table}' in schema '{schema}'."
+            )
+
+        # Primary key extraction
+        pk_columns = []
+        if self.sybase_driver_type.is_iq:
+            pk_sql = f"sp_iqpkeys {table}, NULL, {schema}"
+            pk_rows = self.fetchall(pk_sql)
+            if pk_rows:
+                raw_columns = pk_rows[0][2]
+                pk_columns = [col.strip() for col in raw_columns.split(",")]
+        elif self.sybase_driver_type.is_ase:
+            pk_sql = (
+                "SELECT c.name "
+                "FROM sysobjects t "
+                "JOIN sysindexes i ON t.id = i.id "
+                "JOIN sysindexkeys ic ON i.id = ic.id AND i.indid = ic.indid "
+                "JOIN syscolumns c ON ic.id = c.id AND ic.colid = c.colid "
+                "JOIN sysusers u ON t.uid = u.uid "
+                f"WHERE t.type = 'U' AND t.name = '{table}' AND u.name = '{schema}' "
+                "AND i.status & 2 = 2 "
+                "ORDER BY ic.keyno"
+            )
+            pk_rows = self.fetchall(pk_sql)
+            pk_columns = [row[0].strip() for row in pk_rows] if pk_rows else []
+        elif self.sybase_driver_type.is_freetds:
+            try:
+                self.connection.autocommit = True
+                pk_sql = (
+                    f"EXEC sp_pkeys @table_name = '{table}', @table_owner = '{schema}'"
+                )
+                pk_rows = self.fetchall(pk_sql)
+                pk_columns = [row[3].strip() for row in pk_rows] if pk_rows else []
+            except Exception as e:
+                pk_sql = f"sp_iqpkeys {table}, NULL, {schema}"
+                pk_rows = self.fetchall(pk_sql)
+                if pk_rows:
+                    raw_columns = pk_rows[0][2]
+                    pk_columns = [col.strip() for col in raw_columns.split(",")]
+        else:
+            raise ValueError("Unknown Sybase driver type")
+
+        pk_columns_set = set(pk_columns)
+
+        indexes = {}
+        for row in rows:
+            index_name = row[1]
+            index_type = row[2]
+            column_info = {
+                "column_name": self.safe_get(row, 3),
+                "column_order": self.safe_get(row, 4),
+            }
+            if index_name not in indexes:
+                indexes[index_name] = {"columns": [], "index_type": index_type}
+            indexes[index_name]["columns"].append(column_info)
+
+        for index_name, idx in indexes.items():
+            index_columns = [col["column_name"].strip() for col in idx["columns"]]
+            index_columns_set = set(index_columns)
+            idx["is_primary_key"] = pk_columns_set == index_columns_set and len(
+                index_columns
+            ) == len(pk_columns)
+
+        return indexes
 
     def query_get_table_names(
         self,
