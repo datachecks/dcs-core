@@ -115,6 +115,90 @@ class PostgresDataSource(SQLDataSource):
 
         return result
 
+    def query_get_table_indexes(
+        self, table: str, schema: str | None = None
+    ) -> dict[str, dict]:
+        """
+        Get index information for a table in PostgreSQL DB.
+        :param table: Table name
+        :param schema: Optional schema name
+        :return: Dictionary with index details
+        """
+        schema = schema or self.schema_name
+        table = table.lower()
+        schema = schema.lower()
+
+        query = f"""
+            SELECT
+                i.relname AS index_name,
+                am.amname AS index_type,
+                a.attname AS column_name,
+                x.n AS column_order
+            FROM
+                pg_class t
+            JOIN
+                pg_namespace ns ON ns.oid = t.relnamespace
+            JOIN
+                pg_index ix ON t.oid = ix.indrelid
+            JOIN
+                pg_class i ON i.oid = ix.indexrelid
+            JOIN
+                pg_am am ON i.relam = am.oid
+            JOIN
+                LATERAL unnest(ix.indkey) WITH ORDINALITY AS x(attnum, n)
+                    ON TRUE
+            JOIN
+                pg_attribute a ON a.attnum = x.attnum AND a.attrelid = t.oid
+            WHERE
+                t.relkind = 'r'
+                AND t.relname = '{table}'
+                AND ns.nspname = '{schema}'
+            ORDER BY
+                i.relname, x.n
+        """
+        rows = self.fetchall(query)
+
+        if not rows:
+            raise RuntimeError(
+                f"No index information found for table '{table}' in schema '{schema}'."
+            )
+
+        pk_query = f"""
+            SELECT kcu.column_name
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+            ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
+            AND tc.table_name = kcu.table_name
+            WHERE tc.constraint_type = 'PRIMARY KEY'
+            AND tc.table_name = '{table}'
+            AND tc.table_schema = '{schema}'
+            ORDER BY kcu.ordinal_position
+        """
+        pk_rows = self.fetchall(pk_query)
+        pk_columns = [row[0].strip() for row in pk_rows] if pk_rows else []
+        pk_columns_set = set(pk_columns)
+
+        indexes = {}
+        for row in rows:
+            index_name = row[0]
+            index_type = row[1]
+            column_info = {
+                "column_name": self.safe_get(row, 2),
+                "column_order": self.safe_get(row, 3),
+            }
+            if index_name not in indexes:
+                indexes[index_name] = {"columns": [], "index_type": index_type}
+            indexes[index_name]["columns"].append(column_info)
+
+        for index_name, idx in indexes.items():
+            index_columns = [col["column_name"].strip() for col in idx["columns"]]
+            index_columns_set = set(index_columns)
+            idx["is_primary_key"] = pk_columns_set == index_columns_set and len(
+                index_columns
+            ) == len(pk_columns)
+        return indexes
+
     def query_get_table_columns(
         self,
         table: str,

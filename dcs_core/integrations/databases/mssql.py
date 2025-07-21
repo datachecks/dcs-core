@@ -163,6 +163,92 @@ class MssqlDataSource(SQLDataSource):
 
         return result
 
+    def query_get_table_indexes(
+        self, table: str, schema: str | None = None
+    ) -> dict[str, dict]:
+        """
+        Get index information for a table in MSSQL DB.
+        :param table: Table name
+        :param schema: Optional schema name
+        :return: Dictionary with index details
+        """
+        schema = schema or self.schema_name
+        table = table.upper()
+        schema = schema.upper()
+
+        query = f"""
+            SELECT
+                i.name AS index_name,
+                i.type_desc AS index_type,
+                c.name AS column_name,
+                ic.key_ordinal AS column_order
+            FROM
+                sys.indexes i
+            JOIN
+                sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+            JOIN
+                sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            JOIN
+                sys.tables t ON t.object_id = i.object_id
+            JOIN
+                sys.schemas s ON t.schema_id = s.schema_id
+            WHERE
+                t.name = '{table}'
+                AND s.name = '{schema}'
+                AND i.is_hypothetical = 0
+            ORDER BY
+                i.name, ic.key_ordinal
+        """
+
+        rows = self.fetchall(query)
+
+        if not rows:
+            raise RuntimeError(
+                f"No index information found for table '{table}' in schema '{schema}'."
+            )
+
+        pk_query = f"""
+            SELECT c.name AS column_name
+            FROM
+                sys.key_constraints kc
+            JOIN
+                sys.index_columns ic ON kc.parent_object_id = ic.object_id AND kc.unique_index_id = ic.index_id
+            JOIN
+                sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            JOIN
+                sys.tables t ON t.object_id = kc.parent_object_id
+            JOIN
+                sys.schemas s ON t.schema_id = s.schema_id
+            WHERE
+                kc.type = 'PK'
+                AND t.name = '{table}'
+                AND s.name = '{schema}'
+            ORDER BY ic.key_ordinal
+        """
+        pk_rows = self.fetchall(pk_query)
+        pk_columns = [row[0].strip() for row in pk_rows] if pk_rows else []
+        pk_columns_set = set(pk_columns)
+
+        indexes = {}
+        for row in rows:
+            index_name = row[0]
+            index_type = row[1]
+            column_info = {
+                "column_name": self.safe_get(row, 2),
+                "column_order": self.safe_get(row, 3),
+            }
+            if index_name not in indexes:
+                indexes[index_name] = {"columns": [], "index_type": index_type}
+            indexes[index_name]["columns"].append(column_info)
+
+        for index_name, idx in indexes.items():
+            index_columns = [col["column_name"].strip() for col in idx["columns"]]
+            index_columns_set = set(index_columns)
+            idx["is_primary_key"] = pk_columns_set == index_columns_set and len(
+                index_columns
+            ) == len(pk_columns)
+        return indexes
+
     def query_get_table_columns(
         self, table: str, schema: str | None = None
     ) -> RawColumnInfo:
