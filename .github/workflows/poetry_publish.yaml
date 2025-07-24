@@ -1,0 +1,73 @@
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      python_version:
+        description: "Python version to use (default: 3.12)"
+        required: false
+        default: "3.12"
+  workflow_call:
+    inputs:
+      python_version:
+        description: "Python version to use (default: 3.12)"
+        required: false
+        default: "3.12"
+        type: string
+    secrets:
+      PYPI_TOKEN:
+        description: "PyPI API token for publishing packages"
+        required: true
+
+jobs:
+  publish_to_pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ inputs.python_version || '3.12' }}"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Configure Poetry
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+
+      - name: Install dependencies
+        run: poetry install --only=main --no-root
+
+      - name: Verify package structure
+        run: |
+          echo "Checking package structure..."
+          ls -la
+          dirs=$(grep -oP '(?<=include = \")[^\"]*' pyproject.toml)
+          for dir in $dirs; do
+            if [ -d "$dir" ]; then
+              echo "Found '$dir' directory. Listing contents:"
+              ls -la "$dir/"
+            else
+              echo "'$dir' directory not found. Skipping."
+            fi
+          done
+          echo "Verifying pyproject.toml..."
+          poetry check
+
+      - name: Build package
+        run: poetry build
+
+      - name: Verify build artifacts
+        run: |
+          echo "Build artifacts:"
+          ls -la dist/
+
+      - name: Publish to PyPI
+        run: poetry publish

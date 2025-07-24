@@ -1,0 +1,18 @@
+name: Manual Approval Step
+
+on:
+  workflow_call:
+
+jobs:
+  wait-for-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: subhankarb,Ryuk-me,driptanil,WeryZebra-Yue
+          minimum-approvals: 1
+          issue-title: "Approval needed for Release v${{ github.event.inputs.version }}"
+          issue-body: "Please approve or deny the creation of release branch and tag for v${{ github.event.inputs.version }}"
+          exclude-workflow-initiator-as-approver: false
