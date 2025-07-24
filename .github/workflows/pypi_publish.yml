@@ -12,11 +12,11 @@ on:
 
 jobs:
   wait-for-approval:
-    uses: datachecks/github-action-workflows/.github/workflows/manual_approver.yaml@main
+    uses: .github/workflows/manual_approver.yaml
 
   publish-to-pypi:
     needs: wait-for-approval
-    uses: datachecks/github-action-workflows/.github/workflows/poetry_publish.yaml@main
+    uses: .github/workflows/poetry_publish.yaml
     with:
       python_version: ${{ inputs.python_version || '3.12' }}
     secrets:
