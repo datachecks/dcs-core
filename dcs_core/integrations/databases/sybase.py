@@ -155,17 +155,12 @@ class SybaseDataSource(SQLDataSource):
                         self.connection = pyodbc.connect(**final_config)
                         logger.info(
                             f"Successfully connected to Sybase using: "
-                            f"driver={driver}, "
-                            f"{attempt['key']}={attempt['value']}, "
-                            f"port_config={port_config}, "
-                            f"ase_config={ase_config}"
+                            f"driver={driver}"
                         )
                         return self.connection
                     except Exception as e:
                         error_msg = (
-                            f"Failed with {attempt['key']}={attempt['value']}, "
-                            f"port_config={port_config}, "
-                            f"ase_config={ase_config}: {str(e)}"
+                            "Failed to connect to sybase."
                         )
                         logger.debug(error_msg)
                         errors.append(error_msg)
