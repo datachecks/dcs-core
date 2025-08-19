@@ -155,9 +155,7 @@ class SybaseDataSource(SQLDataSource):
                         )
                         return self.connection
                     except Exception as e:
-                        error_msg = (
-                            "Failed to connect to sybase."
-                        )
+                        error_msg = "Failed to connect to sybase."
                         logger.debug(error_msg)
                         errors.append(error_msg)
                         continue
