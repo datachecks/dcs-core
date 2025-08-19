@@ -70,10 +70,10 @@ class SybaseDataSource(SQLDataSource):
             conn_dict["host"] = host or server
 
             try:
-                logger.debug(f"Attempting FreeTDS connection with config: {conn_dict}")
+                logger.debug(f"Attempting FreeTDS connection")
                 self.connection = pyodbc.connect(**conn_dict)
                 logger.info(
-                    f"Successfully connected to Sybase using FreeTDS: {conn_dict}"
+                    f"Successfully connected to Sybase using FreeTDS"
                 )
                 return self.connection
             except Exception as e:
@@ -150,7 +150,7 @@ class SybaseDataSource(SQLDataSource):
 
                     try:
                         logger.debug(
-                            f"Attempting connection with config: {final_config}"
+                            f"Attempting connection ..."
                         )
                         self.connection = pyodbc.connect(**final_config)
                         logger.info(
