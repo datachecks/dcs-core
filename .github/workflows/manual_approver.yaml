@@ -2,6 +2,12 @@ name: Manual Approval Step
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: "Version being published"
+        required: false
+        default: "latest"
+        type: string
 
 jobs:
   wait-for-approval:
@@ -13,6 +19,6 @@ jobs:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: subhankarb,Ryuk-me,driptanil,WeryZebra-Yue
           minimum-approvals: 1
-          issue-title: "Approval needed for Release v${{ github.event.inputs.version }}"
-          issue-body: "Please approve or deny the creation of release branch and tag for v${{ github.event.inputs.version }}"
+          issue-title: "Approval needed for Release ${{ inputs.version }}"
+          issue-body: "Please approve or deny the creation of release and publishing to PyPI for version ${{ inputs.version }}"
           exclude-workflow-initiator-as-approver: false
