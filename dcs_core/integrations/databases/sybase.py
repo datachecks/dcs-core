@@ -70,11 +70,9 @@ class SybaseDataSource(SQLDataSource):
             conn_dict["host"] = host or server
 
             try:
-                logger.debug(f"Attempting FreeTDS connection with config: {conn_dict}")
+                logger.debug("Attempting FreeTDS connection")
                 self.connection = pyodbc.connect(**conn_dict)
-                logger.info(
-                    f"Successfully connected to Sybase using FreeTDS: {conn_dict}"
-                )
+                logger.info("Successfully connected to Sybase using FreeTDS")
                 return self.connection
             except Exception as e:
                 error_msg = f"Failed to connect to Sybase with FreeTDS: {str(e)}"
@@ -149,24 +147,15 @@ class SybaseDataSource(SQLDataSource):
                     final_config.update(ase_config)
 
                     try:
-                        logger.debug(
-                            f"Attempting connection with config: {final_config}"
-                        )
+                        logger.debug("Attempting connection ...")
                         self.connection = pyodbc.connect(**final_config)
                         logger.info(
-                            f"Successfully connected to Sybase using: "
-                            f"driver={driver}, "
-                            f"{attempt['key']}={attempt['value']}, "
-                            f"port_config={port_config}, "
-                            f"ase_config={ase_config}"
+                            "Successfully connected to Sybase using: "
+                            f"driver={driver}"
                         )
                         return self.connection
                     except Exception as e:
-                        error_msg = (
-                            f"Failed with {attempt['key']}={attempt['value']}, "
-                            f"port_config={port_config}, "
-                            f"ase_config={ase_config}: {str(e)}"
-                        )
+                        error_msg = "Failed to connect to sybase."
                         logger.debug(error_msg)
                         errors.append(error_msg)
                         continue
