@@ -1,6 +1,6 @@
-name: publish to pypi
+name: Publish to PyPI
 
-run-name: publish to pypi
+run-name: Publish to PyPI
 
 on:
   workflow_dispatch:
@@ -9,14 +9,22 @@ on:
         description: "Python version to use (default: 3.12)"
         required: false
         default: "3.12"
+        type: string
+      version:
+        description: "Version being published (for approval message)"
+        required: false
+        default: "latest"
+        type: string
 
 jobs:
   wait-for-approval:
-    uses: .github/workflows/manual_approver.yaml
+    uses: ./.github/workflows/manual_approver.yaml
+    with:
+      version: ${{ inputs.version }}
 
   publish-to-pypi:
     needs: wait-for-approval
-    uses: .github/workflows/poetry_publish.yaml
+    uses: ./.github/workflows/poetry_publish.yaml
     with:
       python_version: ${{ inputs.python_version || '3.12' }}
     secrets:
