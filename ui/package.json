@@ -22,6 +22,7 @@
     "buffer": "^6.0.3",
     "cross-spawn": "^7.0.5",
     "css-loader": "^6.8.1",
+    "d3-color": "^3.1.0",
     "datachecks": "file:",
     "eslint": "^6.6.0",
     "eslint-config-react-app": "^5.2.1",
