@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcs-core"
-version = "0.9.0"
+version = "0.9.1"
 description = "Open Source Data Quality Monitoring"
 license = "Apache-2.0"
 authors = [
