@@ -845,7 +845,7 @@ files = [
 name = "elastic-transport"
 version = "9.1.0"
 description = "Transport classes and utilities shared among Python Elastic client libraries"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"elasticsearch\" or extra == \"all\""
@@ -865,7 +865,7 @@ develop = ["aiohttp", "furo", "httpx", "opentelemetry-api", "opentelemetry-sdk",
 name = "elasticsearch"
 version = "9.1.0"
 description = "Python client for Elasticsearch"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"elasticsearch\" or extra == \"all\""
@@ -5035,4 +5035,4 @@ sybase = ["sqlalchemy-sybase"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "c9171a5f636746a0e555a7f8d091483591752662ec6bfb5926e395465364daa9"
+content-hash = "5d5d73219a10f1d4d22299efa8b9171d820b798361eda5449bfdc6b595e896e8"
