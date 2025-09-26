@@ -608,11 +608,12 @@ class SybaseDataSource(SQLDataSource):
         table_name: str,
         column_names: list[str],
         limit: int = 5,
-    ) -> Tuple[List, Optional[List[str]]]:
+    ) -> list[Tuple]:
         table_name = self.qualified_table_name(table_name)
+        if not column_names:
+            raise ValueError("At least one column name must be provided")
         columns = ", ".join([self.quote_column(col) for col in column_names])
         query = f"SELECT TOP {limit} {columns} FROM {table_name}"
-
         cursor = self.connection.cursor()
         cursor.execute(query)
         rows = cursor.fetchmany(limit)
