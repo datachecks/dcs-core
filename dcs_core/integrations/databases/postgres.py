@@ -284,3 +284,28 @@ class PostgresDataSource(SQLDataSource):
             return rows, list(column_names)
         else:
             return rows, None
+
+    def fetch_sample_values_from_database(
+        self,
+        table_name: str,
+        column_names: list[str],
+        limit: int = 5,
+    ) -> List[Tuple]:
+        """
+        Fetch sample rows for specific columns from the given table.
+
+        :param table_name: The name of the table.
+        :param column_names: List of column names to fetch.
+        :param limit: Number of rows to fetch.
+        :return: List of row tuples.
+        """
+        table_name = self.qualified_table_name(table_name)
+
+        if not column_names:
+            raise ValueError("At least one column name must be provided")
+
+        columns = ", ".join([self.quote_column(col) for col in column_names])
+        query = f"SELECT {columns} FROM {table_name} LIMIT {limit}"
+        result = self.connection.execute(text(query))
+        rows = result.fetchall()
+        return rows
