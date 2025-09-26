@@ -603,6 +603,21 @@ class SybaseDataSource(SQLDataSource):
         else:
             return rows, None
 
+    def fetch_sample_values_from_database(
+        self,
+        table_name: str,
+        column_names: list[str],
+        limit: int = 5,
+    ) -> Tuple[List, Optional[List[str]]]:
+        table_name = self.qualified_table_name(table_name)
+        columns = ", ".join([self.quote_column(col) for col in column_names])
+        query = f"SELECT TOP {limit} {columns} FROM {table_name}"
+
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchmany(limit)
+        return rows
+
     def convert_regex_to_sybase_pattern(self, regex_pattern: str) -> str:
         """
         Convert a regex pattern into a Sybase-compatible LIKE pattern.
