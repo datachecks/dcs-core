@@ -313,7 +313,7 @@ class PostgresDataSource(SQLDataSource):
         return rows
 
     def build_table_metrics_query(
-        self, table_name: str, column_info: list[dict]
+        self, table_name: str, column_info: list[dict], additional_queries:Optional[list[str]]=None
     ) -> list[dict]:
         query_parts = []
 
@@ -321,12 +321,12 @@ class PostgresDataSource(SQLDataSource):
             name = col["column_name"]
             dtype = col["data_type"].lower()
 
-            query_parts.append(f'COUNT(DISTINCT "{name}") AS "{name}_distinct"')
+            query_parts.append(f'COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_distinct"')
             query_parts.append(
-                f'COUNT(*) - COUNT(DISTINCT "{name}") AS "{name}_duplicate"'
+                f'COUNT(*) - COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_duplicate"'
             )
             query_parts.append(
-                f'SUM(CASE WHEN "{name}" IS NULL THEN 1 ELSE 0 END) AS "{name}_is_null"'
+                f'SUM(CASE WHEN {self.quote_column(name)} IS NULL THEN 1 ELSE 0 END) AS "{name}_is_null"'
             )
 
             if dtype in (
@@ -339,16 +339,21 @@ class PostgresDataSource(SQLDataSource):
                 "float",
                 "double",
             ):
-                query_parts.append(f'MIN("{name}") AS "{name}_min"')
-                query_parts.append(f'MAX("{name}") AS "{name}_max"')
-                query_parts.append(f'AVG("{name}") AS "{name}_average"')
+                query_parts.append(f'MIN({self.quote_column(name)}) AS "{name}_min"')
+                query_parts.append(f'MAX({self.quote_column(name)}) AS "{name}_max"')
+                query_parts.append(f'AVG({self.quote_column(name)}) AS "{name}_average"')
 
             elif dtype in ("varchar", "text", "char", "string", "character varying"):
                 query_parts.append(
-                    f'MAX(CHAR_LENGTH("{name}")) AS "{name}_max_character_length"'
+                    f'MAX(CHAR_LENGTH({self.quote_column(name)})) AS "{name}_max_character_length"'
                 )
+            
+        if additional_queries:
+            for queries in additional_queries:
+                query_parts.append(queries)
 
-        query = f"SELECT\n    {',\n    '.join(query_parts)}\nFROM {table_name};"
+        qualified_table = self.qualified_table_name(table_name)
+        query = f'SELECT\n    {",\n    ".join(query_parts)}\nFROM {qualified_table};'
 
         result = self.connection.execute(text(query))
         row = dict(list(result)[0]._mapping)
