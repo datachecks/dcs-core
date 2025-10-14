@@ -320,6 +320,8 @@ class PostgresDataSource(SQLDataSource):
         additional_queries: Optional[List[str]] = None,
     ) -> list[dict]:
         query_parts = []
+        if not column_info:
+            return []
 
         for col in column_info:
             name = col["column_name"]
@@ -384,7 +386,7 @@ class PostgresDataSource(SQLDataSource):
             if isinstance(value, (int, float, bool)):
                 return value
 
-            if isinstance(value, (datetime, datetime.date)):
+            if isinstance(value, (datetime.datetime, datetime.date)):
                 return value.isoformat()
 
             if isinstance(value, UUID):
