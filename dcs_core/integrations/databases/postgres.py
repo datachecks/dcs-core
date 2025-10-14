@@ -15,8 +15,9 @@
 import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
+from uuid import UUID
 
-from sqlalchemy import UUID, create_engine, text
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
@@ -313,7 +314,7 @@ class PostgresDataSource(SQLDataSource):
         return rows
 
     def build_table_metrics_query(
-        self, table_name: str, column_info: list[dict], additional_queries:Optional[list[str]]=None
+        self, table_name: str, column_info: list[dict], additional_queries:Optional[List[str]]=None
     ) -> list[dict]:
         query_parts = []
 
