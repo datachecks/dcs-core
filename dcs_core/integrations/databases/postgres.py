@@ -314,7 +314,10 @@ class PostgresDataSource(SQLDataSource):
         return rows
 
     def build_table_metrics_query(
-        self, table_name: str, column_info: list[dict], additional_queries:Optional[List[str]]=None
+        self,
+        table_name: str,
+        column_info: list[dict],
+        additional_queries: Optional[List[str]] = None,
     ) -> list[dict]:
         query_parts = []
 
@@ -322,7 +325,9 @@ class PostgresDataSource(SQLDataSource):
             name = col["column_name"]
             dtype = col["data_type"].lower()
 
-            query_parts.append(f'COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_distinct"')
+            query_parts.append(
+                f'COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_distinct"'
+            )
             query_parts.append(
                 f'COUNT(*) - COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_duplicate"'
             )
@@ -342,13 +347,15 @@ class PostgresDataSource(SQLDataSource):
             ):
                 query_parts.append(f'MIN({self.quote_column(name)}) AS "{name}_min"')
                 query_parts.append(f'MAX({self.quote_column(name)}) AS "{name}_max"')
-                query_parts.append(f'AVG({self.quote_column(name)}) AS "{name}_average"')
+                query_parts.append(
+                    f'AVG({self.quote_column(name)}) AS "{name}_average"'
+                )
 
             elif dtype in ("varchar", "text", "char", "string", "character varying"):
                 query_parts.append(
                     f'MAX(CHAR_LENGTH({self.quote_column(name)})) AS "{name}_max_character_length"'
                 )
-            
+
         if additional_queries:
             for queries in additional_queries:
                 query_parts.append(queries)
