@@ -747,12 +747,12 @@ class MssqlDataSource(SQLDataSource):
         query = f'SELECT\n    {",\n    ".join(query_parts)}\nFROM {qualified_table};'
 
         cursor = self.connection.cursor()
-        cursor.execute(query)
-
-        columns = [column[0] for column in cursor.description]
-
-        result_row = cursor.fetchone()
-        cursor.close()
+        try:
+            cursor.execute(query)
+            columns = [column[0] for column in cursor.description]
+            result_row = cursor.fetchone()
+        finally:
+            cursor.close()
 
         row = dict(zip(columns, result_row))
 
@@ -813,8 +813,10 @@ class MssqlDataSource(SQLDataSource):
             query = f"SELECT TOP {limit} {columns} FROM {qualified_table_name}"
 
         cursor = self.connection.cursor()
-        cursor.execute(query)
-        column_names = [desc[0] for desc in cursor.description]
-        rows = cursor.fetchall()
-        cursor.close()
+        try:
+            cursor.execute(query)
+            column_names = [desc[0] for desc in cursor.description]
+            rows = cursor.fetchall()
+        finally:
+            cursor.close()
         return rows, column_names
