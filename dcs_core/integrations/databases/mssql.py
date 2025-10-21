@@ -13,10 +13,13 @@
 #  limitations under the License.
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 import pyodbc
 from loguru import logger
+from sqlalchemy import text
 
 from dcs_core.core.common.errors import DataChecksDataSourcesConnectionError
 from dcs_core.core.common.models.data_source_resource import RawColumnInfo
@@ -686,3 +689,130 @@ class MssqlDataSource(SQLDataSource):
                 updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
             return int((datetime.utcnow() - updated_time).total_seconds())
         return 0
+
+    def build_table_metrics_query(
+        self,
+        table_name: str,
+        column_info: list[dict],
+        additional_queries: Optional[List[str]] = None,
+    ) -> list[dict]:
+        query_parts = []
+        if not column_info:
+            return []
+
+        for col in column_info:
+            name = col["column_name"]
+            dtype = col["data_type"].lower()
+
+            quoted_name = self.quote_column(name)
+
+            query_parts.append(f"COUNT(DISTINCT {quoted_name}) AS [{name}_distinct]")
+            query_parts.append(
+                f"COUNT({quoted_name}) - COUNT(DISTINCT {quoted_name}) AS [{name}_duplicate]"
+            )
+            query_parts.append(
+                f"SUM(CASE WHEN {quoted_name} IS NULL THEN 1 ELSE 0 END) AS [{name}_is_null]"
+            )
+
+            if dtype in (
+                "int",
+                "integer",
+                "bigint",
+                "smallint",
+                "tinyint",
+                "decimal",
+                "numeric",
+                "float",
+                "real",
+                "money",
+                "smallmoney",
+            ):
+                query_parts.append(f"MIN({quoted_name}) AS [{name}_min]")
+                query_parts.append(f"MAX({quoted_name}) AS [{name}_max]")
+                query_parts.append(
+                    f"AVG(CAST({quoted_name} AS FLOAT)) AS [{name}_average]"
+                )
+
+            elif dtype in ("varchar", "nvarchar", "char", "nchar", "text", "ntext"):
+                query_parts.append(
+                    f"MAX(LEN({quoted_name})) AS [{name}_max_character_length]"
+                )
+
+        if additional_queries:
+            query_parts.extend(additional_queries)
+
+        qualified_table = self.qualified_table_name(table_name)
+        query = f'SELECT\n    {",\n    ".join(query_parts)}\nFROM {qualified_table};'
+
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+
+        columns = [column[0] for column in cursor.description]
+
+        result_row = cursor.fetchone()
+        cursor.close()
+
+        row = dict(zip(columns, result_row))
+
+        def _normalize_metrics(value):
+            """Safely normalize DB metric values for JSON serialization."""
+            if value is None:
+                return None
+            if isinstance(value, Decimal):
+                return float(value)
+            if isinstance(value, (int, float, bool)):
+                return value
+            if isinstance(value, (datetime.datetime, datetime.date)):
+                return value.isoformat()
+            if isinstance(value, UUID):
+                return str(value)
+            if isinstance(value, list):
+                return [_normalize_metrics(v) for v in value]
+            if isinstance(value, dict):
+                return {k: _normalize_metrics(v) for k, v in value.items()}
+            return str(value)
+
+        column_wise = []
+        for col in column_info:
+            name = col["column_name"]
+            col_metrics = {}
+
+            for key, value in row.items():
+                if key.startswith(f"{name}_"):
+                    metric_name = key[len(name) + 1 :]
+                    col_metrics[metric_name] = _normalize_metrics(value)
+
+            column_wise.append({"column_name": name, "metrics": col_metrics})
+        return column_wise
+
+    def fetch_sample_values_from_database(
+        self,
+        table_name: str,
+        column_names: list[str],
+        limit: int = 5,
+    ) -> Tuple[List[Tuple], List[str]]:
+        """
+        Fetch sample rows for specific columns from the given table (MSSQL version).
+
+        :param table_name: The name of the table.
+        :param column_names: List of column names to fetch.
+        :param limit: Number of rows to fetch.
+        :return: Tuple of (list of row tuples, list of column names)
+        """
+        qualified_table_name = self.qualified_table_name(table_name)
+
+        if not column_names:
+            raise ValueError("At least one column name must be provided")
+
+        if len(column_names) == 1 and column_names[0] == "*":
+            query = f"SELECT TOP {limit} * FROM {qualified_table_name}"
+        else:
+            columns = ", ".join([self.quote_column(col) for col in column_names])
+            query = f"SELECT TOP {limit} {columns} FROM {qualified_table_name}"
+
+        cursor = self.connection.cursor()
+        cursor.execute(query)
+        column_names = [desc[0] for desc in cursor.description]
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows, column_names
