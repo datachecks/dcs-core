@@ -307,11 +307,16 @@ class PostgresDataSource(SQLDataSource):
         if not column_names:
             raise ValueError("At least one column name must be provided")
 
-        columns = ", ".join([self.quote_column(col) for col in column_names])
-        query = f"SELECT {columns} FROM {table_name} LIMIT {limit}"
+        if len(column_names) == 1 and column_names[0] == "*":
+            query = f"SELECT * FROM {table_name} LIMIT {limit}"
+        else:
+            columns = ", ".join([self.quote_column(col) for col in column_names])
+            query = f"SELECT {columns} FROM {table_name} LIMIT {limit}"
+
         result = self.connection.execute(text(query))
+        column_names = list(result.keys())
         rows = result.fetchall()
-        return rows
+        return rows, column_names
 
     def build_table_metrics_query(
         self,
