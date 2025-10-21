@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
+import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
@@ -686,8 +686,10 @@ class MssqlDataSource(SQLDataSource):
         if result:
             updated_time = result[0]
             if isinstance(updated_time, str):
-                updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
-            return int((datetime.utcnow() - updated_time).total_seconds())
+                updated_time = datetime.datetime.strptime(
+                    updated_time, "%Y-%m-%d %H:%M:%S.%f"
+                )
+            return int((datetime.datetime.utcnow() - updated_time).total_seconds())
         return 0
 
     def build_table_metrics_query(
