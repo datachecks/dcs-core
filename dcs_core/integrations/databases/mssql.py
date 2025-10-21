@@ -764,7 +764,7 @@ class MssqlDataSource(SQLDataSource):
                 return float(value)
             if isinstance(value, (int, float, bool)):
                 return value
-            if isinstance(value, (datetime, datetime.date)):
+            if isinstance(value, (datetime.datetime, datetime.date)):
                 return value.isoformat()
             if isinstance(value, UUID):
                 return str(value)
