@@ -417,17 +417,10 @@ class PostgresDataSource(SQLDataSource):
             column_wise.append({"column_name": name, "metrics": col_metrics})
         return column_wise
 
-    def get_table_foreign_key_info(
-        self,
-        table_name:str,
-        schema: str | None = None
-    ):
-        
+    def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
         schema = schema or self.schema_name
-        table_name = table_name.lower()
-        schema = schema.lower()
 
-        query=f"""
+        query = f"""
             SELECT
                 con.conname AS constraint_name,
                 rel_t.relname AS table_name,
@@ -446,4 +439,4 @@ class PostgresDataSource(SQLDataSource):
             AND nsp_t.nspname = '{schema}';
         """
         rows = self.fetchall(query)
-        return rows   
+        return rows

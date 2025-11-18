@@ -821,14 +821,8 @@ class MssqlDataSource(SQLDataSource):
             cursor.close()
         return rows, column_names
 
-    def get_table_foreign_key_info(
-        self,
-        table_name: str,
-        schema: str | None = None
-    ):
+    def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
         schema = schema or self.schema_name
-        table_name = table_name.lower()
-        schema = schema.lower()
 
         query = f"""
             SELECT
@@ -838,7 +832,7 @@ class MssqlDataSource(SQLDataSource):
                 rt.name AS referenced_table,
                 rc.name AS referenced_column
             FROM sys.foreign_keys fk
-            INNER JOIN sys.foreign_key_columns fkc 
+            INNER JOIN sys.foreign_key_columns fkc
                 ON fk.object_id = fkc.constraint_object_id
             INNER JOIN sys.tables t
                 ON fk.parent_object_id = t.object_id
