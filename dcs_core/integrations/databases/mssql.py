@@ -851,5 +851,10 @@ class MssqlDataSource(SQLDataSource):
             WHERE t.name = '{table_name}'
             AND s.name = '{schema}';
         """
-        rows = self.fetchall(query)
-        return rows
+        try:
+            result = self.connection.execute(text(query))
+        except Exception as e:
+            print(e)
+            return []
+        all_results = [dict(row._mapping) for row in result]
+        return all_results
