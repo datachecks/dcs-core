@@ -416,3 +416,34 @@ class PostgresDataSource(SQLDataSource):
 
             column_wise.append({"column_name": name, "metrics": col_metrics})
         return column_wise
+
+    def get_table_foreign_key_info(
+        self,
+        table_name:str,
+        schema: str | None = None
+    ):
+        
+        schema = schema or self.schema_name
+        table_name = table_name.lower()
+        schema = schema.lower()
+
+        query=f"""
+            SELECT
+                con.conname AS constraint_name,
+                rel_t.relname AS table_name,
+                att_t.attname AS fk_column,
+                rel_p.relname AS referenced_table,
+                att_p.attname AS referenced_column
+            FROM pg_constraint con
+            JOIN pg_class rel_t ON rel_t.oid = con.conrelid
+            JOIN pg_namespace nsp_t ON nsp_t.oid = rel_t.relnamespace
+            JOIN pg_class rel_p ON rel_p.oid = con.confrelid
+            JOIN pg_namespace nsp_p ON nsp_p.oid = rel_p.relnamespace
+            JOIN pg_attribute att_t ON att_t.attrelid = rel_t.oid AND att_t.attnum = ANY(con.conkey)
+            JOIN pg_attribute att_p ON att_p.attrelid = rel_p.oid AND att_p.attnum = ANY(con.confkey)
+            WHERE con.contype = 'f'
+            AND rel_t.relname = '{table_name}'
+            AND nsp_t.nspname = '{schema}';
+        """
+        rows = self.fetchall(query)
+        return rows   
