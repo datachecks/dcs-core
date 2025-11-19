@@ -820,3 +820,53 @@ class MssqlDataSource(SQLDataSource):
         finally:
             cursor.close()
         return rows, column_names
+
+    def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
+        schema = schema or self.schema_name
+
+        query = f"""
+            SELECT
+                fk.name AS constraint_name,
+                t.name AS table_name,
+                c.name AS fk_column,
+                rt.name AS referenced_table,
+                rc.name AS referenced_column
+            FROM sys.foreign_keys fk
+            INNER JOIN sys.foreign_key_columns fkc
+                ON fk.object_id = fkc.constraint_object_id
+            INNER JOIN sys.tables t
+                ON fk.parent_object_id = t.object_id
+            INNER JOIN sys.schemas s
+                ON t.schema_id = s.schema_id
+            INNER JOIN sys.columns c
+                ON fkc.parent_object_id = c.object_id
+                AND fkc.parent_column_id = c.column_id
+            INNER JOIN sys.tables rt
+                ON fk.referenced_object_id = rt.object_id
+            INNER JOIN sys.schemas rs
+                ON rt.schema_id = rs.schema_id
+            INNER JOIN sys.columns rc
+                ON fkc.referenced_object_id = rc.object_id
+                AND fkc.referenced_column_id = rc.column_id
+            WHERE t.name = '{table_name}'
+            AND s.name = '{schema}';
+        """
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            rows = cursor.fetchall()
+        except Exception as e:
+            print(f"Failed to fetch fk info for dataset: {table_name}")
+            return []
+
+        data = [
+            {
+                "constraint_name": row[0],
+                "table_name": row[1],
+                "fk_column": row[2],
+                "referenced_table": row[3],
+                "referenced_column": row[4],
+            }
+            for row in rows
+        ]
+        return data
