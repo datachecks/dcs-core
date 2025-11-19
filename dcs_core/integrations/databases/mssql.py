@@ -852,9 +852,21 @@ class MssqlDataSource(SQLDataSource):
             AND s.name = '{schema}';
         """
         try:
-            result = self.connection.execute(text(query))
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            rows = cursor.fetchall()
         except Exception as e:
-            print(e)
+            print(f"Failed to fetch fk info for dataset: {table_name}")
             return []
-        all_results = [dict(row._mapping) for row in result]
-        return all_results
+
+        data = [
+            {
+                "constraint_name": row[0],
+                "table_name": row[1],
+                "fk_column": row[2],
+                "referenced_table": row[3],
+                "referenced_column": row[4],
+            }
+            for row in rows
+        ]
+        return data

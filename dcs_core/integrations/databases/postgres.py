@@ -441,7 +441,7 @@ class PostgresDataSource(SQLDataSource):
         try:
             result = self.connection.execute(text(query))
         except Exception as e:
-            print(e)
+            print(f"Failed to fetch fk info for dataset {table_name}")
             return []
         all_results = [dict(row._mapping) for row in result]
         return all_results
