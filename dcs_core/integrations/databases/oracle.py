@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import secrets
+import string
+import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -690,3 +693,12 @@ class OracleDataSource(SQLDataSource):
             return round((result[0] / result[1]) * 100) if result[1] > 0 else 0
 
         return result[0] if result else 0
+
+    def generate_view_name(self, view_name: str | None = None) -> str:
+        if view_name is not None:
+            return view_name.upper()
+        random_string = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for _ in range(8)
+        )
+        timestamp = int(time.time())
+        return f"dcs_view_{timestamp}_{random_string.lower()}".upper()

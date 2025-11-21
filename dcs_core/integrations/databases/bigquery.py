@@ -15,7 +15,7 @@
 import base64
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from loguru import logger
 from sqlalchemy import create_engine
@@ -162,3 +162,44 @@ class BigQueryDataSource(SQLDataSource):
             for r in rows
         }
         return column_info
+
+    def create_view(
+        self,
+        query: Optional[str] = None,
+        dataset: Optional[str] = None,
+        view_name: Optional[str] = None,
+    ) -> str | None:
+        view_name = self.generate_view_name(view_name=view_name)
+        full_name = (
+            f"`{self.project}`.`{dataset}`.`{view_name}`"
+            if dataset
+            else f"`{view_name}`"
+        )
+        try:
+            if query is None:
+                create_view_query = (
+                    f"CREATE VIEW {full_name} AS SELECT 1 AS dummy_column WHERE FALSE"
+                )
+                self.connection.execute(create_view_query)
+                return full_name
+            else:
+                create_view_query = f"CREATE VIEW {full_name} AS {query}"
+                self.connection.execute(create_view_query)
+                return full_name
+        except Exception as e:
+            logger.error(f"Error creating view: {e}")
+            return None
+
+    def drop_view(self, view_name: str, dataset: Optional[str] = None) -> bool:
+        full_name = (
+            f"`{self.project}`.`{dataset}`.`{view_name}`"
+            if dataset
+            else f"`{view_name}`"
+        )
+        try:
+            drop_view_query = f"DROP VIEW {full_name}"
+            self.connection.execute(drop_view_query)
+            return True
+        except Exception as e:
+            logger.error(f"Error dropping view: {e}")
+            return False
