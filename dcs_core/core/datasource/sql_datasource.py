@@ -12,12 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import secrets
+import string
+import time
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union
 
 from loguru import logger
 from sqlalchemy import inspect, text
-from sqlalchemy.engine import Connection
+from sqlalchemy.engine import Connection, Engine
 
 from dcs_core.core.datasource.base import DataSource
 
@@ -1047,3 +1050,87 @@ class SQLDataSource(DataSource):
         except Exception as e:
             logger.error(f"Error occurred: {e}")
             return 0, 0
+
+    def generate_view_name(self, view_name: str | None = None) -> str:
+        if view_name is not None:
+            return view_name
+        random_string = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for _ in range(8)
+        )
+        timestamp = int(time.time())
+        return f"dcs_view_{timestamp}_{random_string.lower()}"
+
+    def create_view(
+        self,
+        query: str | None = None,
+        schema: str | None = None,
+        view_name: str | None = None,
+    ) -> str | None:
+        view_name = self.generate_view_name(view_name=view_name)
+        schema_prefix = f"{schema}." if schema else ""
+        view_name_full = f"{schema_prefix}{view_name}"
+
+        if query is None:
+            sql = f"CREATE VIEW {view_name_full} AS SELECT 1 AS dummy WHERE 1 = 0"
+        else:
+            sql = f"CREATE VIEW {view_name_full} AS {query}"
+
+        try:
+            if isinstance(self.connection, (Connection, Engine)):
+                if isinstance(self.connection, Engine):
+                    with self.connection.connect() as conn:
+                        conn.execute(text(sql))
+                        conn.commit()
+                else:
+                    self.connection.execute(text(sql))
+                    try:
+                        self.connection.commit()
+                    except Exception:
+                        pass
+            else:
+                plain_sql = str(sql)
+                if hasattr(self.connection, "cursor"):
+                    cur = self.connection.cursor()
+                    cur.execute(plain_sql)
+                    try:
+                        self.connection.commit()
+                    except Exception:
+                        pass
+                else:
+                    self.connection.execute(plain_sql)
+
+            return view_name_full
+        except Exception as e:
+            logger.error(f"Error creating view {view_name_full}: {e}")
+            return None
+
+    def drop_view(self, view_name: str, schema: str | None) -> bool:
+        schema_prefix = f"{schema}." if schema else ""
+        full_view_name = f"{schema_prefix}{view_name}"
+        drop_query = f"DROP VIEW {full_view_name}"
+        try:
+            if isinstance(self.connection, (Connection, Engine)):
+                if isinstance(self.connection, Engine):
+                    with self.connection.connect() as conn:
+                        conn.execute(text(drop_query))
+                        conn.commit()
+                else:
+                    self.connection.execute(text(drop_query))
+                    try:
+                        self.connection.commit()
+                    except Exception:
+                        pass
+            else:
+                if hasattr(self.connection, "cursor"):
+                    cur = self.connection.cursor()
+                    cur.execute(drop_query)
+                    try:
+                        self.connection.commit()
+                    except Exception:
+                        pass
+                else:
+                    self.connection.execute(str(drop_query))
+            return True
+        except Exception as e:
+            logger.error(f"Error dropping view {full_view_name}: {e}")
+            return False
