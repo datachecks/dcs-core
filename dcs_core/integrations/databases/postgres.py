@@ -331,12 +331,16 @@ class PostgresDataSource(SQLDataSource):
         for col in column_info:
             name = col["column_name"]
             dtype = col["data_type"].lower()
+            quoted = self.quote_column(name)
 
+            if dtype in ("json", "jsonb"):
+                distinct_expr = f"{quoted}::text"
+            else:
+                distinct_expr = f"{quoted}"
+
+            query_parts.append(f'COUNT(DISTINCT {distinct_expr}) AS "{name}_distinct"')
             query_parts.append(
-                f'COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_distinct"'
-            )
-            query_parts.append(
-                f'COUNT(*) - COUNT(DISTINCT {self.quote_column(name)}) AS "{name}_duplicate"'
+                f'COUNT(*) - COUNT(DISTINCT {distinct_expr}) AS "{name}_duplicate"'
             )
             query_parts.append(
                 f'SUM(CASE WHEN {self.quote_column(name)} IS NULL THEN 1 ELSE 0 END) AS "{name}_is_null"'
@@ -415,6 +419,62 @@ class PostgresDataSource(SQLDataSource):
                     col_metrics[metric_name] = _normalize_metrics(value)
 
             column_wise.append({"column_name": name, "metrics": col_metrics})
+
+        for col_data in column_wise:
+            metrics = col_data["metrics"]
+            distinct_count = metrics.get("distinct")
+            col_name = col_data["column_name"]
+            dtype = next(
+                c["data_type"].lower()
+                for c in column_info
+                if c["column_name"] == col_name
+            )
+
+            if isinstance(distinct_count, (int, float)) and distinct_count < 20:
+                quoted = self.quote_column(col_name)
+
+                if dtype in ("json", "jsonb"):
+                    group_expr = f"{quoted}::text"
+                else:
+                    group_expr = quoted
+
+                dist_query = (
+                    f"SELECT {group_expr}, COUNT(*) "
+                    f"FROM {qualified_table} GROUP BY {group_expr} ORDER BY COUNT(*) DESC"
+                )
+
+                try:
+                    dist_result = self.connection.execute(text(dist_query)).fetchall()
+
+                    distribution = []
+                    for r in dist_result:
+                        val = _normalize_metrics(r[0])
+                        distribution.append(
+                            {
+                                "col_val": val,
+                                "count": r[1],
+                            }
+                        )
+
+                    metrics["distribution_graph"] = distribution
+
+                except Exception as e:
+                    print(
+                        f"Failed to generate distribution graph for column {col_name}: {e}"
+                    )
+
+        for col_data in column_wise:
+            metrics = col_data["metrics"]
+            formatted_metrics_data = {
+                "general_data": {
+                    key: value
+                    for key, value in metrics.items()
+                    if key != "distribution_graph"
+                },
+                "distribution_data": metrics.get("distribution_graph", []),
+            }
+            col_data["metrics"] = formatted_metrics_data
+
         return column_wise
 
     def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
