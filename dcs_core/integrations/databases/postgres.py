@@ -341,9 +341,7 @@ class PostgresDataSource(SQLDataSource):
                 distinct_expr = f"{quoted}"
 
             # ---- Common Metrics ----
-            query_parts.append(
-                f'COUNT(DISTINCT {distinct_expr}) AS "{name}_distinct"'
-            )
+            query_parts.append(f'COUNT(DISTINCT {distinct_expr}) AS "{name}_distinct"')
             query_parts.append(
                 f'COUNT(*) - COUNT(DISTINCT {distinct_expr}) AS "{name}_duplicate"'
             )
@@ -430,7 +428,11 @@ class PostgresDataSource(SQLDataSource):
             metrics = col_data["metrics"]
             distinct_count = metrics.get("distinct")
             col_name = col_data["column_name"]
-            dtype = next(c["data_type"].lower() for c in column_info if c["column_name"] == col_name)
+            dtype = next(
+                c["data_type"].lower()
+                for c in column_info
+                if c["column_name"] == col_name
+            )
 
             if isinstance(distinct_count, (int, float)) and distinct_count < 20:
                 quoted = self.quote_column(col_name)
@@ -453,16 +455,19 @@ class PostgresDataSource(SQLDataSource):
                     distribution = []
                     for r in dist_result:
                         val = _normalize_metrics(r[0])
-                        distribution.append( {
-                            "col_val": val,
-                            "count": r[1],
-                        })
+                        distribution.append(
+                            {
+                                "col_val": val,
+                                "count": r[1],
+                            }
+                        )
 
                     metrics["distribution_graph"] = distribution
 
-                except Exception:
-                    pass
-
+                except Exception as e:
+                    print(
+                        f"Failed to generate distribution graph for column {col_name}: {e}"
+                    )
 
         return column_wise
 
