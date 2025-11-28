@@ -423,7 +423,6 @@ class PostgresDataSource(SQLDataSource):
 
             column_wise.append({"column_name": name, "metrics": col_metrics})
 
-        # ---- ADD DISTRIBUTION GRAPH FOR DISTINCT < 20 ----
         for col_data in column_wise:
             metrics = col_data["metrics"]
             distinct_count = metrics.get("distinct")
@@ -451,7 +450,6 @@ class PostgresDataSource(SQLDataSource):
                 try:
                     dist_result = self.connection.execute(text(dist_query)).fetchall()
 
-                    # ---- UPDATED FORMAT ----
                     distribution = []
                     for r in dist_result:
                         val = _normalize_metrics(r[0])
@@ -469,7 +467,6 @@ class PostgresDataSource(SQLDataSource):
                         f"Failed to generate distribution graph for column {col_name}: {e}"
                     )
 
-        # ---- Format metrics data ----
         for col_data in column_wise:
             metrics = col_data["metrics"]
             formatted_metrics_data = {
