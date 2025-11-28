@@ -15,6 +15,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from loguru import logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 
@@ -420,7 +421,7 @@ class MysqlDataSource(DB2DataSource):
         try:
             rows = self.fetchall(query)
         except Exception as e:
-            print(f"Failed to fetch fk info for dataset: {table_name} ({e})")
+            logger.error(f"Failed to fetch fk info for dataset: {table_name} ({e})")
             return []
 
         data = [

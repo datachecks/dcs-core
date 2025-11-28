@@ -702,7 +702,7 @@ class OracleDataSource(SQLDataSource):
         )
         timestamp = int(time.time())
         return f"dcs_view_{timestamp}_{random_string.lower()}".upper()
-    
+
     def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
         schema = schema or self.schema_name
 
@@ -732,7 +732,7 @@ class OracleDataSource(SQLDataSource):
         try:
             rows = self.fetchall(query)
         except Exception as e:
-            print(f"Failed to fetch fk info for dataset: {table_name} ({e})")
+            logger.error(f"Failed to fetch fk info for dataset: {table_name} ({e})")
             return []
 
         data = [
