@@ -469,6 +469,19 @@ class PostgresDataSource(SQLDataSource):
                         f"Failed to generate distribution graph for column {col_name}: {e}"
                     )
 
+        # ---- Format metrics data ----
+        for col_data in column_wise:
+            metrics = col_data["metrics"]
+            formatted_metrics_data = {
+                "general_data": {
+                    key: value
+                    for key, value in metrics.items()
+                    if key != "distribution_graph"
+                },
+                "distribution_data": metrics.get("distribution_graph", []),
+            }
+            col_data["metrics"] = formatted_metrics_data
+
         return column_wise
 
     def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
