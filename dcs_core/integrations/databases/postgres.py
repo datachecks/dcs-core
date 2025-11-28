@@ -433,7 +433,6 @@ class PostgresDataSource(SQLDataSource):
             if isinstance(distinct_count, (int, float)) and distinct_count < 20:
                 quoted = self.quote_column(col_name)
 
-                # JSON needs ::text for grouping
                 if dtype in ("json", "jsonb"):
                     group_expr = f"{quoted}::text"
                 else:
