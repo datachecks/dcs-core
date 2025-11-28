@@ -397,3 +397,40 @@ class MysqlDataSource(DB2DataSource):
                 updated_time = datetime.strptime(updated_time, "%Y-%m-%d %H:%M:%S.%f")
             return int((datetime.utcnow() - updated_time).total_seconds())
         return 0
+
+    def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
+        schema = schema or self.schema_name
+
+        query = f"""
+            SELECT
+                kcu.CONSTRAINT_NAME AS constraint_name,
+                kcu.TABLE_NAME AS table_name,
+                kcu.COLUMN_NAME AS fk_column,
+                kcu.REFERENCED_TABLE_NAME AS referenced_table,
+                kcu.REFERENCED_COLUMN_NAME AS referenced_column
+            FROM information_schema.TABLE_CONSTRAINTS tc
+            JOIN information_schema.KEY_COLUMN_USAGE kcu
+                ON tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+                AND tc.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+            WHERE tc.CONSTRAINT_TYPE = 'FOREIGN KEY'
+            AND tc.TABLE_NAME = '{table_name}'
+            AND tc.TABLE_SCHEMA = '{schema}';
+        """
+
+        try:
+            rows = self.fetchall(query)
+        except Exception as e:
+            print(f"Failed to fetch fk info for dataset: {table_name} ({e})")
+            return []
+
+        data = [
+            {
+                "constraint_name": row[0],
+                "table_name": row[1],
+                "fk_column": row[2],
+                "referenced_table": row[3],
+                "referenced_column": row[4],
+            }
+            for row in rows
+        ]
+        return data

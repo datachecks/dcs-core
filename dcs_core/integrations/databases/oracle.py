@@ -702,3 +702,47 @@ class OracleDataSource(SQLDataSource):
         )
         timestamp = int(time.time())
         return f"dcs_view_{timestamp}_{random_string.lower()}".upper()
+    
+    def get_table_foreign_key_info(self, table_name: str, schema: str | None = None):
+        schema = schema or self.schema_name
+
+        query = f"""
+            SELECT
+                ac.CONSTRAINT_NAME AS constraint_name,
+                ac.TABLE_NAME AS table_name,
+                acc.COLUMN_NAME AS fk_column,
+                r_ac.TABLE_NAME AS referenced_table,
+                r_acc.COLUMN_NAME AS referenced_column
+            FROM ALL_CONSTRAINTS ac
+            JOIN ALL_CONS_COLUMNS acc
+                ON ac.CONSTRAINT_NAME = acc.CONSTRAINT_NAME
+                AND ac.OWNER = acc.OWNER
+            JOIN ALL_CONSTRAINTS r_ac
+                ON ac.R_CONSTRAINT_NAME = r_ac.CONSTRAINT_NAME
+                AND ac.R_OWNER = r_ac.OWNER
+            JOIN ALL_CONS_COLUMNS r_acc
+                ON r_ac.CONSTRAINT_NAME = r_acc.CONSTRAINT_NAME
+                AND r_ac.OWNER = r_acc.OWNER
+                AND acc.POSITION = r_acc.POSITION
+            WHERE ac.CONSTRAINT_TYPE = 'R'
+            AND ac.TABLE_NAME = '{table_name.upper()}'
+            AND ac.OWNER = '{schema.upper()}';
+        """
+
+        try:
+            rows = self.fetchall(query)
+        except Exception as e:
+            print(f"Failed to fetch fk info for dataset: {table_name} ({e})")
+            return []
+
+        data = [
+            {
+                "constraint_name": row[0],
+                "table_name": row[1],
+                "fk_column": row[2],
+                "referenced_table": row[3],
+                "referenced_column": row[4],
+            }
+            for row in rows
+        ]
+        return data
