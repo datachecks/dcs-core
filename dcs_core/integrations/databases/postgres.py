@@ -333,14 +333,11 @@ class PostgresDataSource(SQLDataSource):
             dtype = col["data_type"].lower()
             quoted = self.quote_column(name)
 
-            # --- JSON FIX ---
-            # Use ::text for DISTINCT on JSON/JSONB columns
             if dtype in ("json", "jsonb"):
                 distinct_expr = f"{quoted}::text"
             else:
                 distinct_expr = f"{quoted}"
 
-            # ---- Common Metrics ----
             query_parts.append(f'COUNT(DISTINCT {distinct_expr}) AS "{name}_distinct"')
             query_parts.append(
                 f'COUNT(*) - COUNT(DISTINCT {distinct_expr}) AS "{name}_duplicate"'
