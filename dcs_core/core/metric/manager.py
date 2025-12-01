@@ -65,8 +65,8 @@ class MetricManager:
         MetricsType.EMPTY_STRING_COUNT.value: "EmptyStringCountMetric",
         MetricsType.EMPTY_STRING_PERCENTAGE.value: "EmptyStringPercentageMetric",
         MetricsType.CUSTOM_SQL.value: "CustomSqlMetric",
-        MetricsType.SKEWNESS: "SkewnessMetric",
-        MetricsType.KURTOSIS: "KurtosisMetric",
+        MetricsType.SKEWNESS.value: "SkewnessMetric",
+        MetricsType.KURTOSIS.value: "KurtosisMetric",
     }
 
     def __init__(
