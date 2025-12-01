@@ -1153,7 +1153,8 @@ class SQLDataSource(DataSource):
         table = self._sanitize_identifier(table)
 
         query = f"SELECT skewness({field}) FROM {table}"
-        return self.execute_query(query, filters)
+        result = self.fetchone(query, filters)
+        return result[0] if result else None
 
 
     def query_get_kurtosis(self, table, field, filters=None):
@@ -1161,4 +1162,5 @@ class SQLDataSource(DataSource):
         table = self._sanitize_identifier(table)
 
         query = f"SELECT kurtosis({field}) FROM {table}"
-        return self.execute_query(query, filters)
+        result = self.fetchone(query, filters)
+        return result[0] if result else None
