@@ -30,6 +30,8 @@ from dcs_core.core.metric.numeric_metric import (
     StddevMetric,
     SumMetric,
     VarianceMetric,
+    SkewnessMetric, 
+    KurtosisMetric,
 )
 
 
@@ -1032,3 +1034,125 @@ class TestEmptyStringPercentageColumnValueMetric:
         row_value = row.get_metric_value()
         assert row_value.value == 0.0
         assert row_value.is_valid == False
+
+class TestSkewnessAndKurtosisMetric:
+    # ---------- SKEWNESS TESTS ----------
+
+    def test_should_return_skewness_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_skewness.return_value = 1.23
+
+        metric = SkewnessMetric(
+            name="skewness_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.SKEWNESS,
+            field_name="value",
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 1.23
+
+    def test_should_return_skewness_postgres_with_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_skewness.return_value = -0.5
+
+        metric = SkewnessMetric(
+            name="skewness_metric_test_1",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.SKEWNESS,
+            field_name="value",
+            filters={"where": "age > 50"},
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == -0.5
+
+    def test_should_return_skewness_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_skewness.return_value = 0.0
+
+        metric = SkewnessMetric(
+            name="skewness_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.SKEWNESS,
+            field_name="value",
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 0.0
+
+    def test_should_return_skewness_value_with_validation(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_skewness.return_value = 5.0
+
+        metric = SkewnessMetric(
+            name="skewness_metric_val_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.SKEWNESS,
+            field_name="value",
+            validation=Validation(threshold=Threshold(lt=3)),
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 5.0
+        assert result.is_valid is False
+
+    # ---------- KURTOSIS TESTS ----------
+
+    def test_should_return_kurtosis_postgres_without_filter(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_kurtosis.return_value = 2.8
+
+        metric = KurtosisMetric(
+            name="kurtosis_metric_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.KURTOSIS,
+            field_name="value",
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 2.8
+
+    def test_should_return_kurtosis_opensearch_without_filter(self):
+        mock_data_source = Mock(spec=SearchIndexDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_kurtosis.return_value = 1.1
+
+        metric = KurtosisMetric(
+            name="kurtosis_metric_test",
+            data_source=mock_data_source,
+            index_name="numeric_metric_test",
+            metric_type=MetricsType.KURTOSIS,
+            field_name="value",
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 1.1
+
+    def test_should_return_kurtosis_value_with_validation(self):
+        mock_data_source = Mock(spec=SQLDataSource)
+        mock_data_source.data_source_name = "test_data_source"
+        mock_data_source.query_get_kurtosis.return_value = 12.0
+
+        metric = KurtosisMetric(
+            name="kurtosis_metric_val_test",
+            data_source=mock_data_source,
+            table_name="numeric_metric_test",
+            metric_type=MetricsType.KURTOSIS,
+            field_name="value",
+            validation=Validation(threshold=Threshold(gt=10)),
+        )
+
+        result = metric.get_metric_value()
+        assert result.value == 12.0
+        assert result.is_valid is True

@@ -1134,3 +1134,33 @@ class SQLDataSource(DataSource):
         except Exception as e:
             logger.error(f"Error dropping view {full_view_name}: {e}")
             return False
+        
+    def _sanitize_identifier(self, identifier: str) -> str:
+        """
+        Sanitize SQL identifiers to prevent injection.
+        Allows only alphanumeric characters and underscores.
+        """
+        if not isinstance(identifier, str):
+            raise ValueError("Identifier must be a string")
+
+        if not identifier.replace("_", "").isalnum():
+            raise ValueError(f"Invalid SQL identifier: {identifier}")
+
+        return identifier
+
+    def query_get_skewness(self, table, field, filters=None):
+        field = self._sanitize_identifier(field)
+        table = self._sanitize_identifier(table)
+
+        query = f"SELECT skewness({field}) FROM {table}"
+        result = self.fetchone(query, filters)
+        return result[0] if result else None
+
+
+    def query_get_kurtosis(self, table, field, filters=None):
+        field = self._sanitize_identifier(field)
+        table = self._sanitize_identifier(table)
+
+        query = f"SELECT kurtosis({field}) FROM {table}"
+        result = self.fetchone(query, filters)
+        return result[0] if result else None
