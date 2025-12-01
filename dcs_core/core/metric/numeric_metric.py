@@ -411,3 +411,69 @@ class EmptyStringPercentageMetric(FieldMetrics):
             )
         else:
             raise ValueError("Invalid data source type")
+
+class SkewnessMetric(FieldMetrics):
+    """
+    SkewnessMetric represents a skewness value calculated by the datasource.
+    """
+
+    def get_metric_identity(self):
+        return MetricIdentity.generate_identity(
+            metric_type=MetricsType.SKEWNESS,
+            metric_name=self.name,
+            data_source=self.data_source,
+            field_name=self.field_name,
+            table_name=self.table_name if self.table_name else None,
+            index_name=self.index_name if self.index_name else None,
+        )
+
+    def _generate_metric_value(self):
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_skewness(
+                table=self.table_name,
+                field=self.field_name,
+                filters=self.filter_query if self.filter_query else None,
+            )
+
+        elif isinstance(self.data_source, SearchIndexDataSource):
+            return self.data_source.query_get_skewness(
+                index_name=self.index_name,
+                field=self.field_name,
+                filters=self.filter_query if self.filter_query else None,
+            )
+
+        else:
+            raise ValueError("Invalid data source type")
+        
+class KurtosisMetric(FieldMetrics):
+    """
+    KurtosisMetric represents a kurtosis value calculated by the datasource.
+    """
+
+    def get_metric_identity(self):
+        return MetricIdentity.generate_identity(
+            metric_type=MetricsType.KURTOSIS,
+            metric_name=self.name,
+            data_source=self.data_source,
+            field_name=self.field_name,
+            table_name=self.table_name if self.table_name else None,
+            index_name=self.index_name if self.index_name else None,
+        )
+
+    def _generate_metric_value(self):
+        if isinstance(self.data_source, SQLDataSource):
+            return self.data_source.query_get_kurtosis(
+                table=self.table_name,
+                field=self.field_name,
+                filters=self.filter_query if self.filter_query else None,
+            )
+
+        elif isinstance(self.data_source, SearchIndexDataSource):
+            return self.data_source.query_get_kurtosis(
+                index_name=self.index_name,
+                field=self.field_name,
+                filters=self.filter_query if self.filter_query else None,
+            )
+
+        else:
+            raise ValueError("Invalid data source type")

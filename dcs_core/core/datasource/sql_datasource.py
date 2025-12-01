@@ -1134,3 +1134,12 @@ class SQLDataSource(DataSource):
         except Exception as e:
             logger.error(f"Error dropping view {full_view_name}: {e}")
             return False
+
+    def query_get_skewness(self, table, field, filters=None):
+        query = f"SELECT skewness({field}) FROM {table}"
+        return self.execute_query(query, filters)
+
+
+    def query_get_kurtosis(self, table, field, filters=None):
+        query = f"SELECT kurtosis({field}) FROM {table}"
+        return self.execute_query(query, filters)

@@ -446,3 +446,10 @@ class SearchIndexDataSource(DataSource):
             index=index_name, body={"query": {"match_all": {}}}
         )
         return response["hits"]["total"]["value"], total_count["count"]
+    
+    def query_get_skewness(self, index_name, field, filters=None):
+        raise NotImplementedError("Skewness metric not implemented for search datasource")
+
+    def query_get_kurtosis(self, index_name, field, filters=None):
+        raise NotImplementedError("Kurtosis metric not implemented for search datasource")
+

@@ -36,6 +36,8 @@ from dcs_core.core.metric.numeric_metric import (  # noqa F401 this is used in g
     StddevMetric,
     SumMetric,
     VarianceMetric,
+    SkewnessMetric,
+    KurtosisMetric,
 )
 from dcs_core.core.metric.reliability_metric import (  # noqa F401 this is used in globals
     DocumentCountMetric,
@@ -63,6 +65,8 @@ class MetricManager:
         MetricsType.EMPTY_STRING_COUNT.value: "EmptyStringCountMetric",
         MetricsType.EMPTY_STRING_PERCENTAGE.value: "EmptyStringPercentageMetric",
         MetricsType.CUSTOM_SQL.value: "CustomSqlMetric",
+        MetricsType.SKEWNESS: "SkewnessMetric",
+        MetricsType.KURTOSIS: "KurtosisMetric",
     }
 
     def __init__(
