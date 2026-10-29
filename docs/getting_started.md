@@ -111,15 +111,9 @@ While running the above command, you should see the following output:
 
 ![Getting Started](assets/datachecks_getting_started_cli.png)
 
-### Generate Metrics Validation Report
+### HTML Report Availability
 
-You can generate a beautiful data quality report with all the metrics with just one command.
-This html report can be shared with the team.
-
-```bash
-dcs-core inspect --config-path ./dcs_config.yaml --html-report
-```
-![Getting Started](assets/datachecks_dashboard.png)
+HTML report generation is currently disabled in the CLI while validation reporting is being updated. The `--html-report` option is therefore not available in this release. Use the terminal output from the CLI command above, or the Python API below, to access inspection results.
 
 ### Run Datachecks in Python
 

@@ -41,14 +41,10 @@ It identifies potential issues, including in the databases and data pipelines. I
 
 Datachecks can generate several reliability, uniqueness, completeness metrics from several data sources
 
-### Reports: Data Quality Visualisation
+### HTML Reports
 
-You can generate with just one command. It generates a beautiful data quality report with all the metrics.
-This html report can be shared with the team.
-
-<p align="center">
-    <img alt="why_data_observability" src="https://raw.githubusercontent.com/datachecks/dcs-core/main/docs/assets/datachecks_dashboard.png" width="800">
-</p>
+HTML report generation is currently disabled in the CLI while validation reporting is being updated.
+The supported CLI output is the terminal report shown below. The HTML dashboard screenshot is retained in the repository as a reference, but the documented `--html-report` option is not currently available.
 
 ### CLI: Data Quality Visualisation in Bash
 
@@ -84,11 +80,7 @@ For more details, please visit the [config guide](https://docs.datachecks.io/dcs
 dcs-core inspect -C config.yaml
 ```
 
-**Generate HTML Report**
-
-```shell
-dcs-core inspect -C config.yaml  --html-report
-```
+**HTML reports:** The `--html-report` option is currently disabled and will return an unknown-option error. Use the terminal report above until HTML reporting is restored.
 
 Please visit the [Quick Start Guide](https://docs.datachecks.io/dcs-oss/introduction/getting-started)
 
